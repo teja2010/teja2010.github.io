@@ -1,0 +1,87 @@
+<html>
+  <head>
+    <title>UML Setup</title>
+    <style>
+      code {
+        width: 1000px;
+        background: lightgrey;
+
+        font: "Courier New", monospace;
+        font-size: 120%;
+        font-weight: bold;
+      }
+      p {
+        font: Sans-serif;
+        width:1000px;
+        background: white;
+      }
+    </style>
+</head>
+
+<body>
+  <h3>0. UML Setup</h3>
+  <a href=index.html>INDEX</a>
+  <br>
+  <p>
+    I prefer to learn/tinker with linux using UML. UML is User mode linux,
+    which is a simple VM. It emulates a uniprocessor linux system, and can
+    run even on machines with very old hardware (like my laptop). Check the
+    <a href=http://user-mode-linux.sourceforge.net/>UML homepage</a> for
+    additional details. This page is just to a simple tutorial on how to build
+    and run it. I have also added sections on how to attach it to GDB for easy
+    debugging and a section on howto setup basic networking between multiple
+    UMLs which you can skip in the first read.
+  </p>
+
+  <h4>0.1 Clone and build the kernel</h4>
+
+  <p>
+  Clone the kernel, and build it.<br>
+  Make defconfig sets up the default kernel config. The kernel config is a set
+  of kernel features which will either be compiled into the kernel or will be
+  compiled as modules. The architecture for which we are configuring is the UM
+  (user mode) architechture. While building the config, you may be prompted to
+  choose a configuration. Press enter to choose the default configuration.<br>
+  Once the config is built, .config file will be populated with the chosen
+  options.<br>
+  Begin compiling the code. If your machine's CPU capabities, replace 1 with
+  the number of parallel compilation jobs you want make to run. Please remain
+  patient as the very first compilation takes some time.<br>
+
+  </p>
+
+  <code>
+    git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux<br>
+    cd linux<br>
+    make defconfig ARCH=um<br>
+    make -j1 ARCH=um<br>
+  </code>
+
+  <p>
+    A new file "linux" will be created. This is the UML executable which
+    runs as an application on the host machine. It needs a few other files and
+    arguments to run, which will be explained in the next section.
+  </p>
+
+
+  <p>
+  [OPTIONAL]<br>
+  The kernel src includes a neat way to configure the kernel. Run make menuconfig
+  to configure various options. A ncurses interface should start up, with the
+  instructions provided in the top. Pressing Y includes a config and N excludes
+  a config. After configuring the kernel, save and exit the config. The .config
+  file will get updated with the necessary configuration.<br>
+  The kernel can then be rebuilt with the new configuration.<br>
+  </p>
+
+  <code>
+    make menuconfig ARCH=um<br>
+    make -j1 ARCH=um<br>
+  </code>
+
+
+  <br><br><br><br>
+  <a href=index.html>INDEX</a>
+</body>
+
+</html>
