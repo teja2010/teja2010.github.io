@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>Packet RX Path 1: Basic</title>
+    <style>
+      pre {
+        font-family: "Courier New", monospace;
+        font-size: 100%;
+        font-weight: bold;
+      }
+      p {
+        font-family: sans-serif;
+        width:800px;
+        background: white;
+      }
+    </style>
+</head>
+
+<body style="margin-left:10%">
+  <h3>01 Packet RX path 1 : Basic</h3>
+  <a href=index.html>INDEX</a>
+
+  <p>
+    This page describes the code flow while receiving a packet. It begins with
+    the packet just entering the core networking code, top half and bottom half
+    processing, basic flow through the IP and UDP layers and finally enqueueing
+    into the socket queue.
+  </p>
+
+  <p>
+    Additionally hash based software packet steering across CPUs (RPS and RSS),
+    Inter Processor Interrupts (IPI),
+    scheduling softirq processing, some parts of the loop back driver code
+    and softnet_data struct are described. They can be
+    ignored in the first read and can be revisited in later runs after gaining
+    additional context. These sections have been marked OPTIONAL.<br>
+    NAPI will be described in later pages, all NAPI APIs are ignored now.
+  </p>
+
+
+  <br><br><br><br>
+  <a href=index.html>INDEX</a>
+</body>
+
+</html>
