@@ -96,11 +96,12 @@
   <h4>1.2 Visualizing Packet Processing</h4>
   <p>
     This is not a standard way of visualizing, but I think this is the right
-    way to visualize packet processing and cant visualize in no other way.
+    way to visualize packet processing and cant visualize in any other way.
     Receiving packets is in the bottom to top direction. And transmitting
     packets is in the top to bottom direction. Forwarding to a different layer
-    which is left to right.<br>
-    The bottom most layer where the drivers stay.
+    is left to right.<br>
+    While receiving packets, drivers receive data first. The bottom most
+    layer where the drivers stay.
     The drivers hand over the packet to the core network. The core networking
     code then passes it over to the right protocol stack(s). After the protocol
     stack processing is done, it enters socket layer, from where the user
