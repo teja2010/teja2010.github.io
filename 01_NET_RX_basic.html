@@ -16,7 +16,7 @@
 </head>
 
 <body style="margin-left:10%">
-  <h3>01 Packet RX path 1 : Basic</h3>
+  <h3>1. Packet RX path 1 : Basic</h3>
   <a href=index.html>INDEX</a>
 
   <p>
@@ -35,6 +35,216 @@
     additional context. These sections have been marked OPTIONAL.<br>
     NAPI will be described in later pages, all NAPI APIs are ignored now.
   </p>
+
+  <h4>1.1 Packet Representation in Linux</h4>
+
+  <p>
+    Packets are represented using sk_buff (socket buffer) in linux. The struct
+    is declared in "include/linux/skbuff.h". I will call a packet as skb
+    interchangably from now on. The sk_buff struct contains two parts, the
+    packet data and it's metadata.
+  </p>
+
+  <p>
+    Firstly it contains pointers to the actual data. The actual packet with
+    ethernet, IP, transport headers and payload
+    that has made it's way over the network will be put in some memory
+    that is allocated. The simplest way this is done is to allocate a contiguous
+    memory block which will contain the whole packet. (We will see in later
+    pages how very large packets can be created using lists of such blocks or
+    how number of data copies can be reduced by having multiple small chunks of
+    data.)
+    skb->head points to the start of the this block, and skb->end points to the
+    end of this block. The whole block need not contain meaningful
+    data. skb->data points to the place where the packet data starts, and
+    skb->tail points to the place where the packet data ends. This allows the
+    packet to have some head room and tail room if the packet needs to expand.
+    These four
+    pointers are used to point to the actual data. They are placed at the end
+    of the sk_buff struct.
+    David Miller's page on
+    <a href="http://vger.kernel.org/~davem/skb_data.html">skb_data</a>
+    desribes skb data in greater detail.
+  </p>
+
+  <p>
+  An image from the above page:
+  </p>
+  <img src="imgs/01_skb_layout.png">
+
+  <p>
+    Additionally the skb contains lots of meta data. Without checking the actual
+    data, a fully filled skb can provide the protocol information, checksum
+    details, it's corresponding socket, etc.
+    The meta data is information that is extracted from the packet data or
+    information attached to the current packet that can be used by all the
+    layers. A few of these fields are explained in David Miller's page
+    <a href="http://vger.kernel.org/~davem/skb.html">How SKBs work</a>.
+  </p>
+  <p>
+    This is similar to how photographs are saved. One part is the actual
+    image, the second part is meta data like it's dimensions, ISO,
+    aperture, camera model, location information, etc. The meta data by itself
+    is not useful but adds detail to the original data.
+  </p>
+
+  <p>
+    I'll add a page which describes the skb and it's fields in greater detail.
+    TODO.
+  </p>
+
+  <h4>1.2 Visualizing Packet Processing</h4>
+  <p>
+    This is not a standard way of visualizing, but I think this is the right
+    way to visualize packet processing and cant visualize in no other way.
+    Receiving packets is in the bottom to top direction. And transmitting
+    packets is in the top to bottom direction. Forwarding to a different layer
+    which is left to right.<br>
+    The bottom most layer where the drivers stay.
+    The drivers hand over the packet to the core network. The core networking
+    code then passes it over to the right protocol stack(s). After the protocol
+    stack processing is done, it enters socket layer, from where the user
+    picks up the packet.
+  </p>
+
+  <pre>
+                                                 Application
+     ------------------------------------------^-------------v-----   \
+    |     SOCKET LAYER                         |             |     |  |  softirq OR
+     ------------------------------------------^-------------v------  |  bottom half
+    |     PROTOCOL STACKS (IP, UDP, ...)       |             |     |  |
+     ------------------------------------------^-------------v-----   |
+    |                                          |             |     |  |
+    |     CORE NETWORKING                      | RX       TX |     |  /
+    |                                          |             |     |  \
+     ------------------------------------------^-------------v-----   |
+    |     DRIVER CODE                          |             |     |  |  top half
+     ------------------------------------------^-------------v-----   /
+                                                   Network
+  </pre>
+
+  <p>
+    This may seem obvious to some, but I
+    have seen diagrams with packets flowing in wierd directions (shudder).
+  </p>
+
+  <h4>1.2.1 Top half and bottom half processing</h4>
+  <p>
+    The path from the driver to the socket queue is divided into two halfs.
+  </p>
+  <p>
+    The top half happens first, the driver gets the raw packet and creates
+    a skb. After an skb is created it calls functions to hand it over to
+    the core networking code. The top half before exiting schedules the
+    bottom half. Top half runs per packet and exits.
+  <p>
+    The bottom half begins picking up each packet and starts processing them.
+    The packet is passed trough IP, UDP stacks and finally enqueues it into the
+    socket queue. This is done for a bunch of packets. If there are packets
+    that are still pending, the bottom half schedules itself and exits.
+  </p>
+  <p>
+    IMPORTANT:<br>
+    1. The top half is below the bottom half in my figure. <br>
+    2. I can use bottom half OR softirq processing interchangbly. <br>
+    3. Softirq processing done while receiving packets is also called NET_RX
+    processing. I can use this as well. :)<br>
+
+    4. Core network code runs in both these halves. But most of it is in softirq
+    processing.
+  </p>
+  </p>
+
+
+
+  <h4>1.3 Enter the Core, top half processing</h4>
+
+  <p>
+    We assume that the driver has already picked up the packet data and has
+    created a skb. (We will look at how drivers create skbs in the page
+    describing NAPI). This packet needs to be sent up to the core. The kernel
+    provides two simple function calls to do this.
+  </p>
+
+  <pre>
+    netif_rx()
+    netif_rx_ni()
+  </pre>
+
+  <p>
+    netif_rx() does two things,
+  </p>
+
+  <p>
+    1. Enqueue the packet into a queue which contains packets that need
+    processing. <br>
+    The kernel maintains a softnet_data structure for each CPU. It is the core
+    structure that facilitates network processing. Each softnet_data struct
+    contains a "input_pkt_queue" into which packets that need to be processed
+    will be enqueued. This queue is protected by a spinlock that is part of the
+    queue (calls to rps_lock() and rps_unlock() are to lock/unlock the spinlock).
+    The input_pkt_queue is of type sk_buff_head, which is used within by kernel
+    to represent skb lists.<br>
+    Before enqueuing, if the queue length is more than "netdev_max_backlog"
+    (whose default length is 1000), the packet is dropped. This value can be
+    modified by changing "/proc/sys/net/core/netdev_max_backlog".<br>
+    For each each packet drop sd->dropped is incremented. Certain numbers
+    are maintained by softnet_data, I'll add a page describing the struct. TODO
+
+  </p>
+
+  <p>
+    2. After successfully enqueueing the packet, netif_rx schedules softirq
+    processing if it has not already been scheduled. The next section describes
+    how softirq is scheduled.
+  </p>
+
+  <p>
+    Parts of the code have been added below. All the core networking functions
+    are described in "net/core/dev.c".
+  </p>
+  <pre>
+	netif_rx()
+	{
+		netif_rx_internal()
+		{
+			enqueue_to_backlog()
+			{
+				// checks on queue length
+				rps_lock(sd);
+				__skb_queue_tail(&sd->input_pkt_queue, skb);
+				rps_unlock(sd);
+
+				____napi_schedule(sd, &sd->backlog)
+				{
+					// if not scheduled already schedule softirq
+					__raise_softirq_irqoff(NET_RX_SOFTIRQ);
+				}
+			}
+		}
+	}
+  </pre>
+
+  <p>
+    netif_rx() and netif_rx_ni() are very similar except the later additionally
+    begins softirq processing immediately, which will be explained in subsequent
+    section.
+  </p>
+
+  <p>
+    This ends the top half processing, bottom half was scheduled, which will
+    undertake rest of the packet processing.
+  </p>
+
+  <h4>1.4 Packet Steering (RPS and RSS) [OPTIONAL]</h4>
+  <h4>1.5 Inter Processor Inturupts (IPI) [OPTIONAL]</h4>
+  <h4>1.6 Softirqs, softirq Scheduling [OPTIONAL]</h4>
+  <h4>1.7 Softirq processing NET_RX</h4>
+  <h4>1.8 Packet taps [OPTIONAL]</h4>
+  <h4>1.9 IP layer, iptables, routing</h4>
+  <h4>1.10 UDP layer </h4>
+  <h4>1.11 Enqueue into socket queue </h4>
+
 
 
   <br><br><br><br>
