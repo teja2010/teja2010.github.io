@@ -8,8 +8,9 @@
         font-weight: bold;
       }
       p {
-        font-family: sans-serif;
+        font-family: "Calibri", sans-serif;
         width:800px;
+        font-size: 120%;
         background: white;
       }
     </style>
@@ -236,16 +237,586 @@
     This ends the top half processing, bottom half was scheduled, which will
     undertake rest of the packet processing.
   </p>
+  <h4>1.4 Softirqs, Softirq Scheduling [OPTIONAL]</h4>
+  <p>
+    One detail that I have ignored in the previous discussion is to specify
+    which CPU the top and bottom half actually run.
+  </p>
+  <p>
+    The top half runs in the hardware interrupt (IRQ) context, which
+    is a kernel thread which can be on any CPU. (This discription is not really
+    true, I have a seperate page planned on interrupts where this will be
+    described in more detail. Till then this way of visualizing it is
+    not really wrong). Say it runs on CPU0, i.e. netif_rx() is called on CPU0.
+    The packet will be enqueued onto CPU0's input_packet_queue.
+    The kernel thread will then schedule softirq processing on CPU0 and exit.
+    The bottom half will also run on the same CPU. This section describes how
+    the bottom half is scheduled by the top half and how softirq begins.
+  </p>
 
-  <h4>1.4 Packet Steering (RPS and RSS) [OPTIONAL]</h4>
-  <h4>1.5 Inter Processor Inturupts (IPI) [OPTIONAL]</h4>
-  <h4>1.6 Softirqs, softirq Scheduling [OPTIONAL]</h4>
-  <h4>1.7 Softirq processing NET_RX</h4>
-  <h4>1.8 Packet taps [OPTIONAL]</h4>
-  <h4>1.9 IP layer, iptables, routing</h4>
-  <h4>1.10 UDP layer </h4>
-  <h4>1.11 Enqueue into socket queue </h4>
+  <p>
+    Just google what hard interrupts (IRQ) and soft interrupts (softirq) are.
+    Hardware interrupts (IRQs) will stop all processing. For interrupts that
+    take very long to run, some work is done in IRQ and the rest is done in a
+    softirq. Packet processing is one such task that takes very long to complete
+    so NET_RX is the corresponding soft interrupts which take care
+    of packet processing.
+  </p>
 
+  <p>
+    Linux currently has the following softirqs declared in include/linux/interrupt.h
+  </p>
+  <pre>
+	enum
+	{
+		HI_SOFTIRQ=0,
+		TIMER_SOFTIRQ,
+		NET_TX_SOFTIRQ,
+		NET_RX_SOFTIRQ,
+		BLOCK_SOFTIRQ,
+		IRQ_POLL_SOFTIRQ,
+		TASKLET_SOFTIRQ,
+		SCHED_SOFTIRQ,
+		HRTIMER_SOFTIRQ, /* Unused */
+		RCU_SOFTIRQ,
+
+		NR_SOFTIRQS
+	};
+  </pre>
+
+
+  <p>
+    The names are mostly indicative of the subsystem each softirq serves. During
+    kernel initialization, a function is registered for each of these softirqs.
+    When softirq processing is needed, this function is called.<br>
+    For example after core networking init is done, net_dev_init() registers
+    net_rx_action and net_tx_action as the functions corresponding to NET_RX
+    and NET_TX.
+  </p>
+
+  <pre>
+		open_softirq(NET_TX_SOFTIRQ, net_tx_action);
+		open_softirq(NET_RX_SOFTIRQ, net_rx_action);
+  </pre>
+
+  <p>
+    A softirq is scheduled by calling raise_softirq(), which internally disables
+    irqs and calls __raise_softirq_irqoff(). This function sets a bit corresponding
+    to the softirq in the
+    percpu bitmask irq_stat.__softirq_pending. The bitmask is used to track all
+    pending softirqs on the CPU.
+    This operation must be done with all interrupts are disabled on the CPU.
+    Without interrupts disabled, the same bitmask can be overwritten by another
+    interrupt handler, undoing the current change.
+  </p>
+
+  <p>
+    Grepping for ksofirqd in ps, should show multiple threads, one for each
+    CPU. These are threads spawned during init to process pending softirqs on
+    each of the CPUs. Periodically the scheduler will allow ksoftirqd to run,
+    and if any of the bits are set, it's registered function is called.<br>
+    During packet RX, net_rx_action() is called.
+  </p>
+  <p>
+    The CFS scheduler makes sure that all threads get their fair share of CPU
+    time. So ksoftirqd and an application thread will both get their fair share.
+    But, during softirq processing, ksoftirq disables all irqs and the scheduler
+    has no way of interrupting the thread. Hence all registered functions are
+    have checks to prevent the ksoftirqd from highjacking the CPU for too long.<br>
+    In this case, a buggy net_rx_action() function
+    may be able to push packets into the socket queue
+    but the application never will never get a chance to actually read the
+    packets.
+  </p>
+
+  <p>
+    To conclude, netif_rx() calls __raise_softirq_irqoff(NET_RX_SOFTIRQ) to
+    schedule softiq processing on the current CPU. The ksoftirqd running on the
+    current CPU will check the bitmask, since NET_RX_SOFTIRQ is pending will
+    call net_rx_action().
+  </p>
+
+  <h4>1.4.1 Run Softirq Now</h4>
+
+  <p>
+    Other that softirq being scheduled by the scheduler, it is sometimes
+    necessary to kick start processing. For example when a sudden burst of packets
+    arrive, due to delays in softirq processing, packets might be dropped. In
+    such cases, when a burst is detected, kick-starting packet processing is
+    helpful. In the above example, calling netif_rx_ni() will in addition to
+    enqueuing the packet kick start packet processing.
+  </p>
+
+  <h4>1.5 Packet Steering (RSS and RPS) [OPTIONAL]</h4>
+  <p>
+    RSS and RPS are techniques that help with scaling packet processing across
+    multiple CPUs. They allow distribution of packet processing accross CPUs,
+    while restricting a flow to a single CPU. i.e. each flow is assigned a CPU
+    and flows are distributed across CPUs.
+  </p>
+
+  <h4>1.5.1 Packet flow hash</h4>
+
+  <p>
+    Firstly To identify packet flows, a hash is computed based on the following
+    4-tuple.<br>
+    (source address, destination address, source port, destination port).<br>
+    For certain protocols that do not support ports, a tuple containing just
+    the source and destination addresses is used to compute the hash.<br>
+    The hash is computed in __skb_get_hash(). After computing the hash, it
+    is updated in skb->hash.<br>
+    Some drivers have the hardware to offload hash computation, which is then
+    set by the driver before passing the packet to the core networking layer.
+  </p>
+
+  <h4>1.5.2 RSS: Receive Side Scaling</h4>
+  <p>
+    RSS acheives packet steering by configuring receive queues (usually one for
+    each CPU), and by configuring seperate interrupts for each queue and pinning
+    the interrupts to the specific CPU. On
+    receiving a packet, based on it's hash the packet is put in the right queue
+    and the corresponding interrupt is raised.
+    <!--TODO: expand -->
+  </p>
+
+  <h4>1.5.3 RPS: Receive Packet Steering</h4>
+  <p>
+    RPS is RSS in software. While pushing the packet into the core network
+    through netif_rx() or netif_receive_skb(), a CPU is chosen for the packket
+    based on the skb->hash. The packet is then enqueued into the target CPU's
+    input_packet_queue.
+    Since the opertion must have all interrupts disabled, a softirq cannot
+    be directly scheduled on different core.
+    So an Inter Processor Interrupt is used to schedule softirq processing on
+    the other core.
+  </p>
+
+  <p>
+    After RSS decides to put the packet on a remote core, in the rps_ipi_queued()
+    function, the target CPU's softnet struct is added to the current core's
+    sd->rps_ipi_next which is a list to softnet structs for which an IPI has to
+    be sent. During the current core's softirq processing, all the accumilated
+    IPIs are sent to those cores by traversing the rps_ipi_next list.
+  </p>
+  <p>
+    IPIs are actually sent by scheduling a job on a remote core by
+    running calling smp_call_function_single_async() during NET_RX processing.
+  </p>
+  <pre>
+	netif_rx_internal(skb) {
+		cpu = get_rps_cpu(skb->dev, skb, &rflow);
+		enqueue_to_backlog(skb, cpu) {
+			sd = &per_cpu(softnet_data, cpu);	//get remote cpu sd
+			__skb_queue_tail(&sd->input_pkt_queue, skb); //enqueue
+			rps_ipi_queued(sd);		//add sd to rps_ipi_next
+		}
+	}
+  </pre>
+
+  <p>
+    <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/networking/scaling.txt">
+      Kernel documentation</a> describes these methods and also provides
+    instructions to configure them.
+  </p>
+
+
+
+  <h4>1.6 Softirq processing NET_RX</h4>
+  <p>
+    Softirq processing was scheduled by the bottom half, and NET_RX begins.
+    All of NET_RX processing is done in net_rx_action(). The logic is to process
+    packets until one of the following events occurs:<br>
+    1. The packet queue is empty. In this case NET_RX softirq stops.<br>
+    2. NET_RX has been running for longer than netdev_budget_usecs, whose
+    default value is 2 milliseconds.<br>
+    3. NET_RX has processed more than netdev_budget (fixed value of 300) packets.
+    (We will revist this constraint while looking at NAPI)<br>
+
+    <br>
+    In cases 2 and 3, there still might be packets to process, in which case
+    NET_RX will schedule itself before exiting, (i.e. set the NET_RX_SOFTIRQ bit
+    before exiting), so it can process some more packets in another session.
+    In cases 2 and 3 NET_RX processing is almost at it's limits. To indicate
+    this sd->time_squeeze is incremented, so that a few parameters can be
+    tuned. We will revisit this while discussing NAPI.
+  </p>
+  <p>
+    Softirq processing is done
+    with elevated privilages, which can easily cause it to highjack the complete
+    CPU. The above constraints are to make sure that softirq processing allows
+    the applications run. If the softirq were to highjack the CPU, the user
+    application would never run, and the end user would see applications not
+    responding.
+  </p>
+
+  <p>
+    The actual function that dequeues packets from input_pkt_queue and begins
+    processing them is process_backlog(). After dequeueing the packet it
+    calls __netif_receive_skb() which pushes the packet up into the protocol
+    stacks.
+  </p>
+
+  <p>
+    For now ignore the napi part of net_rx_action(), it calls napi_poll()
+    which will call the registered poll function n->poll(). The poll
+    function is set to process_backlog. For now believe me even if
+    it does not make much sense. It will make sense one we look at the NAPI
+    framework.
+  </p>
+
+  <pre>
+	net_rx_action() {
+		unsigned long time_limit = jiffies +
+			usecs_to_jiffies(netdev_budget_usecs);
+		int budget = netdev_budget;
+
+		budget -= napi_poll(n, &repoll) {
+			work = n->poll(n, weight) // same as process_backlog
+			process_backlog(n, weight) {
+				skb_queue_splice_tail_init(&sd->input_pkt_queue,
+							   &sd->process_queue);
+				while ((skb = __skb_dequeue(&sd->process_queue)))
+					__netif_receive_skb(skb);
+			}
+		}
+		// time and budget constraints
+		if (unlikely(budget <= 0 ||
+					time_after_eq(jiffies, time_limit))) {
+			sd->time_squeeze++;
+			break;
+		}
+	}
+  </pre>
+
+  <h4>1.7 __netif_receive_skb_core()</h4>
+  <p>
+    __netif_receive_skb() internally calls __netif_receive_skb_core() for the
+    main packet processing. __netif_receive_skb_core()
+    is large function which handles multiple ways in which a packet can be
+    processed. This section tries to cover some of them.
+  </p>
+  <p>
+    1. skb timestamp:<br>
+    skb->tstamp field is filled with the time at which the kernel began
+    processing the packet. This information is used in various protocol stacks.
+    One example is it's usage by AF_PACKET, which is the protocol tools like
+    wireshark use to collect packet dumps.
+    AF_PACKET extracts the timestamp from skb->tstamp and provides to
+    userspace as part of struct tpacket_uhdr. This timestamp is the one that
+    wireshark reports as the time at which the packet was received.
+  </p>
+
+  <p>
+    2. Increment softnet stat:<br>
+    sd->processed is incremented, which is representative of the number of packets
+    that were processed on a particular core. The packets might be dropped by
+    the kernel for various reasons later, but they were processed on a
+    particular core.
+  </p>
+
+  <p>
+    3. packet types:<br>
+    At this point the packet is sent to all modules that want to process
+    packets. The list of packet types that the kernel supports is defined
+    in "include/linux/netdevice.h", just above PTYPE_HASH_SIZE macro definition.
+    Other than the ones described above, promiscuous packet types (processes
+    packets irrespective of protocol) like AF_PACKET and custom packet_types
+    added by various drivers and subsystems are all supported.
+    Each of them fill up a packet_type structure and register it by calling
+    dev_add_pack(). Based on the type and netdevice the struct is added to the
+    respective packet_type list. __netif_receive_skb() based on the skb's
+    protocol and netdevice traverses the particular list, delivering the packet
+    by calling packet_type->func().<br>
+    All registered packet_types can be seen at /proc/net/ptype.
+  </p>
+
+  <pre>
+	$ cat /proc/net/ptype
+
+	Type Device      Function
+	ALL           tpacket_rcv
+	0800          ip_rcv
+	0011          llc_rcv [llc]
+	0004          llc_rcv [llc]
+	0806          arp_rcv
+	86dd          ipv6_rcv
+  </pre>
+  <p>
+    The lists are described below:
+  </p>
+  <p>
+    ptype_all: It is a global variable containing promiscuous packet_types
+    irrespective of netdevice. Each AF_PACKET socket adds a packet_type to
+    this list. packet_rcv() is called to pass the packet to userspace.
+  </p>
+  <p>
+    skb->dev->ptype_all: Per netdevice list containing promiscuous packet_types
+    specific to the netdevice.  TODO: find an example.
+  </p>
+
+  <p>
+    ptype_base: It is a global hash table, with key as the last 16bits of
+    packet_type->type and value as a list of packet_type. For example
+    ip_packet_type will be added to ptype_base[00], with ptype->func set to ip_rcv.
+    While traversing, based on skb->protocol 's last 16bits, a list
+    is chosen and the packet is delivered to all packet_types whose type matches
+    skb->protocol.
+  </p>
+  <p>
+    skb->dev->ptype_specific: Per netdevice list containing protocol specific
+    packet types. The packet is delivered to if the skb->protocol matches
+    ptype_type. Mellanox for example adds a packet_type with type set to ETH_P_IP,
+    to process all UDP packets received by the driver. See mlx5e_test_loopback().
+    The name suggests some sort of loopback test. I am not really sure how. IDK.
+  </p>
+
+  <p>
+    One important detail is that the same packet will be sent to all applicable
+    packet_type-s. Before delivering the skb, skb->users is incremented. skb->users
+    is the number users that are (ONLY) reading the packet. Each module after
+    completing necessary processing call kfree_skb(), which will first
+    decrement users, and then free the skb only if skb->users hits zero. So
+    the same skb pointer is shared by all the modules, and the last user will
+    free the skb.
+  </p>
+
+  <p>
+    4. RX handler:<br>
+    Drivers can register a rx handler, which will be called. The rx_handler
+    can return values based on which packet processing can stop or continue.
+    If RX_HANDLER_CONSUMED is returned, the driver can completed processing
+    the packet and __netif_receive_skb_core() can stop processing further.
+    If RX_HANDLER_PASS is returned, skb processing will continue. The other
+    values supported and ways to register/unregister a rx handler are available
+    in include/linux/netdevice.h , above enum rx_handler_result.<br>
+    For example
+    if the driver wants to support a custom protocol header over IP,
+    a rx handler can be registered which will process the outer header and
+    return RX_HANDLER_PASS. Futher IP processing can continue when the packet
+    is delivered to ip_packet_type. Note that the packet dumps collected will
+    still contain the custom header. (I dont think anyone does this. To take
+    advantage of GRO offload and to distribute packet processing with RPS,
+    it is better to re-enqueue the packet into the input_pkt_queue after
+    processing the custom header)
+  </p>
+
+  <p>
+  5. Ingress Qdisc processing. We will look at it in a different page, after we
+  have looking at Qdiscs and TX. Similar to RX handler, certain registered
+  functions run on the packet
+  and based on the return value, the processing can stop or continue. But
+  unlike a RX handler, the functions to run are added from userspace.
+  </p>
+
+  <p>
+    The order in which the __netif_receive_skb_core() delivers (if applicable)
+    the packets is:<br>
+    - Promiscuous packet_type<br>
+    - Ingress qdisc<br>
+    - RX handler<br>
+    - Protocol specific packet_type<br>
+    <br>
+    Finally if if none of them consume the packet, the packet is dropped and
+    netdevice stats are incremented.
+  </p>
+
+  <pre>
+	__netif_receive_skb_core() {
+
+		net_timestamp_check(!netdev_tstamp_prequeue, skb) {
+			__net_timestamp(SKB);
+		}
+
+		__this_cpu_inc(softnet_data.processed);
+
+		//Promiscuous packet_type
+		list_for_each_entry_rcu(ptype, &ptype_all, list) {
+			if (pt_prev)
+				ret = deliver_skb(skb, pt_prev, orig_dev);
+			pt_prev = ptype;
+		}
+		list_for_each_entry_rcu(ptype, &skb->dev->ptype_all, list) {
+			if (pt_prev)
+				ret = deliver_skb(skb, pt_prev, orig_dev);
+			pt_prev = ptype;
+		}
+
+		//Ingress qdisc
+		skb = sch_handle_ingress(skb, &pt_prev, &ret, orig_dev);
+
+		//RX handler
+		rx_handler = rcu_dereference(skb->dev->rx_handler);
+		switch (rx_handler(&skb)) {
+		case RX_HANDLER_CONSUMED:
+			ret = NET_RX_SUCCESS;
+			goto out;
+		case RX_HANDLER_PASS:
+			break;
+		default:
+			BUG();
+		}
+
+		//Protocol specific packet_type
+		deliver_ptype_list_skb(skb, &pt_prev, orig_dev, type,
+				       &ptype_base[ntohs(type) & PTYPE_HASH_MASK]);
+		deliver_ptype_list_skb(skb, &pt_prev, orig_dev, type,
+				       &skb->dev->ptype_specific);
+
+	}
+  </pre>
+
+
+
+  <h4>1.8 IP layer</h4>
+  <p>
+    Assuming the skb is an IP packet, the skb will enter ip_rcv(), which
+    then calls ip_rcv_core(). ip_rcv_core validates the IP header (checksum,
+    checks on ip header length, etc),
+    updates ip stats and based on the transport header set in the IP header will
+    set skb->transport_header.
+  </p>
+  <p>
+    The protocol stacks maintain counts when packets enter and counts of
+    the number of packets that were dropped. These numbers can be seen at
+    '/proc/net/snmp'. The correspnding enum can be found at 'include/uapi/linux/snmp.h'.
+  </p>
+
+  <pre>
+	ip_rcv_core() {
+		__IP_UPD_PO_STATS(net, IPSTATS_MIB_IN, skb->len);
+
+		iph = ip_hdr(skb);
+
+		if (unlikely(ip_fast_csum((u8 *)iph, iph->ihl)))
+			goto csum_error;
+
+		skb->transport_header = skb->network_header + iph->ihl*4;
+		return skb;
+
+	csum_error:
+		__IP_INC_STATS(net, IPSTATS_MIB_CSUMERRORS);
+		return NULL;
+	}
+  </pre>
+
+  <p>
+    ip_rcv then sends the packet through the netfilter PREROUTING chain. The
+    netfilter subsystem allows the userspace to filter/modify/drop packets
+    based on the packet's atributes. Tools iptables/ip6tables are used to
+    add/remove IP/IPv6 rules. The netfilter subsystem contains 5 chains,
+    PREROUTING, INPUT, FORWARD, OUTPUT and POSTROUTING. Each chain contains
+    rules and corresponding actions. If a rule matches a packet, the
+    corresponding action is taken. We will look at them in a seperate page
+    dedicated to iptables. An easy example is that it is used to
+    act as a firewall to drop unwanted traffic.
+  </p>
+  <pre>
+		                transport layer (TCP/UDP)
+
+	   ip_local_deliver_finish()
+		        |                                   |
+		      INPUT                               OUTPUT
+		        |                                   |
+    ROUTING DECISION  -----  FORWARDING  -----  +
+		        |                                   |
+		    PREROUTING                         POSTROUTING
+		        |                                   |
+		     ip_rcv()
+
+		                     CORE NETWORKING
+  </pre>
+
+  <p>
+    While receving a packet, at the end of ip_rcv() it enters the PREROUTING
+    chain, at the end of which it enters ip_rcv_finish(). Based on the packet's
+    ip address, a routing decision is taken if the packet should be locally
+    consumed or if it is to forwarded to a different system. (I'll describe
+    this in more detail in a seperate page).
+    If the packet should be locally consumed ip_local_deliver() is called.
+    The packet then enters
+    the INPUT chain, and finally comes out at ip_local_deliver_finish().
+  </p>
+
+  <p>
+    Based on the protocol set in the IP header, the corresponding protocol handler
+    is called. If a transport protocol is supported over IP, the corresponding
+    handler is registered by calling inet_add_protocol().
+  </p>
+  <p>
+    Yes, this section skips a lot of content, I'll add a seperate sections for
+    IP processing, netfilter (esp iptables) and routing.
+  </p>
+
+  <h4>1.9 UDP layer </h4>
+  <p>
+    If the packet is an UDP packet, udp_rcv is the protocol handler called, which
+    internally calls __udp4_lib_rcv(). First the packet header is validated,
+    pseudo ip checksum is checked
+    and then if the packet is unicast, based on the port numbers the socket is
+    looked up, and then udp_unicast_rcv_skb() is called, which then
+    calls udp_queue_rcv_skb().
+  </p>
+  <p>
+    udp_queue_rcv_skb() checks if the udp socket has a registered function to
+    handle encapsulated packets. If the handler is found the corresponding
+    handler is called, which processes the packet further. For example in case
+    of XFRM encapsulation xfrm4_udp_encap_rcv() is registered as the handler.
+    (XRFM short for transform, adds support to add encrypted tunnels in the
+    kernel).
+  </p>
+  <p>
+    If no encap_rcv handler is found, full udp checksum is done and
+    __udp_queue_rcv_skb() is called. Internally it calls __udp_enqueue_schedule_skb()
+    which checks if the sk memory is sufficient to add the packet and then
+    calls __skb_queue_tail() to enqueue the packet into sk_receive_queue.
+    If the application has called the recv() system call and is waiting for
+    the packet the process moves to __TASK_STOPPED state and the scheduler no longer
+    schedules it. sk->sk_data_ready(sk) is called so that it's state is set to
+    TASK_INTERRUPTIBLE, and the scheduler then schedules the application. On
+    waking up the packet is dequeued from the queue
+    and the application recvs the packet data. Receiving a packet
+    and socket calls will be described in a seperate page.
+  </p>
+  <pre>
+	__udp4_lib_rcv() {
+		uh   = udp_hdr(skb);
+		if (udp4_csum_init(skb, uh, proto)) //pseudo ip csum
+			goto csum_error;
+
+		sk = __udp4_lib_lookup_skb(skb, uh->source, uh->dest, udptable);
+		if (sk)
+			return udp_unicast_rcv_skb(sk, skb, uh){
+				ret = udp_queue_rcv_skb(sk, skb);
+				      //continued below..
+			}
+	}
+
+
+	udp_queue_rcv_skb(sk, skb) {
+		struct udp_sock *up = udp_sk(sk);
+
+		encap_rcv = READ_ONCE(up->encap_rcv);
+		if (encap_rcv) {
+			if (udp_lib_checksum_complete(skb))
+				goto csum_error;
+			ret = encap_rcv(sk, skb);
+		}
+
+		udp_lib_checksum_complete(skb);
+		return __udp_queue_rcv_skb(sk, skb) {
+			rc = __udp_enqueue_schedule_skb(sk, skb) {
+
+				rmem = atomic_read(&sk->sk_rmem_alloc);
+				if (rmem > sk->sk_rcvbuf)
+					goto drop;
+
+				__skb_queue_tail(&sk->sk_receive_queue, skb);
+				sk->sk_data_ready(sk);
+				// == sock_def_readable()
+			}
+		}
+	}
+  </pre>
 
 
   <br><br><br><br>

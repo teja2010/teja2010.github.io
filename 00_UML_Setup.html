@@ -8,7 +8,8 @@
         font-weight: bold;
       }
       p {
-        font-family: sans-serif;
+        font-family: "Calibri", sans-serif;
+        font-size: 120%;
         width:800px;
         background: white;
       }
@@ -67,12 +68,27 @@
   instructions provided in the top. Pressing Y includes a config and N excludes
   a config. After configuring the kernel, save and exit the config. The .config
   file will get updated with the necessary configuration.<br>
+  To build the uml binary with debug symbols, edit KBUILD_HOSTCFLAGS in the
+  Makefile. Just add a '-g' option at the end.
   The kernel can then be rebuilt with the new configuration.<br>
   </p>
 
   <pre>
     make menuconfig ARCH=um
     make -j1 ARCH=um
+  </pre>
+
+  <p>
+  Makefile diff:
+  </p>
+  <pre>
+ HOSTCC       = gcc
+ HOSTCXX      = g++
+-KBUILD_HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 \
++KBUILD_HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -g \
+                -fomit-frame-pointer -std=gnu89 $(HOST_LFS_CFLAGS) \
+                $(HOSTCFLAGS)
+ KBUILD_HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS)
   </pre>
 
   <h4>0.2 Rootfs setup</h4>
@@ -272,10 +288,10 @@
     <br>
     On assigning mcast to a eth device, each UML instance opens sockets which
     listen to multicast traffic. If a multicast address is not assigned (like
-    above), all the instances listen to 239.192.168.1 . Packets are accepted by
-    each UML instance if the destination on the device MAC address. The packets
+    above), all the instances listen to 239.192.168.1 . All packets are received
+    and then filtered out based on destination MAC address. The packets
     can even be seen in packetdumps collected in the host OS.
-    Quoting from the above readme, "It's basically like an ethernet 
+    Quoting from the above readme, "It's basically like an ethernet
     where all machines have promiscuous mode turned on". Bad for performance,
     but very easy to setup.
   </p>
