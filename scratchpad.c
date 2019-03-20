@@ -196,3 +196,188 @@ sock_def_readable()
 		}
 	}
 
+	SYSCALL_DEFINE3(sendmsg, int, fd, struct user_msghdr __user *, msg, unsigned int, flags)
+	{
+		return __sys_sendmsg(fd, msg, flags) {
+			sock = sockfd_lookup_light(fd, &err, &fput_needed);
+
+			err = ___sys_sendmsg(sock, msg, &msg_sys, flags) {
+
+				//copy msg (usr mem) into msg_sys (kernel mem)
+				err = copy_msghdr_from_user(msg_sys, msg);
+				sock_sendmsg(sock, msg_sys) {
+					int err = security_socket_sendmsg();
+					if(err)
+						return;
+
+					sock_sendmsg_nosec(sock, msg_sys) {
+						sock->ops->sendmsg(sock, msg_sys);
+					}
+				}
+			}
+		}
+	}
+
+int inet_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
+{
+	inet_autobind(sk)
+	DECLARE_SOCKADDR(struct sockaddr_in *, usin, msg->msg_name);
+	daddr = usin->sin_addr.s_addr;
+	dport = usin->sin_port;
+
+	rt = (struct rtable *)sk_dst_check(sk, 0);
+	if (!rt) {
+		flowi4_init_output();
+		// pass daadr, dport...
+		rt = ip_route_output_flow(net, fl4, sk);
+
+		sk_dst_set(sk, dst_clone(&rt->dst));
+		//next time sendmsg is called, sk_dst_check() will return the rt
+	}
+
+	saddr = fl4->saddr; // route lookup complete, saddr is known
+
+	skb = ip_make_skb(sk, fl4, getfrag, msg, ulen,
+			  sizeof(struct udphdr), &ipc, &rt,
+			  &cork, msg->msg_flags);
+	err = udp_send_skb(skb, fl4, &cork);
+}
+
+	a_function_call()
+	{
+		if( condition ) {
+		}
+	}
+
+struct sk_buff *ip_make_skb()
+{
+	struct sk_buff_head queue;
+	__skb_queue_head_init(&queue);
+
+	err = __ip_append_data()
+	{
+		hh_len = LL_RESERVED_SPACE(rt->dst.dev);
+		//hard header length: maximum space the driver will need to
+		//fill in headers below the network header. i.e.
+		//link local header (e.g. ethernet hdr for ethernet drivers)
+
+		fragheaderlen = sizeof(struct iphdr) + (opt ? opt->optlen : 0);
+		// opt is NULL, fragheaderlen is equal to sizeof(struct iphdr)
+
+		datalen = length + fraggap; //fraggap is zero
+		// length = udphdr len + payload length
+		fraglen = datalen + fragheaderlen;
+
+		alloclen = fraglen;
+		skb = sock_alloc_send_skb(sk,
+				alloclen + hh_len + 15,
+				(flags & MSG_DONTWAIT), &err);
+		// allocate space for (ip, udp headers & payload) plus
+		// hard header len plus 15 (some tail room.)
+
+		skb_reserve(skb, hh_len);  // -------------------------- Step 1
+		data = skb_put(skb, fraglen + exthdrlen - pagedlen);
+		// exthdrlen & pagedlen are zero.  --------------------- Step 2
+		skb_set_network_header(skb, exthdrlen);
+		skb->transport_header = (skb->network_header +
+				fragheaderlen); // --------------------- Step 3
+
+		data += fragheaderlen + exthdrlen; // ------------------ Step 4
+		// move pointer to where payload starts
+		copy = datalen - transhdrlen - fraggap - pagedlen;
+		// amount of payload data that needs to be copied.
+		// datalen = payload len + udp header len.
+		// transhdrlen = udp header len
+
+		getfrag(from, data + transhdrlen, offset, copy, fraggap, skb);
+		// getfrag is set to ip_generic_getfrag()
+		{	//copy and update csum
+			csum_and_copy_from_iter_full(to, len, &csum, &msg->msg_iter);
+			skb->csum = csum_block_add(skb->csum, csum, odd);
+		}
+
+		length -= copy + transhdrlen; // copied length is subtracted
+
+		skb->sk = sk;
+		__skb_queue_tail(queue, skb);
+
+		refcount_add(wmem_alloc_delta, &sk->sk_wmem_alloc);
+	}
+
+	return __ip_make_skb(sk, fl4, &queue, cork)
+	{
+		skb = __skb_dequeue(queue);
+		__skb_pull(skb, skb_network_offset(skb)); // ----------- Step 5
+
+		iph = ip_hdr(skb);
+		iph->version = 4;
+		iph->ihl = 5;
+		iph->tos = (cork->tos != -1) ? cork->tos : inet->tos;
+		iph->frag_off = df;
+		iph->ttl = ttl;
+		iph->protocol = sk->sk_protocol;
+		ip_copy_addrs(iph, fl4); // copy addresses from flow info
+	}
+}
+
+int udp_send_skb()
+{
+	uh = udp_hdr(skb);
+	uh->source = inet->inet_sport;
+	uh->dest = fl4->fl4_dport;
+	uh->len = htons(len);
+	uh->check = 0;
+
+	csum = udp_csum(skb);
+	err = ip_send_skb(sock_net(sk), skb)
+	{
+		//ip_local_out calls
+		__ip_local_out()
+		{
+			skb->protocol = htons(ETH_P_IP);
+			//enter netfilter OUTPUT chain
+		}
+	}
+}
+	static int ip_finish_output2()
+	{
+		neigh = __ipv4_neigh_lookup_noref(dev, nexthop);
+		neigh_output(neigh, skb)
+		{
+			hh_alen = HH_DATA_ALIGN(hh_len); //align hard header
+			memcpy(skb->data - hh_alen, hh->hh_data,
+					hh_alen);
+		}
+		__skb_push(skb, hh_len); // add the hh header
+		return dev_queue_xmit(skb);
+	}
+
+		            transport layer (TCP/UDP)
+
+					   __ip_local_out()
+
+		      INPUT                      OUTPUT
+		        |                           |
+		ROUTING DECISION --- FORWARDING --- +
+		        |                           |
+		    PREROUTING                 POSTROUTING
+		        |                           |
+	
+					   ip_finish_output()
+
+		             CORE NETWORKING
+
+__dev_queue_xmit()
+{
+	struct netdev_queue *txq;
+	struct Qdisc *q;
+
+	txq = netdev_pick_tx(dev, skb, sb_dev);
+	q = rcu_dereference_bh(txq->qdisc);
+	rc = __dev_xmit_skb(skb, q, dev, txq)
+	{
+		rc = q->enqueue(skb, q, &to_free) & NET_XMIT_MASK;
+		__qdisc_run(q);
+		qdisc_run_end(q);
+	}
+}
