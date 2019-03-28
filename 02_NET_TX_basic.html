@@ -27,13 +27,13 @@
     it out. TX, unlike RX, can happen without a softirq being raised. The
     processing happens completely in the application context. In this page I
     describe packet transmission without a softirq being raised. I'll cover
-    how qdiscs are used in a seperate page, after which NET_TX with qdiscs
+    how qdiscs are used in a separate page, after which NET_TX with qdiscs
     will be described.
   </p>
 
   <p>
     UDP & IP stack processing and routing will be described in detail in a
-    seperate page, this is just a basic overview.
+    separate page, this is just a basic overview.
     We will end the discussion by handling over the packet to the driver. How
     the driver actually transmits the packet will be described in later pages.
   </p>
@@ -50,7 +50,7 @@
       Kernel code runs in the application context, i.e. any traces that print
       the pid of the process will return the application's pid. If you do not
       know this, believe me for now, signals & syscalls are explained in a
-      seperate page. The kernel registers functions that are run for each
+      separate page. The kernel registers functions that are run for each
       system call. The registered function's name is "__do_sys_" + syscall name.
       In our case the function is __do_sys_sendmsg(), which internally
       calls __sys_sendmsg(). The arguments passed to the call are the fd, the
@@ -341,7 +341,7 @@
       The neigh entry contains a cached hardware header, which is added while
       adding a neigh entry into the neigh cache (after a successful ARP resolution
       or neighbour discovery) is complete. More of this will be covered in a
-      seperate page covering the neigh subsystem.<br>
+      separate page covering the neigh subsystem.<br>
       Now the skb has all necessary headers, pass it to the core networking
       subsystem which will let the driver send the packet out.
     </p>
@@ -373,7 +373,7 @@
       enqueue packets. run "tc qdisc show dev lo", it should print an output
       saying "noqueue" is the only queue. Other real devices have queues with
       specific properties, as shown below eth0 has a fq_codel queue.
-      I'll add a seperate page for qdiscs, for now ignore them.
+      I'll add a separate page for qdiscs, for now ignore them.
     </p>
     <pre>
 	$ tc qdisc show dev lo
@@ -458,7 +458,7 @@
 		}
 	}
     </pre>
-  <h4>2.8 loopback xmit</h4>
+  <h4>2.8 loopback xmit [OPTIONAL]</h4>
     <p>
       Like described above, each device during creation registers certain
       functions using the net_device_ops structure. Loopback registers
