@@ -2,15 +2,9 @@
   <head>
     <title>teja's notes</title>
     <style>
-      code {
-        width: 800px;
-        background: lightgrey;
-
-        position: fixed;
-        left: 17%;
-        margin-left: -300px;
+      pre {
         font-family: "Courier New", monospace;
-        font-size: 120%;
+        font-size: 100%;
         font-weight: bold;
       }
       p {
@@ -34,8 +28,17 @@
   <br>
   Code or commands that need to be run in the shell will be displayed in
   a monospace font. The paragraph preceeding it will contain the necessary
-  explanations.
+  explanations. If a functions contents have been expanded, curly bracket will
+  start in the next line. A conditional statement, the curly bracket will open
+  in the same line. e.g.
   </p>
+  <pre>
+	a_function_call()
+	{
+		if( condition ) {
+		}
+	}
+  </pre>
 
 
   <h4>Contents:</h4>
@@ -51,14 +54,20 @@
 TODO
 
 pages to add:
+ socket prog BTS, sock mem
  RX NAPI, qdiscs, tc,
  GRO, LRO, GSO, TSO, XPS
  NF iptables, conntrack, NATing, actions: TRACE, LOG.
- fib, routing, ip
- socket prog BTS
+ fib, routing, ip tool,
+ neigh susbsystem,
+ ipv6 SLAAC
+
  irqs
  RCU, rtnl
  r8169 driver, mlnx, um driver, virtio
+
+ system_calls
+ TCP subsystem, cong control
 
  ebpf
 
@@ -66,7 +75,7 @@ pages to add:
  skb, softnet_data, napi, dst, sock, socket
 
  Thanks page
- about
+ about page
 -->
 
   <h5>Appendix</h5>
