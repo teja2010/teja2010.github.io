@@ -390,15 +390,97 @@
     <p>
       __dev_queue_xmit() finds the tx queue and qdisc and if a enqueue function
       is present, calls __dev_xmit_skb() which calls the function to enqueue the
-      skb into the qdisc. After enqueueing the skb, __qdisc_run() is called
-      to process packets (if possible). If no other process needs the cpu and
-      less than 64 packets have been processed, __qdisc_run will continue
-      processing packets.
+      skb into the qdisc. At this point the skb is in the queue. We move
+      forward without any skb pointer held. After enqueueing the skb,
+      __qdisc_run() is called to process packets (if possible) that have been
+      enqueued. If no other process needs the cpu and less than 64 packets
+      have been processed, __qdisc_run() will continue
+      processing packets. __qdisc_run calls qdisc_restart() internally, which
+      dequeues skbs from the queue and calls sch_direct_xmit(), which calls
+      dev_hard_start_xmit() and it finally calls xmit_one();
     </p>
-  <h4>2.x driver xmit</h4>
-  <h4>2.x loopback xmit</h4>
+    <pre>
+	__dev_queue_xmit()
+	{
+		struct netdev_queue *txq;
+		struct Qdisc *q;
+
+		txq = netdev_pick_tx(dev, skb, sb_dev);
+		q = rcu_dereference_bh(txq->qdisc);
+		rc = __dev_xmit_skb(skb, q, dev, txq)
+		{
+			rc = q->enqueue(skb, q, &to_free) & NET_XMIT_MASK;
+			__qdisc_run(q)
+			{
+				//while constraints allow
+				qdisc_restart(q, &packets)
+				{
+					skb = dequeue_skb(q);
+					sch_direct_xmit(skb);
+				}
+			}
+			qdisc_run_end(q);
+		}
+	}
+    </pre>
+  <h4>2.6 NET_TX [OPTIONAL]</h4>
     <p>
+      Ironic that the article on NET_TX has this section marked as OPTIONAL. But
+      in simple scenarios, NET_TX softirq is almost never raised. After enqueueing
+      the packet, if __qdisc_run() cannot process packets because of the above
+      reasons, a NET_TX is scheduled to run. __netif_schedule() will raise a
+      NET_TX softirq if it was not already triggered. net_tx_action(), the
+      registered function will run __qdisc_run() on the qdisc, after which the
+      flow is same as the case without a softirq raised.
     </p>
+  <h4>2.7 driver xmit</h4>
+    <p>
+      xmit_one() is the final function, which like __netif_receive_skb() shares
+      the packet with all registered promiscuous packet_types, i.e. the
+      global list ptype_all and per netdevice list dev->ptype_all. This is done
+      within dev_queue_xmit_nit() function. After this, xmit_one calls
+      netdev_start_xmit() which internally calls __netdev_start_xmit() to
+      hand over the packet to the driver by calling ops->ndo_start_xmit()
+      (ndo stands for netdevice operation). A net_device_ops struct is registered
+      during netdevice creation, where this function pointer is set by the driver.
+      The driver will then send the packet out via the physical interface.
+    </p>
+    <pre>
+	sch_direct_xmit() -> dev_hard_start_xmit() -> xmit_one()
+	{
+		dev_queue_xmit_nit();
+		//deliver skb to promisc packet types
+
+		netdev_start_xmit()
+		{
+			const struct net_device_ops *ops = dev->netdev_ops;
+			return ops->ndo_start_xmit(skb, dev);
+		}
+	}
+    </pre>
+  <h4>2.8 loopback xmit</h4>
+    <p>
+      Like described above, each device during creation registers certain
+      functions using the net_device_ops structure. Loopback registers
+      loopback_xmit as the function. On sending a packet to loopback, when
+      ops->ndo_start_xmit is called, the packet enters loopback_xmit(). It is
+      a very simple function, which increments stats and calls netif_rx_ni()
+      to begin the RX path of the packet. The end of TX coincides and
+      start of RX is in this function.
+    </p>
+    <p>
+      The loopback device is described in drivers/net/loopback.c .
+    </p>
+    <pre>
+	loopback_xmit()
+	{
+		skb_tx_timestamp(skb);
+		skb_orphan(skb);    // remove all links to the skb.
+		skb->protocol = eth_type_trans(skb, dev);	// set protocol
+
+		netif_rx(skb);    //RX!!
+	}
+    </pre>
 
 
 

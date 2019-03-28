@@ -367,17 +367,45 @@ int udp_send_skb()
 
 		             CORE NETWORKING
 
-__dev_queue_xmit()
-{
-	struct netdev_queue *txq;
-	struct Qdisc *q;
-
-	txq = netdev_pick_tx(dev, skb, sb_dev);
-	q = rcu_dereference_bh(txq->qdisc);
-	rc = __dev_xmit_skb(skb, q, dev, txq)
+	__dev_queue_xmit()
 	{
-		rc = q->enqueue(skb, q, &to_free) & NET_XMIT_MASK;
-		__qdisc_run(q);
-		qdisc_run_end(q);
+		struct netdev_queue *txq;
+		struct Qdisc *q;
+
+		txq = netdev_pick_tx(dev, skb, sb_dev);
+		q = rcu_dereference_bh(txq->qdisc);
+		rc = __dev_xmit_skb(skb, q, dev, txq)
+		{
+			rc = q->enqueue(skb, q, &to_free) & NET_XMIT_MASK;
+			__qdisc_run(q)
+			{
+				//while constraints allow
+				qdisc_restart(q, &packets)
+				{
+					skb = dequeue_skb(q);
+					sch_direct_xmit(skb);
+				}
+			}
+			qdisc_run_end(q);
+		}
 	}
-}
+
+	sch_direct_xmit() -> dev_hard_start_xmit() -> xmit_one()
+	{
+		dev_queue_xmit_nit();
+		//deliver skb to promisc packet types
+
+		netdev_start_xmit()
+		{
+			const struct net_device_ops *ops = dev->netdev_ops;
+			return ops->ndo_start_xmit(skb, dev);
+		}
+	}
+	loopback_xmit()
+	{
+		skb_tx_timestamp(skb);
+		skb_orphan(skb);    // remove all links to the skb.
+		skb->protocol = eth_type_trans(skb, dev);	// set protocol
+
+		netif_rx(skb);
+	}
