@@ -16,11 +16,9 @@
     </style>
 </head>
 
-<body onload="javascript:afterLoad();afterLoad();"style="margin-left:10%">
-
+<body style="margin-left:10%">
   <h3>1. Packet RX path 1 : Basic</h3>
-  <p><a href=index.html>INDEX</a>&emsp;
-  <a href="#" onclick="afterLoad();">Toggle Sections</a></p>
+  <a href=index.html>INDEX</a>
 
   <p>
     This page describes the code flow while receiving a packet. It begins with
@@ -38,8 +36,7 @@
     NAPI will be described in later pages, all NAPI APIs are ignored now.
   </p>
 
-  <h4><a href="#" onclick="toggle_visibility('1.1');">1.1 Packet Representation in Linux</a></h4>
-  <div id="1.1">
+  <h4>1.1 Packet Representation in Linux</h4>
 
   <p>
     Packets are represented using sk_buff (socket buffer) in linux. The struct
@@ -95,10 +92,8 @@
     I'll add a page which describes the skb and it's fields in greater detail.
     TODO.
   </p>
-  </div>
 
-  <h4><a href="#" onclick="toggle_visibility('1.2');">1.2 Visualizing Packet Processing</a></h4>
-  <div id="1.2">
+  <h4>1.2 Visualizing Packet Processing</h4>
   <p>
     This is not a standard way of visualizing, but I think this is the right
     way to visualize packet processing and cant visualize in any other way.
@@ -160,12 +155,10 @@
     processing.
   </p>
   </p>
-  </div>
 
 
 
-  <h4><a href="#" onclick="toggle_visibility('1.3');">1.3 Enter the Core, top half processing</a></h4>
-  <div id="1.3">
+  <h4>1.3 Enter the Core, top half processing</h4>
 
   <p>
     We assume that the driver has already picked up the packet data and has
@@ -243,11 +236,7 @@
     This ends the top half processing, bottom half was scheduled, which will
     undertake rest of the packet processing.
   </p>
-
-  </div>
-
-  <h4><a href="#" onclick="toggle_visibility('1.4');">1.4 Softirqs, Softirq Scheduling [OPTIONAL]i</a></h4>
-  <div id="1.4">
+  <h4>1.4 Softirqs, Softirq Scheduling [OPTIONAL]</h4>
   <p>
     One detail that I have ignored in the previous discussion is to specify
     which CPU the top and bottom half actually run.
@@ -357,11 +346,7 @@
     enqueuing the packet kick start packet processing.
   </p>
 
-  </div>
-
-  <h4><a href="#" onclick="toggle_visibility('1.5');">1.5 Packet Steering (RSS and RPS) [OPTIONAL]</a></h4>
-  <div id="1.5">
-
+  <h4>1.5 Packet Steering (RSS and RPS) [OPTIONAL]</h4>
   <p>
     RSS and RPS are techniques that help with scaling packet processing across
     multiple CPUs. They allow distribution of packet processing accross CPUs,
@@ -434,12 +419,10 @@
       Kernel documentation</a> describes these methods and also provides
     instructions to configure them.
   </p>
-  </div>
 
 
-  <h4><a href="#" onclick="toggle_visibility('1.6');">1.6 Softirq processing NET_RX</a></h4>
-  <div id="1.6">
 
+  <h4>1.6 Softirq processing NET_RX</h4>
   <p>
     Softirq processing was scheduled by the bottom half, and NET_RX begins.
     All of NET_RX processing is done in net_rx_action(). The logic is to process
@@ -508,10 +491,8 @@
 		}
 	}
   </pre>
-  </div>
 
-  <h4><a href="#" onclick="toggle_visibility('1.7');">1.7 __netif_receive_skb_core()</a></h4>
-  <div id="1.7">
+  <h4>1.7 __netif_receive_skb_core()</h4>
   <p>
     __netif_receive_skb() internally calls __netif_receive_skb_core() for the
     main packet processing. __netif_receive_skb_core()
@@ -689,12 +670,10 @@
 
 	}
   </pre>
-  </div>
 
 
-  <h4><a href="#" onclick="toggle_visibility('1.8');">1.8 IP layer</a></h4>
-  <div id="1.8">
 
+  <h4>1.8 IP layer</h4>
   <p>
     Assuming the skb is an IP packet, the skb will enter ip_rcv(), which
     then calls ip_rcv_core(). ip_rcv_core validates the IP header (checksum,
@@ -774,10 +753,8 @@
     Yes, this section skips a lot of content, I'll add a seperate sections for
     IP processing, netfilter (esp iptables) and routing.
   </p>
-  </div>
 
-  <h4><a href="#" onclick="toggle_visibility('1.9');">1.9 UDP layer</a></h4>
-  <div id="1.9">
+  <h4>1.9 UDP layer </h4>
   <p>
     If the packet is an UDP packet, udp_rcv is the protocol handler called, which
     internally calls __udp4_lib_rcv(). First the packet header is validated,
@@ -853,36 +830,10 @@
 		}
 	}
   </pre>
-  </div>
 
 
   <br><br><br><br>
   <a href=index.html>INDEX</a>
-
-  <script type="text/javascript">
-  <!--
-      function toggle_visibility(id) {
-         var e = document.getElementById(id);
-         if(e.style.display == 'block')
-            e.style.display = 'none';
-         else
-            e.style.display = 'block';
-      }
-
-      function afterLoad() {
-        toggle_visibility('1.1');
-        toggle_visibility('1.2');
-        toggle_visibility('1.3');
-        toggle_visibility('1.4');
-        toggle_visibility('1.5');
-        toggle_visibility('1.6');
-        toggle_visibility('1.7');
-        toggle_visibility('1.8');
-        toggle_visibility('1.9');
-      }
-
-  //-->
-  </script>
 </body>
 
 </html>
