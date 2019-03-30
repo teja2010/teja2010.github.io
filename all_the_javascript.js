@@ -1,4 +1,10 @@
 
+var article_num = 0;
+var section_count = 0;
+
+//  none  <--> close
+//  block <--> open
+
 function toggle_visibility(id) {
 	var e = document.getElementById(id);
 	if(e.style.display == 'block')
@@ -9,9 +15,9 @@ function toggle_visibility(id) {
 
 function changeall_visibility(changeto) {
 	var i;
-	for(i=1; i<10; i++) {
+	for(i=1; i<=section_count; i++) {
 		//console.log("1." + i);
-		var el = document.getElementById('1.' + i);
+		var el = document.getElementById(article_num + '.' + i);
 		el.style.display = changeto;
 	}
 }
@@ -27,9 +33,12 @@ function open_visibility(id) {
 		e.style.display = 'block';      //open
 		window.location.href = "#"+id;
 	}
+	scrollUp();
 }
 
-function afterLoad() {
+function afterLoad(an, sc) {
+  article_num = an;
+  section_count = sc;
 	changeall_visibility('none');
 }
 

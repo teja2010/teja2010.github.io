@@ -16,45 +16,40 @@
     </style>
 </head>
 
-<!--<body onload="afterLoad();" style="margin-left:10%">-->
-<body onload="javascript:afterLoad();afterLoad();" style="margin-left:10%">
+<body onload="javascript:afterLoad(3,9);afterLoad(3,9);" style="margin-left:10%">
 
   <h3>3. Socket Programming</h3>
-  <a href=index.html>INDEX</a>
+  <p><a href=index.html>INDEX</a>&emsp;
+  <a href="#" onclick="afterLoad(3,9);">Toggle Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('none');">Collapse All Sections</a>
+  </p>
 
-  <p><a href="#" onclick="afterLoad();">Collapse all</a></p>
-  <h4><a href="#" onclick="toggle_visibility('myDIV');">3.1 Socket Programming</a></h3>
-  <div id="myDIV">
-    <p>
-    This page contains my notes. Mostly related to linux networking.
-    </p>
+  <h4><a href="#3.1" onclick="open_visibility('3.1');">
+      3.x Basics of TCP</a></h3>
+  <div id="3.1">
+
+  </div>
+
+  <h4>3.x socket creation</h3>
+  <h4>3.x sock, inet_sock, inet_connection_sock and tcp_sock</h3>
+  <h4>3.x bind() to a port</h3>
+  <h4>3.x [Server] listen()</h3>
+  <h4>3.x [Client] connect()</h3>
+  <h4>3.x [Server] accept()</h3>
+  <h4>3.x send() and recv()</h3>
+  <h4>3.x close()</h3>
+  <h4>3.x time-wait sockets</h3>
+  <h4>3.x </h3>
+  <div id="3.x">
   </div>
 
   <br>
-  <pre>
-    test code
-  </pre>
 
   <br><br><br><br>
   <a href=index.html>INDEX</a>
 
-  <script type="text/javascript">
-  <!--
-      function toggle_visibility(id) {
-         var e = document.getElementById(id);
-         if(e.style.display == 'block')
-            e.style.display = 'none';
-         else
-            e.style.display = 'block';
-      }
-
-      function afterLoad() {
-        toggle_visibility("myDIV");
-      }
-      //window.onload = afterLoad;
-
-  //-->
-  </script>
+  <script type="text/javascript" src="all_the_javascript.js"></script>
 </body>
 
 </html>

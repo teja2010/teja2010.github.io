@@ -16,14 +16,13 @@
     </style>
 </head>
 
-<body onload="javascript:afterLoad();afterLoad();"style="margin-left:10%">
+<body onload="javascript:afterLoad(1,9);afterLoad(1,9);"style="margin-left:10%">
 
   <h3>1. Packet RX path 1 : Basic</h3>
   <p><a href=index.html>INDEX</a>&emsp;
-  <a href="#" onclick="afterLoad();">Toggle Sections</a>&emsp;
+  <a href="#" onclick="afterLoad(1,9);">Toggle Sections</a>&emsp;
   <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
   <a href="#" onclick="changeall_visibility('none');">Collapse All Sections</a>
-  
   </p>
 
   <p>
@@ -42,7 +41,8 @@
     NAPI will be described in later pages, all NAPI APIs are ignored now.
   </p>
 
-  <h4><a href="#1.1" onclick="open_visibility('1.1');">1.1 Packet Representation in Linux</a></h4>
+  <h4><a href="#1.1" onclick="open_visibility('1.1');">
+      1.1 Packet Representation in Linux</a></h4>
   <div id="1.1">
 
   <p>
@@ -101,7 +101,8 @@
   </p>
   </div>
 
-  <h4><a href="#1.2" onclick="open_visibility('1.2');">1.2 Visualizing Packet Processing</a></h4>
+  <h4><a href="#1.2" onclick="open_visibility('1.2');">
+      1.2 Visualizing Packet Processing</a></h4>
   <div id="1.2">
   <p>
     This is not a standard way of visualizing, but I think this is the right
@@ -168,7 +169,8 @@
 
 
 
-  <h4><a href="#1.3" onclick="open_visibility('1.3');">1.3 Enter the Core, top half processing</a></h4>
+  <h4><a href="#1.3" onclick="open_visibility('1.3');">
+      1.3 Enter the Core, top half processing</a></h4>
   <div id="1.3">
 
   <p>
@@ -250,7 +252,8 @@
 
   </div>
 
-  <h4><a href="#1.4" onclick="open_visibility('1.4');">1.4 Softirqs, Softirq Scheduling [OPTIONAL]</a></h4>
+  <h4><a href="#1.4" onclick="open_visibility('1.4');">
+      1.4 Softirqs, Softirq Scheduling [OPTIONAL]</a></h4>
   <div id="1.4">
   <p>
     One detail that I have ignored in the previous discussion is to specify
@@ -363,7 +366,8 @@
 
   </div>
 
-  <h4><a href="#1.5" onclick="open_visibility('1.5');">1.5 Packet Steering (RSS and RPS) [OPTIONAL]</a></h4>
+  <h4><a href="#1.5" onclick="open_visibility('1.5');">
+      1.5 Packet Steering (RSS and RPS) [OPTIONAL]</a></h4>
   <div id="1.5">
 
   <p>
@@ -441,7 +445,8 @@
   </div>
 
 
-  <h4><a href="#1.6" onclick="open_visibility('1.6');">1.6 Softirq processing NET_RX</a></h4>
+  <h4><a href="#1.6" onclick="open_visibility('1.6');">
+      1.6 Softirq processing NET_RX</a></h4>
   <div id="1.6">
 
   <p>
@@ -514,7 +519,8 @@
   </pre>
   </div>
 
-  <h4><a href="#1.7" onclick="open_visibility('1.7');">1.7 __netif_receive_skb_core()</a></h4>
+  <h4><a href="#1.7" onclick="open_visibility('1.7');">
+      1.7 __netif_receive_skb_core()</a></h4>
   <div id="1.7">
   <p>
     __netif_receive_skb() internally calls __netif_receive_skb_core() for the
@@ -696,7 +702,8 @@
   </div>
 
 
-  <h4><a href="#1.8" onclick="open_visibility('1.8');">1.8 IP layer</a></h4>
+  <h4><a href="#1.8" onclick="open_visibility('1.8');">
+      1.8 IP layer</a></h4>
   <div id="1.8">
 
   <p>
@@ -780,7 +787,8 @@
   </p>
   </div>
 
-  <h4><a href="#1.9" onclick="open_visibility('1.9');">1.9 UDP layer</a></h4>
+  <h4><a href="#1.9" onclick="open_visibility('1.9');">
+      1.9 UDP layer</a></h4>
   <div id="1.9">
   <p>
     If the packet is an UDP packet, udp_rcv is the protocol handler called, which
