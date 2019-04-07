@@ -409,3 +409,314 @@ int udp_send_skb()
 
 		netif_rx(skb);
 	}
+
+	SERVER						CLIENT
+
+	fd1 = socket()
+	listen(fd1, N)
+	fd3 = accept(fd1) {
+							fd2 = socket()
+							connect(fd2) {
+				<<---- SYN ------
+				---- SYN-ACK --->>	}
+	}			<<---- ACK ------
+	send(fd3, DATA)
+				----- DATA --->>
+				<<--- DATA -----
+							recv(fd2, DATA);
+							close(fd2);
+				<<---- FIN ------
+	close(fd3);		---- FIN-ACK -->>
+				<<---- ACK ------
+
+
+
+
+__sys_socket() -> sock_create()
+{
+	sock_create() -> __sock_create()
+	{
+		sock = sock_alloc();
+		sock->type = type;
+		pf = rcu_dereference(net_families[family]);
+		err = pf->create(net, sock, protocol, kern);
+		{
+			struct inet_protosw *answer;
+			struct proto *answer_prot;
+			list_for_each_entry_rcu(answer, &inetsw[sock->type], list) {
+				//find the right protocol.
+				if (protocol == answer->protocol) {
+					break;
+				}
+			}
+
+			sock->ops = answer->ops;	// &inet_stream_ops
+			answer_prot = answer->prot;	// tcp_prot
+			sk = sk_alloc(net, PF_INET, GFP_KERNEL, answer_prot, kern);
+
+			sock_init_data(sock, sk);
+			sk->sk_protocol	   = protocol;
+
+			sk_refcnt_debug_inc(sk);
+
+			err = sk->sk_prot->init(sk);
+
+		}
+
+	}
+
+	return sock_map_fd(sock, flags & (O_CLOEXEC | O_NONBLOCK));
+	// find a unused fd and bind it to the socket
+
+}
+
+
+
+	int __sys_bind(fd, sockaddr, int)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		
+		sock->ops->bind(sock, sockaddr, addrlen);	// inet_bind()
+		{
+			struct sock sk = sock->sk
+			return __inet_bind(sk, uaddr, addr_len)
+			{
+				struct inet_sock *inet = inet_sk(sk);
+				lock_sock(sk);	//lock sock
+
+				snum = ntohs(addr->sin_port);
+				if (sk->sk_prot->get_port(sk, snum))
+				//	inet_csk_get_port()
+				{
+					err = -EADDRINUSE;
+					return err;
+				}
+				inet->inet_sport = htons(inet->inet_num);
+				// set src port
+
+				release_sock(sk);	//unlock
+			}
+		}
+	}
+
+	/* check tables if the port is free */
+	inet_csk_get_port(sk, port)
+	{
+		struct inet_hashinfo *hinfo = sk->sk_prot->h.hashinfo;	// hash tables
+		struct inet_bind_hashbucket *head;			// a bucket
+		struct inet_bind_bucket *tb = NULL;
+		int ret = 1;
+
+		if (!port) {
+			head = inet_csk_find_open_port(sk, &tb, &port);
+			// port is zero, assign a unused port
+		}
+
+		head = &hinfo->bhash[inet_bhashfn(net, port,
+						  hinfo->bhash_size)];
+		//calc hash and find the right bucket
+
+		spin_lock_bh(&head->lock);
+		inet_bind_bucket_for_each(tb, &head->chain)	//search in the bucket
+			if (tb->port == port)
+				goto tb_found;
+
+		// if nothing is found, this is the first sock to use the port
+		tb = inet_bind_bucket_create(hinfo->bind_bucket_cachep,
+					     net, head, port);
+
+	tb_found:
+		if (!hlist_empty(&tb->owners)) {	// port is being used
+			if (sk->sk_reuse == SK_FORCE_REUSE)
+				goto success;
+
+			// see the explanation above inet_bind_bucket def by DaveM,
+			// which expains the below function's checks
+			if (inet_csk_bind_conflict(sk, tb, true, true))
+				goto fail_unlock;
+		}
+	success:
+		if (!inet_csk(sk)->icsk_bind_hash)
+			inet_bind_hash(sk, tb, port)
+			{
+				inet_sk(sk)->inet_num = snum;
+				sk_add_bind_node(sk, &tb->owners);
+				// add sk to bucket
+
+				inet_csk(sk)->icsk_bind_hash = tb; // update pointer
+			}
+		ret = 0;
+
+	fail_unlock;
+		spin_unlock_bh(&head->lock);
+		return ret;
+	}
+
+ *	1) Sockets bound to different interfaces may share a local port.
+ *	   Failing that, goto test 2.
+ *	2) If all sockets have sk->sk_reuse set, and none of them are in
+ *	   TCP_LISTEN state, the port may be shared.
+ *	   Failing that, goto test 3.
+ *	3) If all sockets are bound to a specific inet_sk(sk)->rcv_saddr local
+ *	   address, and none of them are the same, the port may be
+ *	   shared.
+ *	   Failing this, the port cannot be shared.
+
+int __sys_listen(int fd, int backlog)
+{
+	sock = sockfd_lookup_light(fd, &err, &fput_needed);
+
+	if ((unsigned int)backlog > somaxconn)
+		backlog = somaxconn;
+	err = sock->ops->listen(sock, backlog);
+	// inet_listen()
+	{
+		struct sock *sk = sock->sk;
+		old_state = sk->sk_state;
+		if (old_state != TCP_LISTEN) {
+			err = inet_csk_listen_start(sk, backlog);
+			{
+				reqsk_queue_alloc(&icsk->icsk_accept_queue);
+
+				sk->sk_max_ack_backlog = backlog;
+				sk->sk_ack_backlog = 0;
+				inet_sk_state_store(sk, TCP_LISTEN);
+				if (!sk->sk_prot->get_port(sk, inet->inet_num)) {
+					// again inet_csk_get_port(), check with tables. Why?
+					inet->inet_sport = htons(inet->inet_num);
+
+					sk_dst_reset(sk);
+					err = sk->sk_prot->hash(sk);
+					//__inet_hash()
+
+					if (likely(!err))
+						return 0;
+				}
+			}
+		}
+		sk->sk_max_ack_backlog = backlog;
+	}
+}
+
+int __sys_connect(int fd, struct sockaddr __user *uservaddr, int addrlen)
+{
+	sock = sockfd_lookup_light(fd, &err, &fput_needed);
+	err = sock->ops->connect(sock, (struct sockaddr *)&address, addrlen,
+				 sock->file->f_flags);
+	// inet_stream_connect()
+	{
+		err = __inet_stream_connect(sock, uaddr, addr_len, flags, 0);
+	switch (sock->state) {
+	case SS_UNCONNECTED:
+		err = sk->sk_prot->connect(sk, uaddr, addr_len);
+		// tcp_v4_connect()
+		sock->state = SS_CONNECTING;
+	}
+
+	timeo = sock_sndtimeo(sk, flags & O_NONBLOCK);
+	// how long, sock has to wait for the response.
+
+	inet_wait_for_connect(sk, timeo, writebias); //sleep for atmost timeo jiffies
+
+	//... to be continued
+
+
+int tcp_v4_connect(struct sock *sk, struct sockaddr *uaddr, int addr_len)
+{
+	tcp_set_state(sk, TCP_SYN_SENT);
+
+	rt = ip_route_connect(fl4, nexthop, inet->inet_saddr,
+			      RT_CONN_FLAGS(sk), sk->sk_bound_dev_if,
+			      IPPROTO_TCP,
+			      orig_sport, orig_dport, sk);
+	sk_setup_caps(sk, &rt->dst);
+	{
+		sk_dst_set(sk, dst);	// set the route
+	}
+
+	err = tcp_connect(sk)
+	{
+		buff = sk_stream_alloc_skb(sk, 0, sk->sk_allocation, true);
+
+		tcp_rbtree_insert(&sk->tcp_rtx_queue, buff);	// to retransmit later
+
+		// send the skb
+		return tcp_transmit_skb() {
+			//build the tcp header
+			th->source		= inet->inet_sport;
+			th->dest		= inet->inet_dport;
+			th->seq			= htonl(tcb->seq);
+			th->ack_seq		= htonl(rcv_nxt);
+
+			err = icsk->icsk_af_ops->queue_xmit(sk, skb, &inet->cork.fl);
+			//ip_queue_xmit().
+		}
+
+		/* Timer for retransmitting the SYN until a SYN-ACK is rcvd. */
+		inet_csk_reset_xmit_timer(sk, ICSK_TIME_RETRANS,
+					  inet_csk(sk)->icsk_rto, TCP_RTO_MAX);
+		// See tcp_retransmit_timer(), which will be called on timeout.
+		// it retransmits the skb returned by tcp_rtx_queue_head() on timeout.
+	}
+}
+
+
+int tcp_v4_rcv(struct sk_buff *skb)
+{
+	th = (const struct tcphdr *)skb->data;
+
+	sk = __inet_lookup_skb(&tcp_hashinfo, skb, __tcp_hdrlen(th), th->source,
+			       th->dest, sdif, &refcounted);
+	{
+		sk = __inet_lookup_established(net, hashinfo, saddr, sport,
+				daddr, hnum, dif, sdif);
+		/* look up established sk table */
+
+		return __inet_lookup_listener(net, hashinfo, skb, doff, saddr,
+				sport, daddr, hnum, dif, sdif);
+		/* look up listening sk table */
+	}
+
+	if(sk->sk_state == TCP_TIME_WAIT)
+		//handle time wait. explained in the section in this page
+
+	tcp_v4_do_rcv(sk, skb);
+	{
+		if (sk->sk_state == TCP_ESTABLISHED) { /* Fast path */
+			tcp_rcv_established(sk, skb);
+			return 0;
+		}
+
+		/* To handle all states except TCP_ESTABLISHED & TIME_WAIT */
+		tcp_rcv_state_process(sk, skb);
+	}
+}
+
+
+int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
+{
+	//case TCP_LISTEN:
+	acceptable = icsk->icsk_af_ops->conn_request(sk, skb) >= 0;
+	//tcp_v4_conn_request()
+	{
+	struct request_sock *req;
+	if (sk_acceptq_is_full(sk)) {
+		NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENOVERFLOWS);
+		goto drop;
+	}
+	req = inet_reqsk_alloc(rsk_ops, sk, !want_cookie);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
