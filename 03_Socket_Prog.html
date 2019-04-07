@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Socket Programming</title>
+    <title>Socket Programming BTS</title>
     <style>
       pre {
         font-family: "Courier New", monospace;
@@ -16,31 +16,604 @@
     </style>
 </head>
 
-<body onload="javascript:afterLoad(3,9);afterLoad(3,9);" style="margin-left:10%">
+<!--<body onload="javascript:afterLoad(3,9);afterLoad(3,9);" style="margin-left:10%">-->
+<body style="margin-left:10%">
 
-  <h3>3. Socket Programming</h3>
+  <h3>3. Socket Programming BTS</h3>
   <p><a href=index.html>INDEX</a>&emsp;
   <a href="#" onclick="afterLoad(3,9);">Toggle Sections</a>&emsp;
   <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
   <a href="#" onclick="changeall_visibility('none');">Collapse All Sections</a>
   </p>
 
-  <h4><a href="#3.1" onclick="open_visibility('3.1');">
-      3.x Basics of TCP</a></h3>
-  <div id="3.1">
+  <p>
+    This page describes the magic that happens in the kernel behind the scenes
+    (BTS) while running a server and client exchanging data over TCP. A small
+    introduction with the basics of TCP has been added, a few optional sections
+    describing the internal structure of networking sockets, socket memory accounting,
+    time wait sockets have been added. The TCP subsystem is not described, it
+    requires a dedicated article, this article only mentions the basic functions
+    where necessary.<br>
+    Hereon the application sending the data is the server and one receiving it
+    is the client. Ofcourse, both the applications can be server and client by
+    sending and receiving simultaneously.
+  </p>
 
+  <h4><a href="#3.1" onclick="open_visibility('3.1');">
+      3.x Basics of TCP</a></h4>
+  <div id="3.1">
+  <p>
+    Please skip this section if you have a fair idea how basic TCP operates.
+  </p>
+  <p>
+    TCP provides reliable, ordered and error-checked delivery of octets.
+    The server divides the data into smaller segments and assigns each of them a
+    sequence number and sends it out. The client sends back an acknowledgement
+    for each sequence received. Reliability is achieved by tracking acknowledgements
+    and retransmitting segments if necessary. The receiver re-assembles the packets
+    using the sequence numbers so the application receives it in the right order.
+    Finally checksum is used to verify the integrity of the data. The application
+    actually knows nothing of how the packets are sent and received, the kernel
+    works all the TCP magic in the background. (Which is why this is a Behind
+    The Scenes Article).
+  </p>
+  <p>
+    Before TCP begins transmitting the data, the server and client connect to
+    each other and exchange a few parameters. The server begins by binding to a
+    particular port. The client sends a request to the server, a SYN (short for
+    synchronize) packet. (A tcp packet with the SYN flag set in the header is
+    called a SYN packet).
+    The server responds with a SYN packet which also
+    acknowledges the packet sent by the client, i.e. SYN-ACK packet (ACK is short
+    for acknowledgement). The client on receiving the SYN-ACK acknowledges the
+    SYN sent by the server with an ACK. The exchange of these three packets
+    ( SYN, SYN-ACK and ACK) establishes a connection between the server and
+    the client. The connection on both the sides is uniquely identified by
+    the following four tuple:<br>
+    (saddr, daddr, sport, dport) which are short for<br>
+    ( source IP address, destination IP address, source
+    port, destination port) respectively.
+  </p>
+  <p>
+    Connection termination also happens with the exchange of packets between
+    the server and client. A FIN is sent by the initiator, to which the peer
+    responds with a FIN-ACK (acknowledging the initiator's FIN). The connection
+    closes with the initiator acknowledging the FIN-ACK.
+  </p>
+  <pre>
+	SERVER						CLIENT
+
+	fd1 = socket()
+	listen(fd1, N)
+	fd3 = accept(fd1) {
+							fd2 = socket()
+							connect(fd2) {
+				<<---- SYN ------
+				---- SYN-ACK --->>	}
+	}			<<---- ACK ------
+	send(fd3, DATA)
+				----- DATA --->>
+				<<--- DATA -----
+							recv(fd2, DATA);
+							close(fd2);
+				<<---- FIN ------
+	close(fd3);		---- FIN-ACK -->>
+				<<---- ACK ------
+  </pre>
+<!--  <p>-->
+<!--    TCP also ensures the rate at which data is transferred is as high as possible.-->
+<!--    This again will be described in a separate article.-->
+<!--  </p>-->
   </div>
 
-  <h4>3.x socket creation</h3>
-  <h4>3.x sock, inet_sock, inet_connection_sock and tcp_sock</h3>
-  <h4>3.x bind() to a port</h3>
-  <h4>3.x [Server] listen()</h3>
-  <h4>3.x [Client] connect()</h3>
-  <h4>3.x [Server] accept()</h3>
-  <h4>3.x send() and recv()</h3>
-  <h4>3.x close()</h3>
-  <h4>3.x time-wait sockets</h3>
-  <h4>3.x </h3>
+  <h4><a href="#3.2" onclick="open_visibility('3.2');">
+      3.2 socket(int domain, int type, int protocol)</a></h4>
+  <div id="3.2">
+  <p>
+    Both applications create networking sockets using the socket() system call.
+    The arguments are socket family, socket type and protocol type. The
+    <a href="http://www.man7.org/linux/man-pages/man2/socket.2.html">man page</a>
+    describes possible values the arguments take. AF_INET and AF_INET6 are to
+    create a IPv4 and IPv6 sockets respectively. Some of other options are to
+    create UNIX sockets for Inter process communication, NETLINK sockets for
+    monitoring kernel events and communicating with kernel modules,
+    AF_PACKET sockets to capture packets,
+    AF_PPPOX sockets for creating PPP tunnels, etc.
+  </p>
+  <p>
+    There are two major Socket types:<br><br>
+    1. SOCK_STREAM: used to send/recv octet streams.
+    For example TCP socket is a STREAM sock. Stream sockets guarantee reliable
+    in order delivery after a two way connection is established.
+    It does not preserve message boundaries. i.e. if the server
+    writes 40 bytes first and then 60 bytes, the client may receive all the
+    100 bytes in one shot, never knowing that the server wrote it in two parts.
+    Usually both sides agree upon a fixed boundary that is used to detect message
+    boundaries.
+    For example HTTP, which operates over TCP uses "\r\n" (CRLF: Carriage Return
+    Line Feed) as a boundary. See the
+    <a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Message_format">
+      wiki</a> page describing the HTTP Message format.<br><br>
+    2. SOCK_DGRAM: Datagram are the exact opposite of SOCK_STREAM, they are
+    connectionless, delivery is unreliable. But message boundaries are preserved,
+    i.e. in the prev example, the client would receive two messages 40 and 60
+    bytes long (if they were not dropped on the way). An example is UDP.
+  </p>
+
+  <p>
+    Protocol field, usually zero, is used if there are multiple protocols for a
+    specific (family, protocol) set. For example both SCTP and TCP both offer
+    SOCK_STREAM services within AF_INET family, UDP and ICMP offer DGRAM services
+    within the AF_INET family. TCP is the default option, so a socket call with
+    family AF_INET, type STREAM_SOCK and protocol set to zero will initialize a
+    TCP socket.
+    Providing IPPROTO_SCTP instead of zero will create a SCTP socket.
+    Explicitly setting IPPROTO_TCP will also create a TCP.
+  </p>
+
+  <p>
+    The socket() system call internally calls __sys_socket(), which has two parts
+    to it, firstly it creates a socket and a networking socket (struct sock) and
+    initializes them.
+    The second part is to create provide a fd to the application as a handle to
+    the socket.
+    __sys_socket() first calls
+    sock_create(), which internally calls __sock_create(). __sock_create() checks
+    the input values. It then checks if the application has permissions needed
+    to create the socket. For example packet sockets can be created only by
+    applications with admin privileges. Simple sockets like TCP & UDP dont need
+    any special permissions. Next it allocates a socket. Based on the family,
+    the corresponding create function is called. All protocol families are registered
+    during initialization by calling sock_register(). They can be accessed via
+    the global variable net_families[]. In this case,
+    family AF_INET has the structure inet_family_ops registered, and the create
+    function inet_create() is called.
+  </p>
+  <p>
+    inet_create() searches among the registered struct proto which corresponds to
+    the protocol input. On finding the protocol sk_alloc() is called to create
+    the corresponding protocol sock, and the registered protocol init is called,
+    in this tcp_v4_init_sock(). The structure of the sock is described below,
+    an optional section. The socket is a BSD socket, while the sock is a networking
+    socket which handles all the protocol functionality and stores the corresponding
+    data. For example, in TCP the tcp sock maintains queues to track packets that
+    have been sent but not yet acknowledged by the peer. Once sock init is done,
+    control returns to __sys_socket().
+  </p>
+  <p>
+    __sys_socket() then assigns a fd to the socket that was created, and returns
+    this to the application. Any interaction with the network sock will go through
+    the socket. System calls will call the socket call, using the fd the
+    corresponding sock will be found, after which the corresponding
+    protocol function will be invoked. sock->sk points to the sk and sk->sk_socket
+    points to sock. This way knowing one, we can reach the other.
+  </p>
+
+  <pre>
+__sys_socket() -> sock_create()
+{
+	sock_create() -> __sock_create()
+	{
+		sock = sock_alloc();
+		sock->type = type;
+		pf = rcu_dereference(net_families[family]);
+		err = pf->create(net, sock, protocol, kern);
+		{
+			struct inet_protosw *answer;
+			struct proto *answer_prot;
+			list_for_each_entry_rcu(answer, &inetsw[sock->type], list) {
+				//find the right protocol.
+				if (protocol == answer->protocol) {
+					break;
+				}
+			}
+
+			sock->ops = answer->ops;	// &inet_stream_ops
+			answer_prot = answer->prot;	// tcp_prot
+			sk = sk_alloc(net, PF_INET, GFP_KERNEL, answer_prot, kern);
+
+			sock_init_data(sock, sk);
+			sk->sk_protocol	   = protocol;
+
+			sk_refcnt_debug_inc(sk);
+
+			err = sk->sk_prot->init(sk);
+
+		}
+
+	}
+
+	return sock_map_fd(sock, flags & (O_CLOEXEC | O_NONBLOCK));
+	// find a unused fd and bind it to the socket
+
+}
+  </pre>
+  </div>
+
+  <p>
+    The flow after calling a socket call usually follows the following pattern:<br>
+    1. syscall entry, socket lookup based on fd. <br>
+    2. check if the process has the necessary security permissions<br>
+    3. call the corresponding function from sock->ops<br>
+    4. get sock from the socket, call the function from sk->ops<br>
+  </p>
+
+
+  <h4>3.3 socket, sock, inet_sock, inet_connection_sock and tcp_sock [OPTIONAL]</h4>
+  <p>
+    TODO:
+    Why two parts: socket and sock ? is a socket without sock possible ?
+  </p>
+
+  <h4>3.4 bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)</h4>
+
+  <p>
+    TCP bind is called by server, which provides services on a well known port,
+    to which the client connects to. The client may also bind, but usually the
+    client's port is not of importance, so a bind() call is seldom made.
+  </p>
+  <p>
+    The usual flow, enter syscall, find the socket from fd, call the bind
+    function from the ops, which is inet_bind(). Then, the get the sk from
+    the sock, call sk->sk_prot->get_port(). In case of tcp it points to
+    inet_csk_get_port(). The get_port() takes two arguments, sk and port num, and
+    returns 0 if that port was available and was assigned to sk, and returns 1
+    if binding the port was not possible.
+  </p>
+  <pre>
+	int __sys_bind(fd, sockaddr, int)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		
+		sock->ops->bind(sock, sockaddr, addrlen);	// inet_bind()
+		{
+			struct sock sk = sock->sk
+			return __inet_bind(sk, uaddr, addr_len)
+			{
+				struct inet_sock *inet = inet_sk(sk);
+				lock_sock(sk);	//lock sock
+
+				snum = ntohs(addr->sin_port);
+				if (sk->sk_prot->get_port(sk, snum))
+				//	inet_csk_get_port()
+				{
+					err = -EADDRINUSE;
+					return err;
+				}
+				inet->inet_sport = htons(inet->inet_num);
+				// set src port
+
+				release_sock(sk);	//unlock
+			}
+		}
+	}
+  </pre>
+  <p>
+    The TCP subsystem maintains a hash table with a list of hashbuckets corresponding
+    to each hash. Each bucket contains a list of sk which are bound to a port.
+    First, it checks if a bucket exists for the port requested. If it does not,
+    a new one is added and the sk is added ot the bucket. If the bucket exists,
+    and if the certain conditions are satisfied (see the next paragraph), the
+    sk is added to the bucket, and the bind is successful.
+  </p>
+  <pre>
+	/* check tables if the port is free */
+	inet_csk_get_port(sk, port)
+	{
+		struct inet_hashinfo *hinfo = sk->sk_prot->h.hashinfo;	// hash tables
+		struct inet_bind_hashbucket *head;			// a bucket
+		struct inet_bind_bucket *tb = NULL;
+		int ret = 1;
+
+		if (!port) {
+			head = inet_csk_find_open_port(sk, &tb, &port);
+			// port is zero, assign a unused port
+		}
+
+		head = &hinfo->bhash[inet_bhashfn(net, port,
+						  hinfo->bhash_size)];
+		//calc hash and find the right bucket head
+
+		spin_lock_bh(&head->lock);
+		inet_bind_bucket_for_each(tb, &head->chain)	//search in the bucket
+			if (tb->port == port) //exact bucket found
+				goto tb_found;
+
+		// if nothing is found, this is the first sock to use the port
+		tb = inet_bind_bucket_create(hinfo->bind_bucket_cachep,
+					     net, head, port);
+
+	tb_found:
+		if (!hlist_empty(&tb->owners)) {	// bucket has sk, i.e. port is being used
+			if (sk->sk_reuse == SK_FORCE_REUSE)
+				goto success;
+
+			// see the explanation above inet_bind_bucket def by DaveM,
+			// which expains the below function's checks
+			if (inet_csk_bind_conflict(sk, tb, true, true))
+				goto fail_unlock;
+		}
+	success:
+		if (!inet_csk(sk)->icsk_bind_hash)
+			inet_bind_hash(sk, tb, port)
+			{
+				inet_sk(sk)->inet_num = snum;
+				sk_add_bind_node(sk, &tb->owners);
+				// add sk to bucket
+
+				inet_csk(sk)->icsk_bind_hash = tb; // update pointer
+			}
+		ret = 0;
+
+	fail_unlock;
+		spin_unlock_bh(&head->lock);
+		return ret;
+	}
+  </pre>
+  <p>
+    Multiple sockets can be bound to a single port, both TCP and UDP use it to
+    allow mutliple processes to share a port. All applications that want to reuse
+    the port should us the reuseport socket option (SO_REUSEPORT) to allow sharing
+    the port. See man page socket(7), about the use of SO_REUSEPORT, where possible
+    use cases are also described.<br>
+    TCP (in Linux) has a unique way of allowing multiple sockets to share a port,
+    this has been added as a comment in "include/net/inet_hashtables.h", which
+    I have added below. This logic is implemented in inet_csk_bind_conflict().
+  </p>
+
+  <pre>
+	 1) Sockets bound to different interfaces may share a local port.
+	    Failing that, goto test 2.
+	 2) If all sockets have sk->sk_reuse set, and none of them are in
+	    TCP_LISTEN state, the port may be shared.
+	    Failing that, goto test 3.
+	 3) If all sockets are bound to a specific inet_sk(sk)->rcv_saddr local
+	    address, and none of them are the same, the port may be
+	    shared.
+	    Failing this, the port cannot be shared.
+  </pre>
+
+  <h4>3.x [Server] listen(int sockfd, int backlog)</h4>
+
+  <p>
+    After opening a socket and binding to a port, the server calls the listen()
+    call. It is signal to the kernel that the application is now ready to accept
+    connections. The kernel initializes the necessary data structures, so SYN
+    packets can be received. This will be explained in the accept call. The code
+    flow is the standard one, finally calling sk->sk_prot->listen(), the
+    registered function is inet_listen().
+  </p>
+  <p>
+    If the sock state is not TCP_LISTEN (i.e. this is the first listen() call),
+    sk_max_ack_backlog is set to the value supplied by the user. The sk->sk_ack_backlog
+    is a value that tracks the current value. The way these variables is used will
+    be seen before the accept call. For now the value is used to limit the number
+    of connections that have not been accepted by the application. The sk state
+    is moved to TCP_LISTEN, i.e. waiting to accept new connections. The
+    sk->sk_port->get_port() is called again (it was called while binding). This is
+    to make sure that two TCP_LISTEN sockets with the same port are not allowed
+    (case 2). While binding, the TCP port can be a server port or a client port.
+    Two client sockets reusing the port is acceptable. But a server socket and a
+    client socket on the same port cannot be allowed. So, though the bind() call has
+    not failed, because of clashing ports, the listen call can fail. The error
+    returned in that case is EADDRINUSE. Once the get_port call succeeds (returns 0),
+    inet->inet_sport is set. sk->sk_prot->hash() call is called, which similar
+    to get_port adds this sk into a hash table, which is maintained exclusively
+    for listen sockets. The function __inet_hash() is similar to inet_csk_get_port()
+    and hence is not explained.
+  </p>
+  <pre>
+int __sys_listen(int fd, int backlog)
+{
+	sock = sockfd_lookup_light(fd, &err, &fput_needed);
+
+	if ((unsigned int)backlog > somaxconn)
+		backlog = somaxconn;
+
+	err = sock->ops->listen(sock, backlog);
+	// inet_listen()
+	{
+		struct sock *sk = sock->sk;
+		old_state = sk->sk_state;
+
+		if (old_state != TCP_LISTEN) {
+			err = inet_csk_listen_start(sk, backlog);
+			{
+				reqsk_queue_alloc(&icsk->icsk_accept_queue);
+
+				sk->sk_max_ack_backlog = backlog;
+				sk->sk_ack_backlog = 0;
+
+				inet_sk_state_store(sk, TCP_LISTEN);
+				if (!sk->sk_prot->get_port(sk, inet->inet_num)) {
+					// again inet_csk_get_port(), check with tables.
+					inet->inet_sport = htons(inet->inet_num);
+
+					sk_dst_reset(sk);
+					err = sk->sk_prot->hash(sk);
+					//__inet_hash()
+
+					if (likely(!err))
+						return 0;
+				}
+			}
+		}
+		sk->sk_max_ack_backlog = backlog;
+	}
+}
+  </pre>
+
+  <p>
+    At this point, the server is ready to accept new connections. The client has
+    to initiate the connection by calling connect().
+  </p>
+
+  <h4>3.x [Client] connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)</h4>
+  <p>
+    The client calls connect() to initiate the connection, the sockaddr struct
+    providing the server's ip address and port. struct sockaddr is a common struct
+    which is passed in socket calls. The application and the kernel typecasts it
+    into another structure to fill/extract data. In case of IPv4 sockets,
+    it is set to struct sockaddr_in, which contains the IPv4 address and port.
+    In case of UNIX sockets, it is struct sockaddr_un.
+    Proper padding is added in each of them so all of them are of the same size.
+  </p>
+  <p>
+    The usual flow, find the sock from fd, call sock->ops->connect() which is
+    inet_stream_connect(). Which internally calls __inet_stream_connect() after
+    holding sock->sk lock. The sock state till now was SS_UNCONNECTED,
+    sk->sk_prot->connect() is called, which points to tcp_v4_connect(). tcp_v4_connect()
+    sends out a TCP SYN packet. The sock state is moved to SS_CONNECTING state.
+    The connect call is blocked till a SYN-ACK is received from the server in
+    response. Based on the sk->sk_sndtimeo value, inet_wait_for_connect() is called.
+    If the non-blocking option is set, the connect call will not wait for the SYN-ACK,
+    instead will return immediately. The application can work on something else,
+    while TCP sets up the connection. In the default case, it will be blocked till
+    a SYN-ACK returns.
+  </p>
+
+  <pre>
+int __sys_connect(int fd, struct sockaddr __user *uservaddr, int addrlen)
+{
+	sock = sockfd_lookup_light(fd, &err, &fput_needed);
+	err = sock->ops->connect(sock, (struct sockaddr *)&address, addrlen,
+				 sock->file->f_flags);
+	// inet_stream_connect()
+	{
+		err = __inet_stream_connect(sock, uaddr, addr_len, flags, 0);
+	switch (sock->state) {
+	case SS_UNCONNECTED:
+		err = sk->sk_prot->connect(sk, uaddr, addr_len);
+		// tcp_v4_connect()
+		sock->state = SS_CONNECTING;
+	}
+
+	timeo = sock_sndtimeo(sk, flags & O_NONBLOCK);
+	// how long, sock has to wait for the response.
+
+	inet_wait_for_connect(sk, timeo, writebias); //sleep for atmost timeo jiffies
+
+	//... to be continued
+  </pre>
+
+  <p>
+    tcp_v4_connect() sends out a SYN to the server and updates the sk state.
+    Sending out a packet (usually) has these three steps:<br>
+    1. Create a skb, fill up the headers.<br>
+    2. Find a route to send it out<br>
+    3. Call the function to hand it over to the ip layer.<br><br>
+
+    tcp_v4_connect first moves the sk state to TCP_SYN_SENT. If something else
+    fails, the socket is closed, state moved back to TCP_CLOSE. Next a route to
+    the server is found and this route is set in the sk. Once a connect call is
+    called, the sk will only communicate over this route, no point in trying to
+    route the packet each time. If an interface is brought down, all TCP connections
+    which use a route through the interface will get closed. After setting the route
+    in the sk, tcp_connect is called, which allocates the skb, and transmits it.
+    A timer is started to retry sending SYN packets till a SYN-ACK is sent back.
+  </p>
+
+  <pre>
+int tcp_v4_connect(struct sock *sk, struct sockaddr *uaddr, int addr_len)
+{
+	tcp_set_state(sk, TCP_SYN_SENT);
+
+	rt = ip_route_connect(fl4, nexthop, inet->inet_saddr,
+			      RT_CONN_FLAGS(sk), sk->sk_bound_dev_if,
+			      IPPROTO_TCP,
+			      orig_sport, orig_dport, sk);
+	sk_setup_caps(sk, &rt->dst);
+	{
+		sk_dst_set(sk, dst);	// set the route
+	}
+
+	err = tcp_connect(sk)
+	{
+		buff = sk_stream_alloc_skb(sk, 0, sk->sk_allocation, true);
+
+		tcp_rbtree_insert(&sk->tcp_rtx_queue, buff);	// to retransmit later
+
+		// send the skb
+		return tcp_transmit_skb() {
+			//build the tcp header
+			th->source		= inet->inet_sport;
+			th->dest		= inet->inet_dport;
+			th->seq			= htonl(tcb->seq);
+			th->ack_seq		= htonl(rcv_nxt);
+
+			err = icsk->icsk_af_ops->queue_xmit(sk, skb, &inet->cork.fl);
+			//ip_queue_xmit().
+		}
+
+		/* Timer for retransmitting the SYN until a SYN-ACK is rcvd. */
+		inet_csk_reset_xmit_timer(sk, ICSK_TIME_RETRANS,
+					  inet_csk(sk)->icsk_rto, TCP_RTO_MAX);
+		// See tcp_retransmit_timer(), which will be called on timeout.
+		// it retransmits the skb returned by tcp_rtx_queue_head() on timeout.
+	}
+}
+  </pre>
+
+  <p>
+    At the end of all this, the connect call is blocked, it will wake up to either
+    find that a
+    SYN-ACK was rcvd in which case the connect call succeeds, returns 0 to the user,
+    the application can proceed and begin sending data.
+    Or the connect call will wake up after multiple SYN packets and finally a RST
+    was sent closing the connection. The connect call will return -1 and
+    errno is set to ETIMEDOUT.
+  </p>
+
+  <h4>3.x TCP packet rcv</h4>
+  <p>
+    TCP's handler while receiving packets is tcp_v4_rcv(). It looks up the hashtables
+    maintained for bound sockets and listening sockets. If sk is not found, a reset
+    is sent back. If the sk->sk_state is not TCP_TIME_WAIT, further processing
+    is done in tcp_v4_do_rcv(). tcp_rcv_established() is called if the sk is a
+    established sk, for all other states tcp_rcv_state_process() is called.
+    We will begin with either tcp_rcv_established() or tcp_rcv_state_process()
+    hereon to describe the packet flow.
+  </p>
+
+  <pre>
+int tcp_v4_rcv(struct sk_buff *skb)
+{
+	th = (const struct tcphdr *)skb->data;
+
+	sk = __inet_lookup_skb(&tcp_hashinfo, skb, __tcp_hdrlen(th), th->source,
+			       th->dest, sdif, &refcounted);
+	{
+		sk = __inet_lookup_established(net, hashinfo, saddr, sport,
+				daddr, hnum, dif, sdif);
+		/* look up established sk table */
+
+		return __inet_lookup_listener(net, hashinfo, skb, doff, saddr,
+				sport, daddr, hnum, dif, sdif);
+		/* look up listening sk table */
+	}
+
+	if(sk->sk_state == TCP_TIME_WAIT)
+		//handle time wait. explained in the last section in this page
+
+	tcp_v4_do_rcv(sk, skb);
+	{
+		if (sk->sk_state == TCP_ESTABLISHED) { /* Fast path */
+			tcp_rcv_established(sk, skb);
+			return 0;
+		}
+
+		/* To handle all states except TCP_ESTABLISHED & TIME_WAIT */
+		tcp_rcv_state_process(sk, skb);
+	}
+}
+  </pre>
+
+  <h4>3.x [Server] accept()</h4>
+  <h4>3.x send() and recv()</h4>
+  <h4>3.x Socket Memory accounting[OPTIONAL]</h4>
+  <h4>3.x close()</h4>
+  <h4>3.x time-wait sockets [OPTIONAL]</h4>
+  <h4>3.x </h4>
   <div id="3.x">
   </div>
 
@@ -49,7 +622,7 @@
   <br><br><br><br>
   <a href=index.html>INDEX</a>
 
-  <script type="text/javascript" src="all_the_javascript.js"></script>
+  <!--<script type="text/javascript" src="all_the_javascript.js"></script>-->
 </body>
 
 </html>
