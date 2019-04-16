@@ -481,19 +481,18 @@ int __sys_connect(int fd, struct sockaddr __user *uservaddr, int addrlen)
 	// inet_stream_connect()
 	{
 		err = __inet_stream_connect(sock, uaddr, addr_len, flags, 0);
-	switch (sock->state) {
-	case SS_UNCONNECTED:
-		err = sk->sk_prot->connect(sk, uaddr, addr_len);
-		// tcp_v4_connect()
-		sock->state = SS_CONNECTING;
-	}
+		switch (sock->state) {
+		case SS_UNCONNECTED:
+			err = sk->sk_prot->connect(sk, uaddr, addr_len);
+			// tcp_v4_connect()
+			sock->state = SS_CONNECTING;
+		}
 
-	timeo = sock_sndtimeo(sk, flags & O_NONBLOCK);
-	// how long, sock has to wait for the response.
+		timeo = sock_sndtimeo(sk, flags & O_NONBLOCK);
+		// how long, sock has to wait for the response.
 
-	inet_wait_for_connect(sk, timeo, writebias); //sleep for atmost timeo jiffies
-
-	//... to be continued
+		inet_wait_for_connect(sk, timeo, writebias); //sleep for atmost timeo jiffies
+		//... to be continued
   </pre>
 
   <p>
@@ -559,8 +558,8 @@ int tcp_v4_connect(struct sock *sk, struct sockaddr *uaddr, int addr_len)
     find that a
     SYN-ACK was rcvd in which case the connect call succeeds, returns 0 to the user,
     the application can proceed and begin sending data.
-    Or the connect call will wake up after multiple SYN packets and finally a RST
-    was sent closing the connection. The connect call will return -1 and
+    Or the connect call will wake up after multiple SYN packets
+    were sent and connection is closed. The connect call will return -1 and
     errno is set to ETIMEDOUT.
   </p>
 
@@ -573,6 +572,12 @@ int tcp_v4_connect(struct sock *sk, struct sockaddr *uaddr, int addr_len)
     established sk, for all other states tcp_rcv_state_process() is called.
     We will begin with either tcp_rcv_established() or tcp_rcv_state_process()
     hereon to describe the packet flow.
+  </p>
+  <p>
+    Another thing to keep in mind is that TCP packet processing mentioned above
+    happens in the NET_RX softirq context. Once the processing is done, the userspace
+    process, which is waiting on a system call, has to be signalled so it can
+    continue processing the data.
   </p>
 
   <pre>
@@ -606,6 +611,121 @@ int tcp_v4_rcv(struct sk_buff *skb)
 		tcp_rcv_state_process(sk, skb);
 	}
 }
+  </pre>
+  <h4>3.x [Server] Recv SYN</h4>
+  <p>
+    On receiving a SYN, only if the sk->sk_state TCP_LISTEN, tcp_v4_conn_request()
+    is called. A struct tcp_request_sock is allocated and initialized. It is added
+    to the hash maps and a timer is started to retransmit SYN-ACKs. Finally
+    a SYN-ACK is sent out. The reqsk represents incoming sockets, and the number
+    of such req socks is limited by sk_max_ack_backlog, which is set in the
+    listen() call.
+  </p>
+  <pre>
+int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
+{
+	//case TCP_LISTEN:
+	acceptable = icsk->icsk_af_ops->conn_request(sk, skb) >= 0;
+	//tcp_v4_conn_request()
+	{
+		struct request_sock *req;
+		if (sk_acceptq_is_full(sk)) {
+			NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENOVERFLOWS);
+			goto drop;
+		}
+		req = inet_reqsk_alloc(rsk_ops, sk, !want_cookie);
+		{
+			req = reqsk_alloc();
+			ireq->ireq_state = TCP_NEW_SYN_RECV;
+		}
+
+		tcp_openreq_init(req, &tmp_opt, skb, sk);
+		af_ops->init_req(req, sk, skb);
+		// tcp_v4_init_req() : init req, copy
+
+		inet_csk_reqsk_queue_hash_add(sk, req,
+				tcp_timeout_init((struct sock *)req));
+		{
+			reqsk_queue_hash_req(req, timeout);
+			{
+				timer_setup(&req->rsk_timer, reqsk_timer_handler,
+						TIMER_PINNED);
+				mod_timer(&req->rsk_timer, jiffies + timeout);
+
+				inet_ehash_insert(req_to_sk(req), NULL);
+			}
+
+			inet_csk_reqsk_queue_added(sk);
+			// increment icsk_accept_queue length
+		}
+
+		af_ops->send_synack(sk, dst, &fl, req, &foc,
+				    !want_cookie ? TCP_SYNACK_NORMAL :
+						   TCP_SYNACK_COOKIE);
+		{
+			skb = tcp_make_synack(sk, dst, req, foc, synack_type);
+			err = ip_build_and_send_pkt(skb, sk, ireq->ir_loc_addr,
+					ireq->ir_rmt_addr,
+					rcu_dereference(ireq->ireq_opt));
+		}
+
+	}
+}
+  </pre>
+
+  <h4>3.x [Client] Recv SYN-ACK</h4>
+
+  <p>
+    Fairly straight forward, the sock is found, tcp header data added into the
+    sock. The sock is moved to the TCP_ESTABLISHED state and the process waiting
+    in the connect() call.
+  </p>
+
+  <pre>
+int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
+{
+	//case TCP_SYN_SENT:
+	queued = tcp_rcv_synsent_state_process(sk, skb, th);
+	{
+		tp->rcv_nxt = TCP_SKB_CB(skb)->seq + 1;
+		tp->rcv_wup = TCP_SKB_CB(skb)->seq + 1;
+		tcp_finish_connect(sk, skb);
+		{
+			tcp_set_state(sk, TCP_ESTABLISHED);
+
+			if (!sock_flag(sk, SOCK_DEAD)) {
+				sk->sk_state_change(sk); //sock_def_wakeup()
+				{
+					wake_up_interruptible_all(&wq->wait);
+					// wakeup the process waiting on connect()
+				}
+			}
+		}
+		tcp_send_ack(sk);
+		return -1;
+	}
+}
+  </pre>
+
+
+  <h4>3.x [Client] connect() [continued]</h4>
+  <p>
+    The process waiting on connect system call wakes up, and if the sock state
+    is not TCP_CLOSE, the connect was successful. The socket state is moved
+    to SS_CONNECTED.
+  </p>
+  <pre>
+		inet_wait_for_connect(sk, timeo, writebias);
+		
+		/* Connection was closed by RST, timeout, ICMP error
+		 * or another process disconnected us.
+		 */
+		if (sk->sk_state == TCP_CLOSE)
+			goto sock_error;
+
+		sock->state = SS_CONNECTED;
+	} // inet_stream_connect
+} // __sys_connect
   </pre>
 
   <h4>3.x [Server] accept()</h4>

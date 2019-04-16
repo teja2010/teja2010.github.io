@@ -606,19 +606,19 @@ int __sys_connect(int fd, struct sockaddr __user *uservaddr, int addrlen)
 	// inet_stream_connect()
 	{
 		err = __inet_stream_connect(sock, uaddr, addr_len, flags, 0);
-	switch (sock->state) {
-	case SS_UNCONNECTED:
-		err = sk->sk_prot->connect(sk, uaddr, addr_len);
-		// tcp_v4_connect()
-		sock->state = SS_CONNECTING;
-	}
+		switch (sock->state) {
+		case SS_UNCONNECTED:
+			err = sk->sk_prot->connect(sk, uaddr, addr_len);
+			// tcp_v4_connect()
+			sock->state = SS_CONNECTING;
+		}
 
-	timeo = sock_sndtimeo(sk, flags & O_NONBLOCK);
-	// how long, sock has to wait for the response.
+		timeo = sock_sndtimeo(sk, flags & O_NONBLOCK);
+		// how long, sock has to wait for the response.
 
-	inet_wait_for_connect(sk, timeo, writebias); //sleep for atmost timeo jiffies
+		inet_wait_for_connect(sk, timeo, writebias); //sleep for atmost timeo jiffies
 
-	//... to be continued
+		//... to be continued
 
 
 int tcp_v4_connect(struct sock *sk, struct sockaddr *uaddr, int addr_len)
@@ -699,15 +699,87 @@ int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
 	acceptable = icsk->icsk_af_ops->conn_request(sk, skb) >= 0;
 	//tcp_v4_conn_request()
 	{
-	struct request_sock *req;
-	if (sk_acceptq_is_full(sk)) {
-		NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENOVERFLOWS);
-		goto drop;
-	}
-	req = inet_reqsk_alloc(rsk_ops, sk, !want_cookie);
+		struct request_sock *req;
+		if (sk_acceptq_is_full(sk)) {
+			NET_INC_STATS(sock_net(sk), LINUX_MIB_LISTENOVERFLOWS);
+			goto drop;
+		}
+		req = inet_reqsk_alloc(rsk_ops, sk, !want_cookie);
+		// allocate a tcp_request_sock
+
+		tcp_openreq_init(req, &tmp_opt, skb, sk);
+		af_ops->init_req(req, sk, skb);
+		// tcp_v4_init_req() : init req, copy
+
+		inet_csk_reqsk_queue_hash_add(sk, req,
+				tcp_timeout_init((struct sock *)req));
+		{
+			reqsk_queue_hash_req(req, timeout);
+			{
+				timer_setup(&req->rsk_timer, reqsk_timer_handler,
+						TIMER_PINNED);
+				mod_timer(&req->rsk_timer, jiffies + timeout);
+
+				inet_ehash_insert(req_to_sk(req), NULL);
+			}
+
+			inet_csk_reqsk_queue_added(sk);
+			// increment icsk_accept_queue length
+		}
+
+		af_ops->send_synack(sk, dst, &fl, req, &foc,
+				    !want_cookie ? TCP_SYNACK_NORMAL :
+						   TCP_SYNACK_COOKIE);
+		{
+			skb = tcp_make_synack(sk, dst, req, foc, synack_type);
+			err = ip_build_and_send_pkt(skb, sk, ireq->ir_loc_addr,
+					ireq->ir_rmt_addr,
+					rcu_dereference(ireq->ireq_opt));
+		}
+
+		//req sk state ?
 	}
 
 }
+
+int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
+{
+	//case TCP_SYN_SENT:
+	queued = tcp_rcv_synsent_state_process(sk, skb, th);
+	{
+		tp->rcv_nxt = TCP_SKB_CB(skb)->seq + 1;
+		tp->rcv_wup = TCP_SKB_CB(skb)->seq + 1;
+		tcp_finish_connect(sk, skb);
+		{
+			tcp_set_state(sk, TCP_ESTABLISHED);
+
+			if (!sock_flag(sk, SOCK_DEAD)) {
+				sk->sk_state_change(sk); //sock_def_wakeup()
+				{
+					wake_up_interruptible_all(&wq->wait);
+					// wakeup the socket waiting on connect()
+				}
+			}
+		}
+		tcp_send_ack(sk);
+		return -1;
+	}
+}
+
+
+		inet_wait_for_connect(sk, timeo, writebias);
+		
+		/* Connection was closed by RST, timeout, ICMP error
+		 * or another process disconnected us.
+		 */
+		if (sk->sk_state == TCP_CLOSE)
+			goto sock_error;
+
+		sock->state = SS_CONNECTED;
+	} // inet_stream_connect
+} // __sys_connect
+
+
 
 
 
