@@ -16,12 +16,13 @@
     </style>
 </head>
 
-<!--<body onload="javascript:afterLoad(3,9);afterLoad(3,9);" style="margin-left:10%">-->
+<body onload="javascript:afterLoad(3,15);afterLoad(3,15);" style="margin-left:10%">
 <body style="margin-left:10%">
 
+  <h2 style="color:red"> WIP. Parts of it may be incomplete or incorrect. </h2>
   <h3>3. Socket Programming BTS</h3>
   <p><a href=index.html>INDEX</a>&emsp;
-  <a href="#" onclick="afterLoad(3,9);">Toggle Sections</a>&emsp;
+  <a href="#" onclick="afterLoad(3,15);">Toggle Sections</a>&emsp;
   <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
   <a href="#" onclick="changeall_visibility('none');">Collapse All Sections</a>
   </p>
@@ -40,7 +41,7 @@
   </p>
 
   <h4><a href="#3.1" onclick="open_visibility('3.1');">
-      3.x Basics of TCP</a></h4>
+      3.1 Basics of TCP</a></h4>
   <div id="3.1">
   <p>
     Please skip this section if you have a fair idea how basic TCP operates.
@@ -228,7 +229,6 @@ __sys_socket() -> sock_create()
 
 }
   </pre>
-  </div>
 
   <p>
     The flow after calling a socket call usually follows the following pattern:<br>
@@ -237,16 +237,21 @@ __sys_socket() -> sock_create()
     3. call the corresponding function from sock->ops<br>
     4. get sock from the socket, call the function from sk->ops<br>
   </p>
+  </div>
 
 
-  <h4>3.3 socket, sock, inet_sock, inet_connection_sock and tcp_sock [OPTIONAL]</h4>
+  <h4><a href="#3.3" onclick="open_visibility('3.3');">
+      3.3 socket, sock, inet_sock, inet_connection_sock and tcp_sock [OPTIONAL]</a></h4>
+  <div id="3.3">
   <p>
     TODO:
     Why two parts: socket and sock ? is a socket without sock possible ?
   </p>
+  </div>
 
-  <h4>3.4 bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)</h4>
-
+  <h4><a href="#3.4" onclick="open_visibility('3.4')">
+      3.4 bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)</a></h4>
+  <div id="3.4">
   <p>
     TCP bind is called by server, which provides services on a well known port,
     to which the client connects to. The client may also bind, but usually the
@@ -372,8 +377,11 @@ __sys_socket() -> sock_create()
 	    shared.
 	    Failing this, the port cannot be shared.
   </pre>
+  </div>
 
-  <h4>3.x [Server] listen(int sockfd, int backlog)</h4>
+  <h4><a href="#3.5" onclick="open_visibility('3.5')">
+      3.5 [Server] listen(int sockfd, int backlog)</a></h4>
+  <div id="3.5">
 
   <p>
     After opening a socket and binding to a port, the server calls the listen()
@@ -447,8 +455,11 @@ int __sys_listen(int fd, int backlog)
     At this point, the server is ready to accept new connections. The client has
     to initiate the connection by calling connect().
   </p>
+  </div>
 
-  <h4>3.x [Client] connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)</h4>
+  <h4><a href="#3.6" onclick="open_visibility('3.6')">
+      3.6 [Client] connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)</a></h4>
+  <div id="3.6">
   <p>
     The client calls connect() to initiate the connection, the sockaddr struct
     providing the server's ip address and port. struct sockaddr is a common struct
@@ -562,8 +573,11 @@ int tcp_v4_connect(struct sock *sk, struct sockaddr *uaddr, int addr_len)
     were sent and connection is closed. The connect call will return -1 and
     errno is set to ETIMEDOUT.
   </p>
+  </div>
 
-  <h4>3.x TCP packet rcv</h4>
+  <h4><a href="#3.7" onclick="open_visibility('3.7');">
+      3.7 TCP packet rcv</a></h4>
+  <div id="3.7">
   <p>
     TCP's handler while receiving packets is tcp_v4_rcv(). It looks up the hashtables
     maintained for bound sockets and listening sockets. If sk is not found, a reset
@@ -612,7 +626,13 @@ int tcp_v4_rcv(struct sk_buff *skb)
 	}
 }
   </pre>
-  <h4>3.x [Server] Recv SYN</h4>
+  </div>
+
+
+  <h4><a href="#3.8" onclick="open_visibility('3.8');">
+      3.8 [Server] Recv SYN</a></h4>
+  <div id="3.8">
+
   <p>
     On receiving a SYN, only if the sk->sk_state TCP_LISTEN, tcp_v4_conn_request()
     is called. A struct tcp_request_sock is allocated and initialized. It is added
@@ -672,8 +692,11 @@ int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
 	}
 }
   </pre>
+  </div>
 
-  <h4>3.x [Client] Recv SYN-ACK</h4>
+  <h4><a href="#3.9" onclick="open_visibility('3.9');">
+      3.9 [Client] Recv SYN-ACK</a></h4>
+  <div id="3.9">
 
   <p>
     Fairly straight forward, the sock is found, tcp header data added into the
@@ -706,9 +729,12 @@ int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
 	}
 }
   </pre>
+  </div>
 
 
-  <h4>3.x [Client] connect() [continued]</h4>
+  <h4><a href="#3.10" onclick="open_visibility('3.10');">
+      3.10 [Client] connect() [continued]</a></h4>
+  <div id="3.10">
   <p>
     The process waiting on connect system call wakes up, and if the sock state
     is not TCP_CLOSE, the connect was successful. The socket state is moved
@@ -727,22 +753,382 @@ int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
 	} // inet_stream_connect
 } // __sys_connect
   </pre>
-
-  <h4>3.x [Server] accept()</h4>
-  <h4>3.x send() and recv()</h4>
-  <h4>3.x Socket Memory accounting[OPTIONAL]</h4>
-  <h4>3.x close()</h4>
-  <h4>3.x time-wait sockets [OPTIONAL]</h4>
-  <h4>3.x </h4>
-  <div id="3.x">
   </div>
+
+  <h4><a href="#3.11" onclick="open_visibility('3.11');">
+      3.11 [Server] Recv ACK</a></h4>
+  <div id="3.11">
+
+  <p>
+  On receiving the ACK in response to the sent SYN-ACK, initial socket lookup
+  will return the request_sock created earlier which is in the TCP_NEW_SYN_RECV
+  state. This sock is not a full blown sock which can handle a TCP connection.
+  The kernel now creates another tcp_sock which will replace this sock.
+  </p>
+  <p>
+  The syn_recv_sock() function registered within inet connection ops is called,
+  which is set to tcp_v4_syn_recv_sock(). Firstly if the accept queue is full,
+  the new packet is dropped. Next a new sock is created in inet_csk_clone_lock(),
+  data from inet request sock is copied into newsk and its state is set to
+  TCP_SYN_RECV. Next tcp specific data is copied from the listen socket into the
+  new sock. __inet_inherit_port() edits the hashbuckets to make sure that any
+  socket lookups will fetch the newsk and not reqsk. Finally the reqsk is added
+  into the accept queue, and req->sk points to the newly created sock.
+  </p>
+  <p>
+  Finally the skb (ACK) is processed holding the new sock. The new sock is called
+  the child sock as well. Since the new sock 's state is in TCP_SYN_RECV and a
+  valid ACK was received, the child sock moves to TCP_ESTABLISHED state.
+  </p>
+  <p>
+  Since the process waits on accept() call on the listen fd to accept new
+  connections, the process is woken up by calling sk_data_ready().
+  </p>
+
+  <pre>
+int tcp_v4_rcv(struct sk_buff *skb)
+{
+	sk = __inet_lookup_skb(&tcp_hashinfo, skb, __tcp_hdrlen(th), th->source,
+				   th->dest, sdif, &refcounted);
+	if (sk->sk_state == TCP_NEW_SYN_RECV) {
+		struct request_sock *req = inet_reqsk(sk);
+		struct sock *nsk;
+
+		sk = req->rsk_listener;
+		nsk = tcp_check_req(sk, skb, req, false, &req_stolen);
+		{
+			child = inet_csk(sk)->icsk_af_ops->syn_recv_sock(sk, skb, req);
+			//tcp_v4_syn_recv_sock()
+			{
+				if (sk_acceptq_is_full(sk))
+					goto exit_overflow;
+
+				newsk = tcp_create_openreq_child(sk, req, skb);
+				{
+					struct sock *newsk = inet_csk_clone_lock(sk, req, GFP_ATOMIC);
+					{
+						inet_sk_set_state(newsk, TCP_SYN_RECV);
+						// copy data from inet_rsk(req) into newsk
+					}
+					// copy data from req into newsk
+
+					newtp = tcp_sk(newsk);
+					oldtp = tcp_sk(sk);
+					//init newtp ; copy data from oldtp into newtp
+
+					return newsk;
+				}
+
+				__inet_inherit_port(sk, newsk);
+				return newsk;
+			}
+			return inet_csk_complete_hashdance(sk, child, req, own_req);
+			{
+				inet_csk_reqsk_queue_drop(sk, req);
+				reqsk_queue_removed(&inet_csk(sk)->icsk_accept_queue, req);
+				inet_csk_reqsk_queue_add(sk, req, child)
+				{
+					struct request_sock_queue *queue = &inet_csk(sk)->icsk_accept_queue;
+					req->sk = child;
+					queue->rskq_accept_tail->dl_next = req;
+				}
+			}
+		}
+
+		tcp_child_process(sk, nsk, skb);
+		{
+			int state = child->sk_state;
+			ret = tcp_rcv_state_process(child, skb);
+			{
+				switch (child->sk_state) {
+					case TCP_SYN_RECV:
+						tcp_set_state(child, TCP_ESTABLISHED);
+				}
+			}
+			/* Wakeup parent, send SIGIO */
+			if (state == TCP_SYN_RECV && child->sk_state != state)
+				parent->sk_data_ready(parent);
+		}
+	}
+}
+  </pre>
+  </div>
+
+
+  <h4><a href="#3.12" onclick="open_visibility('3.12');">
+      3.12 [Server] accept()</a></h4>
+  <div id="3.12">
+  <p>
+  The accept call takes the listenfd and returns a fd for the established
+  connection. This fd will be used to transfer data, while the listen fd wil
+  continue accepting connections.
+  </p>
+  <p>
+  A socket is allocated and an unused fd is assigned to it. Next inet_accept
+  is called, which calls inet_csk_accept. Here the icsk_accept_queue is checked,
+  if empty the process sleeps waiting for a connection. Once a connection is
+  established, an entry is dequeued  from the icsk_accept_queue. This
+  request sock req points to the full tcp sock which is returned. Also reqsk_put()
+  is called, so if the refcount is zero the socket will be freed.
+  </p>
+  <p>
+  The new sock is connected to the socket allocated earlier and the socket is
+  moved to SS_CONNECTED state. Now the user can send/recv data using this fd.
+  </p>
+  <pre>
+int __sys_accept4(int fd, struct sockaddr __user *upeer_sockaddr,
+		  int __user *upeer_addrlen, int flags)
+{
+	sock = sockfd_lookup_light(fd, &err, &fput_needed);
+
+	newsock = sock_alloc();
+	newsock->type = sock->type;
+	newsock->ops = sock->ops;
+
+	newfd = get_unused_fd_flags(flags);
+	newfile = sock_alloc_file(newsock);
+
+	err = sock->ops->accept(sock, newsock, sock->file->f_flags, false);
+	//inet_accept()
+	{
+		struct sock *sk1 = sock->sk;
+		int err = -EINVAL;
+		struct sock *sk2 = sk1->sk_prot->accept(sk1, flags, &err, kern);
+		//inet_csk_accept()
+		{
+			struct request_sock_queue *queue = &icsk->icsk_accept_queue;
+			struct request_sock *req;
+
+			if (reqsk_queue_empty(queue)) {
+				long timeo = sock_rcvtimeo(sk, flags & O_NONBLOCK);
+				inet_csk_wait_for_connect(sk, timeo);
+				{
+					prepare_to_wait_exclusive(sk_sleep(sk), &wait,
+							TASK_INTERRUPTIBLE);
+					// waits till sk_data_ready() is called
+				}
+			}
+			req = reqsk_queue_remove(queue, sk);
+			{
+				struct request_sock_queue *queue = &inet_csk(sk)->icsk_accept_queue;
+				req = queue->rskq_accept_head;
+			}
+			newsk = req->sk;
+			reqsk_put(req);
+
+			return newsk;
+		}
+
+		sock_graft(sk2, newsock);
+		newsock->state = SS_CONNECTED;
+	}
+
+	fd_install(newfd, newfile);
+	return newfd;
+}
+  </pre>
+  </div>
+
+  <h4><a href="#3.13" onclick="open_visibility('3.13');">
+      3.13 send() and recv()</a></h4>
+  <div id="3.13">
+  <p>
+  Sending a message is similar to the way it is described in
+  <a href="02_NET_TX_basic.html">Packet TX path 1 : Basic</a>. Just pasting the
+  call flow below.
+  </p>
+  <pre>
+	__sys_sendmsg(int fd, struct user_msghdr __user *msg)
+	 ___sys_sendmsg(sock, msg, &msg_sys, flags, NULL, 0);
+	sock_sendmsg(sock, msg_sys);
+	int sock_sendmsg_nosec(sock, msg)
+	inet_sendmsg(sock, msg, size);
+	tcp_sendmsg(sk, msg, size);
+	tcp_sendmsg_locked(sk, msg, size);
+	tcp_push_one(sk, mss_now);
+	tcp_write_xmit(sk, mss_now, TCP_NAGLE_PUSH, 1, sk->sk_allocation);
+	tcp_transmit_skb(sk, skb, 1, gfp);
+	__tcp_transmit_skb(sk, skb, clone_it, gfp_mask, tcp_sk(sk)->rcv_nxt);
+	icsk->icsk_af_ops->queue_xmit(sk, skb, &inet->cork.fl);
+  </pre>
+  <p>
+  On receiving a packet, similar to the description in
+  <a href="01_NET_RX_basic.html">Packet RX path 1 : Basic</a>, the packet is added
+  to the socket queue and the kernel wakes up the process, if the process is
+  waiting on the recv() system call.
+  Just pasting the flow of packet till sock enqueue below.
+  </p>
+  <pre>
+	void tcp_rcv_established(struct sock *sk, struct sk_buff *skb)
+	tcp_queue_rcv(sk, skb, tcp_header_len, &fragstolen);
+	{
+		__skb_queue_tail(&sk->sk_receive_queue, skb);
+		tcp_data_ready(sk);	// wake up the process
+	}
+  </pre>
+  <p>
+  The recv() system call is simple, if a packet is available in the sk_receive_queue
+  the data is copied into the buffer else the process sleeps waiting for a packet.
+  The tcp subsystem makes sure that the packets are added in the right order using
+  sequence numbers.
+  </p>
+  <pre>
+	long __sys_recvmsg(int fd, struct user_msghdr __user *msg, unsigned int flags)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		err = ___sys_recvmsg(sock, msg, &msg_sys, flags, 0);
+		sock_recvmsg_nosec(sock, msg_sys, flags);
+		{
+			return sock->ops->recvmsg(sock, msg, msg_data_left(msg), flags);
+			//inet_recvmsg()
+			{
+				err = sk->sk_prot->recvmsg(sk, msg, size, flags & MSG_DONTWAIT,
+							   flags & ~MSG_DONTWAIT, &addr_len);
+				//tcp_recvmsg()
+				{
+					timeo = sock_rcvtimeo(sk, nonblock);
+					sk_wait_data(sk, &timeo, last);
+
+					skb_copy_datagram_msg(skb, offset, msg, used);
+					//copy data into msg
+					sk_eat_skb(sk, skb);
+				}
+			}
+		}
+	}
+  </pre>
+  </div>
+
+
+  <h4><a href="#3.14" onclick="open_visibility('3.14');">
+      3.14 close() or the process died: Ungraceful shutdown</a></h4>
+  <div id="3.14">
+  <p>
+  If a process wants to abort the connection or in case the process crashes or
+  is killed without closing it's open tcp socket, a RST is sent to the peer closing
+  the connection. We will describe the close() system call below.
+  </p>
+  <p>
+  On calling close() on a established tcp_sock, all packets that are waiting in
+  the receive queue are dropped, all packets in send queue are pushed out and
+  a RST is sent to close the TCP connection. The sock is moved to TCP_CLOSE state
+  and sock is freed.
+  </p>
+  <pre>
+	SYSCALL_DEFINE1(close, unsigned int, fd)
+	{
+		int retval = __close_fd(current->files, fd);
+		{
+			return filp_close(file, files);
+			{
+				fput(filp);
+				{
+					schedule_delayed_work(&delayed_fput_work, 1);
+					//schedule delayed_fput()
+				}
+			}
+
+			__put_unused_fd(files, fd);	// fd can be reused
+		}
+	}
+
+	static void delayed_fput(struct work_struct *unused)
+	{
+		struct file *f, *t;
+		__fput(f);
+		{
+			file->f_op->release(inode, file);
+			//inet_release()
+			{
+				struct sock *sk = sock->sk;
+				sock->sk = NULL;
+				sk->sk_prot->close(sk, timeout);
+				{
+					if (sk->sk_state == TCP_LISTEN) {
+						tcp_set_state(sk, TCP_CLOSE);
+
+						/* Special case. */
+						inet_csk_listen_stop(sk);
+
+						goto adjudge_to_death;
+					}
+					while ((skb = __skb_dequeue(&sk->sk_receive_queue)) != NULL) {
+						//dequeue and free all skbs
+						__kfree_skb(skb);
+					}
+					tcp_set_state(sk, TCP_CLOSE);
+					tcp_send_active_reset(sk, sk->sk_allocation);
+
+				adjudge_to_death:
+					state = sk->sk_state;
+					sock_hold(sk);
+					sock_orphan(sk);
+					sock_put(sk);
+				}
+
+			}
+		}
+	}
+  </pre>
+
+  <p>
+  One minor thing to note is that if the process reads all data enqueued in the
+  receive queue and then calls close(), the kernel will close the connection
+  gracefully by sending out a FIN, as described in the next section.
+  </p>
+  </div>
+
+  <h4><a href="#3.15" onclick="open_visibility('3.15');">
+      3.15 shutdown()</a></h4>
+  <div id="3.15">
+
+  <p>
+  Shutdown is the graceful way of closing, where the initiator sends out a FIN
+  and the peer acknowledges it by sending a FIN-ACK, and finally the initiator
+  sends a ACK. Similar to the way connection establishment happens, using FIN
+  instead of SYN. Both peers close their sockets.
+  </p>
+
+  <pre>
+	int __sys_shutdown(int fd, int how)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		err = sock->ops->shutdown(sock, how);
+		//inet_shutdown()
+		{
+			sk->sk_prot->shutdown(sk, how);
+			//tcp_shutdown()
+			{
+				if (tcp_close_state(sk))
+					tcp_send_fin(sk);
+			}
+		}
+	}
+  </pre>
+  <p>
+  The initiator moves to the TCP_FIN_WAIT1 state and on receiving a FIN-ACK
+  eventually closes the socket.<br>
+  The socket is eventually reused for another connection. A delayed FIN, that
+  was meant for the previous connection may arrive causing the connection to
+  close. To prevent this, before closing the TCP sockets moves to a TIME WAIT
+  state, accepting any packets from the peer. After a sufficiently long time
+  the socket is closed.
+  </p>
+  </div>
+
+  <!--
+    <h4>3.x </h4>
+    <div id="3.x">
+    </div>
+  -->
 
   <br>
 
   <br><br><br><br>
   <a href=index.html>INDEX</a>
+  <h2 style="color:red"> WIP. Parts of it may be incomplete or incorrect. </h2>
 
-  <!--<script type="text/javascript" src="all_the_javascript.js"></script>-->
+  <script type="text/javascript" src="all_the_javascript.js"></script>
 </body>
 
 </html>

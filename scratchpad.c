@@ -780,10 +780,239 @@ int tcp_rcv_state_process(struct sock *sk, struct sk_buff *skb)
 } // __sys_connect
 
 
+int __sys_accept4(int fd, struct sockaddr __user *upeer_sockaddr,
+		  int __user *upeer_addrlen, int flags)
+{
+	sock = sockfd_lookup_light(fd, &err, &fput_needed);
+
+	newsock = sock_alloc();
+	newsock->type = sock->type;
+	newsock->ops = sock->ops;
+
+	newfd = get_unused_fd_flags(flags);
+	newfile = sock_alloc_file(newsock);
+
+	err = sock->ops->accept(sock, newsock, sock->file->f_flags, false);
+	//inet_accept()
+	{
+		struct sock *sk1 = sock->sk;
+		int err = -EINVAL;
+		struct sock *sk2 = sk1->sk_prot->accept(sk1, flags, &err, kern);
+		//inet_csk_accept()
+		{
+			struct request_sock_queue *queue = &icsk->icsk_accept_queue;
+			struct request_sock *req;
+
+			if (reqsk_queue_empty(queue)) {
+				long timeo = sock_rcvtimeo(sk, flags & O_NONBLOCK);
+				inet_csk_wait_for_connect(sk, timeo);
+				{
+					prepare_to_wait_exclusive(sk_sleep(sk), &wait,
+							TASK_INTERRUPTIBLE);
+					// wait till 
+				}
+			}
+			req = reqsk_queue_remove(queue, sk);
+			{
+				struct request_sock_queue *queue = &inet_csk(sk)->icsk_accept_queue;
+				req = queue->rskq_accept_head;
+			}
+			newsk = req->sk;
+			reqsk_put(req);
+
+			return newsk;
+		}
+
+		sock_graft(sk2, newsock);
+		newsock->state = SS_CONNECTED;
+	}
+
+	fd_install(newfd, newfile);
+	return newfd;
+}
 
 
+// recv ACK
+int tcp_v4_rcv(struct sk_buff *skb)
+{
+	sk = __inet_lookup_skb(&tcp_hashinfo, skb, __tcp_hdrlen(th), th->source,
+				   th->dest, sdif, &refcounted);
+	if (sk->sk_state == TCP_NEW_SYN_RECV) {
+		struct request_sock *req = inet_reqsk(sk);
+		struct sock *nsk;
+
+		sk = req->rsk_listener;
+		nsk = tcp_check_req(sk, skb, req, false, &req_stolen);
+		{
+			child = inet_csk(sk)->icsk_af_ops->syn_recv_sock(sk, skb, req);
+			//tcp_v4_syn_recv_sock()
+			{
+				if (sk_acceptq_is_full(sk))
+					goto exit_overflow;
+
+				newsk = tcp_create_openreq_child(sk, req, skb);
+				{
+					struct sock *newsk = inet_csk_clone_lock(sk, req, GFP_ATOMIC);
+					{
+						inet_sk_set_state(newsk, TCP_SYN_RECV);
+						// copy data from inet_rsk(req) into newsk
+					}
+					// copy data from req into newsk
+
+					newtp = tcp_sk(newsk);
+					oldtp = tcp_sk(sk);
+					//init newtp ; copy data from oldtp into newtp
+
+					return newsk;
+				}
+
+				__inet_inherit_port(sk, newsk);
+				return newsk;
+			}
+			return inet_csk_complete_hashdance(sk, child, req, own_req);
+			{
+				inet_csk_reqsk_queue_drop(sk, req);
+				reqsk_queue_removed(&inet_csk(sk)->icsk_accept_queue, req);
+				inet_csk_reqsk_queue_add(sk, req, child)
+				{
+					struct request_sock_queue *queue = &inet_csk(sk)->icsk_accept_queue;
+					req->sk = child;
+					queue->rskq_accept_tail->dl_next = req;
+				}
+			}
+		}
+
+		tcp_child_process(sk, nsk, skb);
+		{
+			int state = child->sk_state;
+			ret = tcp_rcv_state_process(child, skb);
+			{
+				switch (child->sk_state) {
+					case TCP_SYN_RECV:
+						tcp_set_state(child, TCP_ESTABLISHED);
+				}
+			}
+			/* Wakeup parent, send SIGIO */
+			if (state == TCP_SYN_RECV && child->sk_state != state)
+				parent->sk_data_ready(parent);
+		}
+	}
+}
+
+	__sys_sendmsg(int fd, struct user_msghdr __user *msg)
+	 ___sys_sendmsg(sock, msg, &msg_sys, flags, NULL, 0);
+	sock_sendmsg(sock, msg_sys);
+	int sock_sendmsg_nosec(sock, msg)
+	inet_sendmsg(sock, msg, size);
+	tcp_sendmsg(sk, msg, size);
+	tcp_sendmsg_locked(sk, msg, size);
+	tcp_push_one(sk, mss_now);
+	tcp_write_xmit(sk, mss_now, TCP_NAGLE_PUSH, 1, sk->sk_allocation);
+	tcp_transmit_skb(sk, skb, 1, gfp);
+	__tcp_transmit_skb(sk, skb, clone_it, gfp_mask, tcp_sk(sk)->rcv_nxt);
+	icsk->icsk_af_ops->queue_xmit(sk, skb, &inet->cork.fl);
 
 
+	void tcp_rcv_established(struct sock *sk, struct sk_buff *skb)
+	tcp_queue_rcv(sk, skb, tcp_header_len, &fragstolen);
+	{
+		__skb_queue_tail(&sk->sk_receive_queue, skb);
+		tcp_data_ready(sk);	// wake up the process
+	}
+
+	long __sys_recvmsg(int fd, struct user_msghdr __user *msg, unsigned int flags)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		err = ___sys_recvmsg(sock, msg, &msg_sys, flags, 0);
+		sock_recvmsg_nosec(sock, msg_sys, flags);
+		{
+			return sock->ops->recvmsg(sock, msg, msg_data_left(msg), flags);
+			//inet_recvmsg()
+			{
+				err = sk->sk_prot->recvmsg(sk, msg, size, flags & MSG_DONTWAIT,
+							   flags & ~MSG_DONTWAIT, &addr_len);
+				//tcp_recvmsg()
+				{
+					timeo = sock_rcvtimeo(sk, nonblock);
+					sk_wait_data(sk, &timeo, last);
+
+					skb_copy_datagram_msg(skb, offset, msg, used);
+					//copy data into msg
+					sk_eat_skb(sk, skb);
+				}
+			}
+		}
+	}
+
+	SYSCALL_DEFINE1(close, unsigned int, fd)
+	{
+		int retval = __close_fd(current->files, fd);
+		{
+			return filp_close(file, files);
+			{
+				fput(filp);
+				{
+					schedule_delayed_work(&delayed_fput_work, 1);
+					//schedule delayed_fput()
+				}
+			}
+
+			__put_unused_fd(files, fd);	// fd can be reused
+		}
+	}
+
+	static void delayed_fput(struct work_struct *unused)
+	{
+		struct file *f, *t;
+		__fput(f);
+		{
+			file->f_op->release(inode, file);
+			//inet_release()
+			{
+				struct sock *sk = sock->sk;
+				sock->sk = NULL;
+				sk->sk_prot->close(sk, timeout);
+				{
+					if (sk->sk_state == TCP_LISTEN) {
+						tcp_set_state(sk, TCP_CLOSE);
+
+						/* Special case. */
+						inet_csk_listen_stop(sk);
+
+						goto adjudge_to_death;
+					}
+					while ((skb = __skb_dequeue(&sk->sk_receive_queue)) != NULL) {
+						//dequeue and free all skbs
+						__kfree_skb(skb);
+					}
+					tcp_set_state(sk, TCP_CLOSE);
+					tcp_send_active_reset(sk, sk->sk_allocation);
+
+				adjudge_to_death:
+					state = sk->sk_state;
+					sock_hold(sk);
+					sock_orphan(sk);
+					sock_put(sk);
+				}
+
+			}
+		}
+	}
+
+	int __sys_shutdown(int fd, int how)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		err = sock->ops->shutdown(sock, how);
+		//inet_shutdown()
+		{
+			sk->sk_prot->shutdown(sk, how);
+			//tcp_shutdown()
+			{
+				if (tcp_close_state(sk))
+					tcp_send_fin(sk);
+			}
+		}
+	}
 
 
 
