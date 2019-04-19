@@ -854,6 +854,8 @@ int tcp_v4_rcv(struct sk_buff *skb)
 				{
 					struct sock *newsk = inet_csk_clone_lock(sk, req, GFP_ATOMIC);
 					{
+						inet_sk_set_state(newsk, TCP_SYN_RECV);
+						// copy data from inet_rsk(req) into newsk
 					}
 					// copy data from req into newsk
 
@@ -897,8 +899,13 @@ int tcp_v4_rcv(struct sk_buff *skb)
 	}
 }
 
-
-
+__sys_sendmsg(int fd, struct user_msghdr __user *msg)
+ ___sys_sendmsg(sock, msg, &msg_sys, flags, NULL, 0);
+sock_sendmsg(sock, msg_sys);
+int sock_sendmsg_nosec(sock, msg)
+inet_sendmsg(sock, msg, size);
+tcp_sendmsg(sk, msg, size);
+tcp_sendmsg_locked(sk, msg, size);
 
 
 
