@@ -801,22 +801,27 @@ int __sys_accept4(int fd, struct sockaddr __user *upeer_sockaddr,
 		//inet_csk_accept()
 		{
 			struct request_sock_queue *queue = &icsk->icsk_accept_queue;
-            struct request_sock *req;
+			struct request_sock *req;
 
-            if (reqsk_queue_empty(queue)) {
-                long timeo = sock_rcvtimeo(sk, flags & O_NONBLOCK);
-                inet_csk_wait_for_connect(sk, timeo);
-                {
-                    prepare_to_wait_exclusive(sk_sleep(sk), &wait,
-                            TASK_INTERRUPTIBLE);
-                    // wait till 
-                }
-            }
-            req = reqsk_queue_remove(queue, sk);
-            newsk = req->sk;
+			if (reqsk_queue_empty(queue)) {
+				long timeo = sock_rcvtimeo(sk, flags & O_NONBLOCK);
+				inet_csk_wait_for_connect(sk, timeo);
+				{
+					prepare_to_wait_exclusive(sk_sleep(sk), &wait,
+							TASK_INTERRUPTIBLE);
+					// wait till 
+				}
+			}
+			req = reqsk_queue_remove(queue, sk);
+			{
+				struct request_sock_queue *queue = &inet_csk(sk)->icsk_accept_queue;
+				req = queue->rskq_accept_head;
+			}
+			newsk = req->sk;
+			reqsk_put(req);
 
-            return newsk;
-        }
+			return newsk;
+		}
 
 		sock_graft(sk2, newsock);
 		newsock->state = SS_CONNECTED;
@@ -848,6 +853,8 @@ int tcp_v4_rcv(struct sk_buff *skb)
 				newsk = tcp_create_openreq_child(sk, req, skb);
 				{
 					struct sock *newsk = inet_csk_clone_lock(sk, req, GFP_ATOMIC);
+					{
+					}
 					// copy data from req into newsk
 
 					newtp = tcp_sk(newsk);
@@ -861,17 +868,26 @@ int tcp_v4_rcv(struct sk_buff *skb)
 				return newsk;
 			}
 			return inet_csk_complete_hashdance(sk, child, req, own_req);
+			{
+				inet_csk_reqsk_queue_drop(sk, req);
+				reqsk_queue_removed(&inet_csk(sk)->icsk_accept_queue, req);
+				inet_csk_reqsk_queue_add(sk, req, child)
+				{
+					struct request_sock_queue *queue = &inet_csk(sk)->icsk_accept_queue;
+					req->sk = child;
+					queue->rskq_accept_tail->dl_next = req;
+				}
+			}
 		}
 
 		tcp_child_process(sk, nsk, skb);
 		{
+			int state = child->sk_state;
 			ret = tcp_rcv_state_process(child, skb);
 			{
-				int state = child->sk_state;
-
-				switch (sk->sk_state) {
+				switch (child->sk_state) {
 					case TCP_SYN_RECV:
-						tcp_set_state(sk, TCP_ESTABLISHED);
+						tcp_set_state(child, TCP_ESTABLISHED);
 				}
 			}
 			/* Wakeup parent, send SIGIO */
