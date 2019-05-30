@@ -901,13 +901,175 @@ int __sys_accept4(int fd, struct sockaddr __user *upeer_sockaddr,
   <a href="02_NET_TX_basic.html">Packet TX path 1 : Basic</a>. Just pasting the
   call flow below.
   </p>
+  <pre>
+	__sys_sendmsg(int fd, struct user_msghdr __user *msg)
+	 ___sys_sendmsg(sock, msg, &msg_sys, flags, NULL, 0);
+	sock_sendmsg(sock, msg_sys);
+	int sock_sendmsg_nosec(sock, msg)
+	inet_sendmsg(sock, msg, size);
+	tcp_sendmsg(sk, msg, size);
+	tcp_sendmsg_locked(sk, msg, size);
+	tcp_push_one(sk, mss_now);
+	tcp_write_xmit(sk, mss_now, TCP_NAGLE_PUSH, 1, sk->sk_allocation);
+	tcp_transmit_skb(sk, skb, 1, gfp);
+	__tcp_transmit_skb(sk, skb, clone_it, gfp_mask, tcp_sk(sk)->rcv_nxt);
+	icsk->icsk_af_ops->queue_xmit(sk, skb, &inet->cork.fl);
+  </pre>
   <p>
+  On receiving a packet, similar to the description in
+  <a href="01_NET_RX_basic.html">Packet RX path 1 : Basic</a>, the packet is added
+  to the socket queue and the kernel wakes up the process, if the process is
+  waiting on the recv() system call.
+  Just pasting the flow of packet till sock enqueue below.
+  </p>
+  <pre>
+	void tcp_rcv_established(struct sock *sk, struct sk_buff *skb)
+	tcp_queue_rcv(sk, skb, tcp_header_len, &fragstolen);
+	{
+		__skb_queue_tail(&sk->sk_receive_queue, skb);
+		tcp_data_ready(sk);	// wake up the process
+	}
+  </pre>
+  <p>
+  The recv() system call is simple, if a packet is available in the sk_receive_queue
+  the data is copied into the buffer else the process sleeps waiting for a packet.
+  The tcp subsystem makes sure that the packets are added in the right order using
+  sequence numbers.
+  </p>
+  <pre>
+	long __sys_recvmsg(int fd, struct user_msghdr __user *msg, unsigned int flags)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		err = ___sys_recvmsg(sock, msg, &msg_sys, flags, 0);
+		sock_recvmsg_nosec(sock, msg_sys, flags);
+		{
+			return sock->ops->recvmsg(sock, msg, msg_data_left(msg), flags);
+			//inet_recvmsg()
+			{
+				err = sk->sk_prot->recvmsg(sk, msg, size, flags & MSG_DONTWAIT,
+							   flags & ~MSG_DONTWAIT, &addr_len);
+				//tcp_recvmsg()
+				{
+					timeo = sock_rcvtimeo(sk, nonblock);
+					sk_wait_data(sk, &timeo, last);
+
+					skb_copy_datagram_msg(skb, offset, msg, used);
+					//copy data into msg
+					sk_eat_skb(sk, skb);
+				}
+			}
+		}
+	}
+  </pre>
+  <h4>3.x close() or the process died: Ungraceful shutdown</h4>
+  <p>
+  If a process wants to abort the connection or in case the process crashes or
+  is killed without closing it's open tcp socket, a RST is sent to the peer closing
+  the connection. We will describe the close() system call below.
   </p>
   <p>
+  On calling close() on a established tcp_sock, all packets that are waiting in
+  the receive queue are dropped, all packets in send queue are pushed out and
+  a RST is sent to close the TCP connection. The sock is moved to TCP_CLOSE state
+  and sock is freed.
   </p>
-  <h4>3.x Socket Memory accounting[OPTIONAL]</h4>
-  <h4>3.x close()</h4>
-  <h4>3.x time-wait sockets [OPTIONAL]</h4>
+  <pre>
+	SYSCALL_DEFINE1(close, unsigned int, fd)
+	{
+		int retval = __close_fd(current->files, fd);
+		{
+			return filp_close(file, files);
+			{
+				fput(filp);
+				{
+					schedule_delayed_work(&delayed_fput_work, 1);
+					//schedule delayed_fput()
+				}
+			}
+
+			__put_unused_fd(files, fd);	// fd can be reused
+		}
+	}
+
+	static void delayed_fput(struct work_struct *unused)
+	{
+		struct file *f, *t;
+		__fput(f);
+		{
+			file->f_op->release(inode, file);
+			//inet_release()
+			{
+				struct sock *sk = sock->sk;
+				sock->sk = NULL;
+				sk->sk_prot->close(sk, timeout);
+				{
+					if (sk->sk_state == TCP_LISTEN) {
+						tcp_set_state(sk, TCP_CLOSE);
+
+						/* Special case. */
+						inet_csk_listen_stop(sk);
+
+						goto adjudge_to_death;
+					}
+					while ((skb = __skb_dequeue(&sk->sk_receive_queue)) != NULL) {
+						//dequeue and free all skbs
+						__kfree_skb(skb);
+					}
+					tcp_set_state(sk, TCP_CLOSE);
+					tcp_send_active_reset(sk, sk->sk_allocation);
+
+				adjudge_to_death:
+					state = sk->sk_state;
+					sock_hold(sk);
+					sock_orphan(sk);
+					sock_put(sk);
+				}
+
+			}
+		}
+	}
+  </pre>
+
+  <p>
+  One minor thing to note is that if the process reads all data enqueued in the
+  receive queue and then calls close(), the kernel will close the connection
+  gracefully by sending out a FIN, as described in the next section.
+  </p>
+
+  <h4>3.x shutdown()</h4>
+  <p>
+  Shutdown is the graceful way of closing, where the initiator sends out a FIN
+  and the peer acknowledges it by sending a FIN-ACK, and finally the initiator
+  sends a ACK. Similar to the way connection establishment happens, using FIN
+  instead of SYN. Both peers close their sockets.
+  </p>
+
+  <pre>
+	int __sys_shutdown(int fd, int how)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		err = sock->ops->shutdown(sock, how);
+		//inet_shutdown()
+		{
+			sk->sk_prot->shutdown(sk, how);
+			//tcp_shutdown()
+			{
+				if (tcp_close_state(sk))
+					tcp_send_fin(sk);
+			}
+		}
+	}
+  </pre>
+  <p>
+  The initiator moves to the TCP_FIN_WAIT1 state and on receiving a FIN-ACK
+  eventually closes the socket.<br>
+  The socket is eventually reused for another connection. A delayed FIN, that
+  was meant for the previous connection may arrive causing the connection to
+  close. To prevent this, before closing the TCP sockets moves to a TIME WAIT
+  state, accepting any packets from the peer. After a sufficiently long time
+  the socket is closed.
+  </p>
+
   <h4>3.x </h4>
   <div id="3.x">
   </div>

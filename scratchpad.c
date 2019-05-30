@@ -899,17 +899,120 @@ int tcp_v4_rcv(struct sk_buff *skb)
 	}
 }
 
-__sys_sendmsg(int fd, struct user_msghdr __user *msg)
- ___sys_sendmsg(sock, msg, &msg_sys, flags, NULL, 0);
-sock_sendmsg(sock, msg_sys);
-int sock_sendmsg_nosec(sock, msg)
-inet_sendmsg(sock, msg, size);
-tcp_sendmsg(sk, msg, size);
-tcp_sendmsg_locked(sk, msg, size);
+	__sys_sendmsg(int fd, struct user_msghdr __user *msg)
+	 ___sys_sendmsg(sock, msg, &msg_sys, flags, NULL, 0);
+	sock_sendmsg(sock, msg_sys);
+	int sock_sendmsg_nosec(sock, msg)
+	inet_sendmsg(sock, msg, size);
+	tcp_sendmsg(sk, msg, size);
+	tcp_sendmsg_locked(sk, msg, size);
+	tcp_push_one(sk, mss_now);
+	tcp_write_xmit(sk, mss_now, TCP_NAGLE_PUSH, 1, sk->sk_allocation);
+	tcp_transmit_skb(sk, skb, 1, gfp);
+	__tcp_transmit_skb(sk, skb, clone_it, gfp_mask, tcp_sk(sk)->rcv_nxt);
+	icsk->icsk_af_ops->queue_xmit(sk, skb, &inet->cork.fl);
 
 
+	void tcp_rcv_established(struct sock *sk, struct sk_buff *skb)
+	tcp_queue_rcv(sk, skb, tcp_header_len, &fragstolen);
+	{
+		__skb_queue_tail(&sk->sk_receive_queue, skb);
+		tcp_data_ready(sk);	// wake up the process
+	}
 
+	long __sys_recvmsg(int fd, struct user_msghdr __user *msg, unsigned int flags)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		err = ___sys_recvmsg(sock, msg, &msg_sys, flags, 0);
+		sock_recvmsg_nosec(sock, msg_sys, flags);
+		{
+			return sock->ops->recvmsg(sock, msg, msg_data_left(msg), flags);
+			//inet_recvmsg()
+			{
+				err = sk->sk_prot->recvmsg(sk, msg, size, flags & MSG_DONTWAIT,
+							   flags & ~MSG_DONTWAIT, &addr_len);
+				//tcp_recvmsg()
+				{
+					timeo = sock_rcvtimeo(sk, nonblock);
+					sk_wait_data(sk, &timeo, last);
 
+					skb_copy_datagram_msg(skb, offset, msg, used);
+					//copy data into msg
+					sk_eat_skb(sk, skb);
+				}
+			}
+		}
+	}
+
+	SYSCALL_DEFINE1(close, unsigned int, fd)
+	{
+		int retval = __close_fd(current->files, fd);
+		{
+			return filp_close(file, files);
+			{
+				fput(filp);
+				{
+					schedule_delayed_work(&delayed_fput_work, 1);
+					//schedule delayed_fput()
+				}
+			}
+
+			__put_unused_fd(files, fd);	// fd can be reused
+		}
+	}
+
+	static void delayed_fput(struct work_struct *unused)
+	{
+		struct file *f, *t;
+		__fput(f);
+		{
+			file->f_op->release(inode, file);
+			//inet_release()
+			{
+				struct sock *sk = sock->sk;
+				sock->sk = NULL;
+				sk->sk_prot->close(sk, timeout);
+				{
+					if (sk->sk_state == TCP_LISTEN) {
+						tcp_set_state(sk, TCP_CLOSE);
+
+						/* Special case. */
+						inet_csk_listen_stop(sk);
+
+						goto adjudge_to_death;
+					}
+					while ((skb = __skb_dequeue(&sk->sk_receive_queue)) != NULL) {
+						//dequeue and free all skbs
+						__kfree_skb(skb);
+					}
+					tcp_set_state(sk, TCP_CLOSE);
+					tcp_send_active_reset(sk, sk->sk_allocation);
+
+				adjudge_to_death:
+					state = sk->sk_state;
+					sock_hold(sk);
+					sock_orphan(sk);
+					sock_put(sk);
+				}
+
+			}
+		}
+	}
+
+	int __sys_shutdown(int fd, int how)
+	{
+		sock = sockfd_lookup_light(fd, &err, &fput_needed);
+		err = sock->ops->shutdown(sock, how);
+		//inet_shutdown()
+		{
+			sk->sk_prot->shutdown(sk, how);
+			//tcp_shutdown()
+			{
+				if (tcp_close_state(sk))
+					tcp_send_fin(sk);
+			}
+		}
+	}
 
 
 
