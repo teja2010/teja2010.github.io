@@ -1,0 +1,383 @@
+<html>
+  <head>
+    <title>teja's notes</title>
+    <style>
+      pre {
+        font-family: "Courier New", monospace;
+        font-size: 100%;
+        font-weight: bold;
+      }
+      h4{
+        font-size: 120%;
+      }
+      p {
+        font-family: "Calibri", sans-serif;
+        font-size: 120%;
+        width:800px;
+        background: white;
+      }
+    </style>
+</head>
+
+<body onload="javascript:afterLoad(1,22);afterLoad(1,22);" style="margin-left:10%">
+  <h3> CSE 222a, Winter 2020</h3>
+  <p><a href=index.html>INDEX</a>&emsp;
+  <a href="#" onclick="afterLoad(1,22);">Toggle Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('none');">Collapse All Sections</a>
+  </p>
+
+  <p>
+    This page contains summaries of the various papers I read as a part of
+    <a href="http://cseweb.ucsd.edu/~gmporter/classes/wi20/cse222a/">CSE222a, at UCSD</a>.
+    It was taught Prof. George Porter. The course focused on
+    reading classical and current papers followed by in class discussions. The
+    following are papers that I found interesting. The summaries usually consist
+    four paragraphs:<br>
+    1. the introduction, problem its trying to solve, the pain points<br>
+    2. the idea, how it solves the problem<br>
+    3. their implementation<br>
+    4. their results and my thoughts<br>
+  </p>
+  <p>
+    Most of these papers cannot be uploaded/shared.
+    I have provided links to some of the papers if I was able to find a public
+    link off DuckDuckGo. Else I have provided a private link which needs
+    subscription.
+    In case you cannot access them, send me a mail so I can share access to my google drive,
+    which contains these papers.
+  </p>
+
+  <h4><a href="#1.1" onclick="open_visibility('1.1');">
+      M1.1 Early Internet, Darpa Internet Protocols</a></h4>
+  <div id="1.1">
+  <p>
+    These papers describe the structure of an early internet. The first paper
+    is a description of the components in building a packet switching network.
+    The second one, published 14 years later is a description the design goals
+    and the protocols developed.
+  </p>
+  <p>
+    1. <a href="https://www.cs.princeton.edu/courses/archive/fall06/cos561/papers/cerf74.pdf">
+      A Protocol for Packet Network Incommunication</a>
+  </p>
+  <p>
+    The paper first clearly defines the components of the network viz Hosts,
+    networks and gateways. The hosts as the end points which are connected to
+    each other. Multiple hosts are connected to internetwork. And internetworks
+    are connected via Gateways. Each internetwork can use its own protocol
+    for communication. But communication across internetworks needed a common
+    protocol. The protocol for internetwork communication is the early IP protocol.
+    The authors then describe a protocol over the internetwork protocol to
+    transfer data between end points.
+  </p>
+  <p>
+    The protocols described are similar to modern implementations of IP and TCP
+    headers. The original vision of the packet switching network remains very
+    similar to our current networks. The paper clearly explains their choice for
+    a common internetwork protocol, while each network was free to develop protocols
+    for communication within the network. Th Gateway simply handled translation
+    between the network protocols. This is very clearly the design that we still
+    adopt, except that hosts very rarely communicate on bare link local protocol.
+    Most communication, even between hosts within a network, is over IP. The authors
+    choice to have a common IP protocol implemented by all hosts which we have
+    acknowledge today as the narrow waist of the internet. Other differences
+    include fragmentation using sequence numbers, which have now moved to TCP,
+    while IP implements a blunt form of fragmentation.
+  </p>
+  <p>
+    TODO: add a picture comparing the protocols.
+  </p>
+  <p>
+    The authors describe the transmission control protocol as a means to transmit
+    a stream of data, which it breaks into segments. Early TCP used the sequence
+    numbers provided by internetwork protocol, and both the protocols worked closely
+    to transmit data. Modern IP and TCP have been separated into distinct
+    protocols with independent functions. The authors also have a section which
+    describes early address format and address assignment which have completely
+    changed. The authors also envision a central repository that provides addresses
+    for each node within a network, which in  way the current DHCP implementation.
+  </p>
+  <p>
+    The paper is a description of the network that the authors envisioned, some
+    of their decisions have formed the basic of the current internet.
+  </p>
+  <br>
+
+  <p>
+    2. <a href="https://groups.csail.mit.edu/ana/Publications/PubPDFs/The%20design%20philosophy%20of%20the%20DARPA%20internet%20protocols.pdf">
+      The Design Philosophy of the DARPA Internet Protocols</a>
+  </p>
+  <p>
+    The second paper describes the philosophy behind the design of the Internet
+    protocols after the protocols had standardised. The paper first describes the
+    fundamental goals of the network. Then they describe how these goals influence
+    the design.
+  </p>
+
+  <p>
+    One of the foremost goals was for the network to and continue
+    working despite loss. This goal was adopted since the network
+    was initially a military project that was later released for civil use.
+    This made the internet fault tolerant at the expense of performance.
+    To achieve this, the state necessary for internet functioning is moved to
+    the endpoints. This approach is described as "fate sharing" since both entity
+    and the state share the same fate. A consequence of this approach was the
+    stateless design of switches and gateways. Also, each end node is responsible
+    for maintaining any state necessary for the connection.
+    It is interesting that the goal and the chosen approach is applied in current
+    network designs.
+  </p>
+
+  <p>
+    The paper then describes the services supported over IP and the need for a
+    protocol that allows the user to use the datagram services offered by IP.
+    This created a need for decoupling IP and TCP, and building the
+    User Datagram Protocol as the protocol which offers these services. The paper
+    then describes the division into layers which offer services independently using
+    services offered by lower layers. The classical OSI model is the modern form
+    of this idea, with clear abstractions of the functions provided by each layer.
+  </p>
+  </div>
+
+  <h4><a href="#1.2" onclick="open_visibility('1.2');">
+      M1.2 Distributed Computation of a Spanning Tree in an Extended LAN</a></h4>
+  <div id="1.2">
+    <p><a href="https://www.it.uu.se/edu/course/homepage/datakom/ht06/slides/sta-perlman.pdf">
+      An Algorithm for Distributed Computation of a Spanning Tree in an Extended LAN</a>
+    </p>
+
+    <p>
+      The author describes a algorithm to build a tree from an extended LAN.
+      As networks began to grow, with LANs interconnected with bridges to build
+      an extended LAN, manual configuration of the bridges increased the risk
+      of loops due to manual error. Similarly a user connecting LANs using a bridge
+      could create a Loop. The proposed algorithm allows the bridges to exchange
+      data and  construct a tree without any additional configuration. Secondly
+      the algorithm converges in O(mesh diameter) while imposing small memory
+      requirements (proportional to the number of LANs the bridge is connected to)
+      on each bridge.
+    </p>
+    <p>
+      TODO: add a image of the extended LAN.
+    </p>
+
+    <p>
+      In the final tree, each LAN has a designated bridge. On receiving data from
+      a LAN, a bridge forwards the data to all other LANs on which it is a designated
+      bridge. The complete mesh is transformed into a tree by choosing the designated
+      bridges. The root of the tree is a designated bridge on all of it's LANs.
+      The algorithm chooses a very simple way to choose the root. The bridge with
+      the smallest MAC value is chosen as the root. The bridges exchange HELLO
+      messages to find the root. Once a root is found, the root sends out
+      periodic HELLO messages. These HELLO messages are forwarded on all connected
+      LANs. The bridges based on the HELLO messages share information and choose
+      the designated bridge on each LAN.
+      The algorithm works by each bridge first trying to become the root and then
+      trying to become the designated brigde on each of the LANs it is connected to.
+    </p>
+
+    <p>
+      The paper also describes states maintained by the bridge for each LAN and
+      transitions between states to prevent loops due to new bridges being added.
+      Also, the HELLO messages timeout letting the bridge detect failures in the
+      network. This has been described in detail in the paper and I cannot
+      sufficiently describe it in a single paragraph.
+    </p>
+
+    <p>
+      It is always nice to see a simple distributed algorithm which
+      solves the problem. What is especially refreshing is the poem she wrote as
+      a part of the abstract, which summarises the algorithm succinctly.
+    </p>
+    <p style="font-size:100%"><i>
+      <br>  I think that I shall never see
+      <br>  A graph more lovely than a tree
+      <br>
+      <br>  A tree whose crucial property
+      <br>  Is loop-free connectivity.
+      <br>
+      <br>  A tree which must be sure to span
+      <br>  So packets can reach every LAN.
+      <br>
+      <br>  First the Root must be selected
+      <br>  By ID it is elected.
+      <br>
+      <br>  Least cost paths from Root are traced.
+      <br>  In the tree these paths are placed
+      <br>
+      <br>  A mesh is made by folks like me
+      <br>  Then bridges find a spanning  tree.
+    </i></p>
+
+  </div>
+
+  <h4><a href="#1.3" onclick="open_visibility('1.3');">
+      M1.3 (TODO) Network Protocol Folklore</a></h4>
+  <div id="1.3">
+    <p>
+    <a href="https://ccronline.sigcomm.org/wp-content/uploads/2019/10/acmdl19-336.pdf">
+      Network Protocol Folklore</a>
+    </p>
+    <p> Radia Perlman's reflections.
+    </p>
+  </div>
+
+  <h4><a href="#1.4" onclick="open_visibility('1.4');">
+      M1.4 Classic Multicast Routing</a></h4>
+  <div id="1.4">
+    <p> <a href="http://web.cs.ucla.edu/~lixia/papers/deering88.pdf">
+      Multicast Routing in Datagram Internetworks and Extended LANs </a>
+    </p>
+
+    <p>
+      The paper is the seminal paper on how multicast can be implemented with
+      support from the bridges. The paper proposes minor modifcations to routing
+      algorithms to facilitate multicast.
+    </p>
+  </div>
+
+  <h4><a href="#1.5" onclick="open_visibility('1.5');">
+      M1.5 BGP: Interdomain Routing</a></h4>
+  <div id="1.5">
+  <p> eBGP and iBGP, sharing routing information.
+  </p>
+  </div>
+
+  <h4><a href="#1.6" onclick="open_visibility('1.6');">
+      M1.6 End to End Routing Behavior</a></h4>
+  <div id="1.6">
+    <p> Radia Perlman
+    </p>
+  </div>
+
+
+  <h4><a href="#1.7" onclick="open_visibility('1.7');">
+      M1.7 Narada: End System Multicast</a></h4>
+  <div id="1.7">
+    <p> Radia Perlman
+    </p>
+  </div>
+
+
+  <h4><a href="#1.8" onclick="open_visibility('1.8');">
+      M1.8 Active Network Architecture</a></h4>
+  <div id="1.8">
+    <p> Radia Perlman
+    </p>
+  </div>
+
+  <h4><a href="#1.9" onclick="open_visibility('1.9');">
+      M1.9 Click Modular Router</a></h4>
+  <div id="1.9">
+    <p> Radia Perlman
+    </p>
+  </div>
+
+  <h4><a href="#1.10" onclick="open_visibility('1.10');">
+      M1.10 Open Flow</a></h4>
+  <div id="1.10">
+    <p> Radia Perlman
+    </p>
+  </div>
+
+  <h4><a href="#1.11" onclick="open_visibility('1.11');">
+      M1.11 Congestion Avoidance and Control</a></h4>
+  <div id="1.11">
+    <p> Reno TCP
+    </p>
+  </div>
+
+  <h4><a href="#1.12" onclick="open_visibility('1.12');">
+      M1.12 Fast Switched Backplane for a Gigabit Switched Router</a></h4>
+  <div id="1.12">
+    <p> iSlip
+    </p>
+  </div>
+
+  <h4><a href="#1.13" onclick="open_visibility('1.13');">
+      M1.13 P4: Programming Protocol Independent Packet Processors</a></h4>
+  <div id="1.13">
+    <p> p4
+    </p>
+  </div>
+
+  <h4><a href="#1.14" onclick="open_visibility('1.14');">
+      M1.14 SWAN</a></h4>
+  <div id="1.14">
+    <p> SWAN: Achieving High Utilization with Software Driven WAN
+    </p>
+  </div>
+
+  <h4><a href="#1.15" onclick="open_visibility('1.15');">
+      M1.15 Fat Trees</a></h4>
+  <div id="1.15">
+    <p> scalable commodity data center network arch
+    </p>
+  </div>
+
+  <h4><a href="#1.16" onclick="open_visibility('1.16');">
+      M1.16 PortLand</a></h4>
+  <div id="1.16">
+    <p> fault tolerant l2 data center
+    </p>
+  </div>
+
+  <h4><a href="#1.17" onclick="open_visibility('1.17');">
+      M1.17 Jellyfish</a></h4>
+  <div id="1.17">
+    <p> 
+    </p>
+  </div>
+
+  <h4><a href="#1.18" onclick="open_visibility('1.18');">
+      M1.18 DCTCP</a></h4>
+  <div id="1.18">
+    <p> 
+    </p>
+  </div>
+
+  <h4><a href="#1.19" onclick="open_visibility('1.19');">
+      M1.19 MPTCP</a></h4>
+  <div id="1.19">
+    <p> 
+    </p>
+  </div>
+
+  <h4><a href="#1.20" onclick="open_visibility('1.20');">
+      M1.20 Open vSwitch</a></h4>
+  <div id="1.20">
+    <p> 
+    </p>
+  </div>
+
+  <h4><a href="#1.21" onclick="open_visibility('1.21');">
+      M1.21 EyeQ</a></h4>
+  <div id="1.21">
+    <p> 
+    </p>
+  </div>
+
+  <h4><a href="#1.22" onclick="open_visibility('1.22');">
+      M1.22 Censorship in China</a></h4>
+  <div id="1.22">
+    <p> great firewall
+    </p>
+  </div>
+
+  <!--
+  <h4><a href="#1.3" onclick="open_visibility('1.3');">
+      M1.3</a></h4>
+  <div id="1.3">
+    <p> 
+    </p>
+  </div>
+  -->
+
+
+  <br><br><br><br>
+  <a href=index.html>INDEX</a>
+  <script type="text/javascript" src="all_the_javascript.js"></script>
+</body>
+
+</html>
