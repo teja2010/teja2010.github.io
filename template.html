@@ -1,6 +1,8 @@
 <html>
   <head>
+    <link rel=stylesheet type="text/css" href="all_css.css">
     <title>teja's notes</title>
+    <!--
     <style>
       pre {
         font-family: "Courier New", monospace;
@@ -14,11 +16,17 @@
         background: white;
       }
     </style>
+      -->
 </head>
 
-<body style="margin-left:10%">
-  <h3> My Notes. </h3>
-  <a href=index.html>INDEX</a>
+<body onload="javascript:afterLoad(1,9);afterLoad(1,9);"style="margin-left:10%">
+  <h1> My Notes. </h1>
+  <p><a href=index.html>INDEX</a>&emsp;
+  <a href="#" onclick="afterLoad(1,9);">Toggle Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('none');">Collapse All Sections</a>
+  </p>
+
   <p> PREREQUISITE: Page 0</p>
   <p>
   This page contains my notes. Mostly related to linux networking.

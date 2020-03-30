@@ -1,19 +1,7 @@
 <html>
   <head>
+    <link rel=stylesheet type="text/css" href="all_css.css">
     <title>UML Setup</title>
-    <style>
-      pre {
-        font-family: "Courier New", monospace;
-        font-size: 100%;
-        font-weight: bold;
-      }
-      p {
-        font-family: "Calibri", sans-serif;
-        font-size: 120%;
-        width:800px;
-        background: white;
-      }
-    </style>
 </head>
 
 <body style="margin-left:10%">
@@ -51,8 +39,7 @@
     git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
     cd linux
     make defconfig ARCH=um
-    make -j1 ARCH=um
-  </pre>
+    make -j1 ARCH=um </pre>
 
   <p>
     A new file "linux" will be created. This is the UML executable which
@@ -75,8 +62,7 @@
 
   <pre>
     make menuconfig ARCH=um
-    make -j1 ARCH=um
-  </pre>
+    make -j1 ARCH=um </pre>
 
   <p>
   Makefile diff:
@@ -88,8 +74,7 @@
 +KBUILD_HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -g \
                 -fomit-frame-pointer -std=gnu89 $(HOST_LFS_CFLAGS) \
                 $(HOSTCFLAGS)
- KBUILD_HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS)
-  </pre>
+ KBUILD_HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS) </pre>
 
   <h4>0.2 Rootfs setup</h4>
   <p>
@@ -102,8 +87,7 @@
   </p>
   <pre>
     wget -nv https://dl.google.com/dl/android/net_test.rootfs.20150203.xz
-    unxz net_test.rootfs.20150203.xz
-  </pre>
+    unxz net_test.rootfs.20150203.xz </pre>
 
   <p>
     Note: If the above download does not work, check the
@@ -137,8 +121,7 @@
   </p>
 
   <pre>
-    sudo cp ~/.tmux.conf temp/home/
-  </pre>
+    sudo cp ~/.tmux.conf temp/home/ </pre>
 
   <p>
     By chroot-ing into the mounted directory, any necessary programs can be
@@ -158,8 +141,7 @@
   </p>
 
   <pre>
-    sudo umount temp
-  </pre>
+    sudo umount temp </pre>
 
   <h4>0.2.1.1 apt-get is failing</h4>
   <p>
@@ -203,8 +185,7 @@
   </p>
 
   <pre>
-    ./linux ubda=net_test.rootfs.20150203 mem=256M
-  </pre>
+    ./linux ubda=net_test.rootfs.20150203 mem=256M </pre>
 
   <p>
     You will see the VM booting, printing dmesg, bringing up the various kernel
@@ -238,8 +219,7 @@
     1 t teja     29405 27089  0  80   0 -  5003 ptrace 16:53 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
     1 t teja     29408 27089  0  80   0 -  5390 ptrace 16:53 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
     1 t teja     29410 27089  1  80   0 -  5717 ptrace 16:53 pts/6    00:00:08 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
-    0 S teja     30278  3682  0  80   0 -  5500 pipe_w 17:05 pts/1    00:00:00 grep --color=auto ubda
-  </pre>
+    0 S teja     30278  3682  0  80   0 -  5500 pipe_w 17:05 pts/1    00:00:00 grep --color=auto ubda </pre>
 
   <p>
     The third column is the process id and the fourth one is the parent PID.
@@ -270,8 +250,7 @@
 
   <pre>
     ./linux ubda=net_test.rootfs.20150203_1 mem=256M eth0=mcast
-    ./linux ubda=net_test.rootfs.20150203_2 mem=256M eth0=mcast
-  </pre>
+    ./linux ubda=net_test.rootfs.20150203_2 mem=256M eth0=mcast </pre>
 
   <p>
     Assign addresses to the eth0 interfaces, and they are ready. You try pinging

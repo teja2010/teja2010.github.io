@@ -1,0 +1,114 @@
+/* got css from toroid.org;
+ * http://meyerweb.com/eric/tools/css/reset/ | v2.0 | 20110126 */ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block;}body{line-height:1;}ol,ul{list-style:none;}blockquote,q{quotes:none;}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none;}table{border-collapse:collapse;border-spacing:0;}
+
+body {
+    color: #000;
+    background:  #FFFFFF;
+    font: 16px Verdana, Geneva, sans-serif;
+    line-height: 1.5;
+}
+
+pre {
+    overflow: auto;
+    background-color: #eeeeee;
+    color: black;
+    white-space: pre;
+    font-family: "Source Code Pro", "Droid Sans Mono", "DejaVu Sans Mono", "Andale Mono", "Consolas", monospace;
+}
+
+pre.excerpt {
+    padding-left: 1em;
+    border-left: 1px solid grey;
+}
+
+img { border: none; }
+a { text-decoration: none; color: #000088; }
+a:hover { text-decoration: underline grey; }
+h1 a, h2 a { color: inherit; }
+i, em { font-style: italic; }
+b, strong { font-weight: bolder; }
+q { quotes: '\201c' '\201d' '\2018' '\2019' }
+q:before { content: open-quote; }
+q:after { content: close-quote; }
+blockquote { color: #333333; }
+
+img.post-img {
+    width: 100%;
+    height: auto;
+    margin: auto;
+    max-width: 37em;
+}
+
+header > p { margin: 0; }
+header, footer { font-size: 14px }
+body > footer { margin-top: 1.5em; }
+header { margin-bottom: 1.5em; }
+h1 + address { margin-top: 0.75em; }
+
+h1 { font-size: 24px; }
+h2 { font-size: 20px; }
+h3 { font-size: 18px; }
+h4 { font-size: 16px; }
+h1, h2, h3, h4 { line-height: 1.5; }
+
+p, dl, ul, ol, embed, table, blockquote, img, pre { margin: 1em 0 1em 0; }
+p + p { margin-top: 0; }
+
+header + article { margin-top: 2em; }
+article + article { margin-top: 1.75em; }
+
+ol { list-style: decimal inside; }
+ul.pointed {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 1em;
+    text-indent: -1em;
+}
+ul.pointed li:before {
+    content: "\0BB \020";
+}
+ul.pointed li + li {
+    margin-top: 0.5em;
+}
+
+.videowrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    padding-top: 25px;
+    height: 0;
+}
+.videowrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+@media screen and (min-width: 801px) {
+    body {
+        max-width: 47em;
+        margin: 0 1em 0 2em;
+        padding: 2em 0 2em 6em;
+    }
+
+    blockquote { padding: 0 1em 0 2em; }
+}
+
+@media screen and (max-width: 800px) {
+    body {
+        margin: 0 0.5em 0 0.5em;
+    }
+
+    h1 { font-size: 20px; }
+    h2, h3, h4 { font-size: 16px; font-weight: bolder; }
+    h1, h2, h3, h4 { line-height: 1.5; }
+
+    p { margin: 0.75em 0 0.75em 0; }
+    p + p { margin-top: 0; }
+
+    header + article { margin-top: 1em; }
+    article + article { margin-top: 1.5em; }
+
+    blockquote { padding: 0 1em 0 1em; }
+}
