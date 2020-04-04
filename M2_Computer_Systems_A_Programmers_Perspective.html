@@ -1,0 +1,115 @@
+<html>
+  <head>
+    <link rel=stylesheet type="text/css" href="all_css.css">
+    <title>Computer Systems A Programmer’s Perspective</title>
+</head>
+
+<body onload="javascript:afterLoad(2,9);afterLoad(2,9);"style="margin-left:10%">
+  <h1> My Notes on Computer Systems A Programmer’s Perspective</h1>
+  <p><a href=index.html>INDEX</a>&emsp;
+  <a href="#" onclick="afterLoad(2,9);">Toggle Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('none');">Collapse All Sections</a>
+  </p>
+
+  <p>
+  Link to the book's <a href="http://csapp.cs.cmu.edu/2e/home.html">site</a>.
+  </p>
+
+  <h4><a href="#2.1" onclick="open_visibility('2.1');">
+      M2.1 Tour of Computer Systems</a></h4>
+  <div id="2.1">
+  <ul>
+    <li> Stages of compiling a program. Four parts to a compiler:
+        preprocessor: process macros, add headers into program.
+        compiler: translate into Assembly Language. An intermediate
+        form, optimize the program, check for issues (produce warnings).
+        assembler: translate into machine code, produce a object file.
+        linker:link object files and libraries to produce a executable.
+    </li>
+
+    <li> Running a program. Shell reads the program's name, loads exec file into
+      RAM, executes it. Data copied from Disk into main memory without CPU
+      involvement = using DMA. Data loaded into caches on cache miss. Faster
+      access when memory access is spatially local.
+    </li>
+
+    <li> A hierarchy of memory: Registers, L1, L2, L3 caches, DRAM, Local Disk
+      (SSD, HDD), remote storage.
+    </li>
+
+    <li> OS manages the hardware, facilitates sharing among processes. System
+      calls to communicate with IO. Each system call is trapped by the HW,
+      registered kernel code begins running in kernel mode.
+      After necessary operation is complete, returns to user mode.
+    </li>
+
+    <li>
+      Process is OS abstraction for running a program. Threads are multiple
+      execution units within a process. Each process is provided an illusion of
+      access of the complete memory. Virtual address space of the program is
+      translated into the physical address space using OS page tables. Each
+      virtual address is translated into the physical address using hardware.
+      If a address is not found or is out of bounds, the hardware calls a
+      registered function to signal the error.
+    </li>
+
+    <li>
+      Concurrency and Parallelism:<br>
+      Concurrency : Multiple simultaneous activity<br>
+      Parallelism : Using concurrency to make the system faster.
+    </li>
+
+    <li>
+      Concurrent kernel threads. Concurrency in hardware: multiple processor
+      cores, multiple hardware threads per core (hyperthreading).
+    </li>
+    <li> Instruction level parallelism: pipeline instructions to execute
+      multiple different instructions in parallel. SIMD parallelism: the same
+      instruction is run on multiple data streams (e.g. adding blocks in
+      parallel)
+    </li>
+
+  </ul>
+  </div>
+
+  <h4><a href="#2.2" onclick="open_visibility('2.2');">
+      M2.2 Representing and Manipulating Information</a></h4>
+  <div id="2.2">
+  <ul>
+    <li>
+      Information stored in virtual memory. Word size is the nominal size of
+      integer and pointer data. w-bit word implies 2^w addresses are possible.
+      64bit word processors (amd64) are common.
+    </li>
+
+    <li> Each C type has a fixed size. e.g. char is 1 byte irrespective of word
+      size. Long int and pointer types are 1 word sized.
+    </li>
+
+    <li> Endianess: Order of storing bits in memory. Only for data spanning
+      multiple bytes. Little endian: in memory highest significant bit goes to
+      highest address. Big endian: highest significant bit goes to lowest
+      address. e.g.
+      0x12345678 is represented as:
+      <img src="imgs/M2_endianess.png"> <br>
+      Some architectures are bi-endian: can read either way.
+    </li>
+
+    <li>
+    </li>
+  </ul>
+  </div>
+
+  <!--
+  <h4><a href="#2.1" onclick="open_visibility('2.1');">
+      M2.1 Packet Representation in Linux</a></h4>
+  <div id="2.1">
+  </div>
+  -->
+
+  <br><br><br><br>
+  <a href=index.html>INDEX</a>
+</body>
+
+</html>

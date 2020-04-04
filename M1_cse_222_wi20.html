@@ -1,26 +1,11 @@
 <html>
   <head>
+    <link rel=stylesheet type="text/css" href="all_css.css">
     <title>teja's notes</title>
-    <style>
-      pre {
-        font-family: "Courier New", monospace;
-        font-size: 100%;
-        font-weight: bold;
-      }
-      h4{
-        font-size: 120%;
-      }
-      p {
-        font-family: "Calibri", sans-serif;
-        font-size: 120%;
-        width:800px;
-        background: white;
-      }
-    </style>
 </head>
 
 <body onload="javascript:afterLoad(1,22);afterLoad(1,22);" style="margin-left:10%">
-  <h3> CSE 222a, Winter 2020</h3>
+  <h1> CSE 222a, Winter 2020</h1>
   <p><a href=index.html>INDEX</a>&emsp;
   <a href="#" onclick="afterLoad(1,22);">Toggle Sections</a>&emsp;
   <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
@@ -30,17 +15,17 @@
   <p>
     This page contains summaries of the various papers I read as a part of
     <a href="http://cseweb.ucsd.edu/~gmporter/classes/wi20/cse222a/">CSE222a, at UCSD</a>.
-    It was taught Prof. George Porter. The course focused on
+    It was taught by Prof. George Porter. The course focused on
     reading classical and current papers followed by in class discussions. The
-    following are papers that I found interesting. The summaries usually consist
-    four paragraphs:<br>
+    following are papers that I found interesting. Most of the summaries usually
+    consist of four paragraphs:<br>
     1. the introduction, problem its trying to solve, the pain points<br>
     2. the idea, how it solves the problem<br>
     3. their implementation<br>
     4. their results and my thoughts<br>
   </p>
   <p>
-    Most of these papers cannot be uploaded/shared.
+    Some of these papers cannot be uploaded/shared.
     I have provided links to some of the papers if I was able to find a public
     link off DuckDuckGo. Else I have provided a private link which needs
     subscription.
@@ -58,8 +43,8 @@
     and the protocols developed.
   </p>
   <p>
-    1. <a href="https://www.cs.princeton.edu/courses/archive/fall06/cos561/papers/cerf74.pdf">
-      A Protocol for Packet Network Incommunication</a>
+    Paper 1. A Protocol for Packet Network Incommunication (IEEE 1974)
+     [<a href="https://www.cs.princeton.edu/courses/archive/fall06/cos561/papers/cerf74.pdf">Link</a>]
   </p>
   <p>
     The paper first clearly defines the components of the network viz Hosts,
@@ -105,8 +90,8 @@
   <br>
 
   <p>
-    2. <a href="https://groups.csail.mit.edu/ana/Publications/PubPDFs/The%20design%20philosophy%20of%20the%20DARPA%20internet%20protocols.pdf">
-      The Design Philosophy of the DARPA Internet Protocols</a>
+    Paper 2. The Design Philosophy of the DARPA Internet Protocols (ACM 1988)
+    [<a href="https://groups.csail.mit.edu/ana/Publications/PubPDFs/The%20design%20philosophy%20of%20the%20DARPA%20internet%20protocols.pdf">Link</a>]
   </p>
   <p>
     The second paper describes the philosophy behind the design of the Internet
@@ -143,16 +128,18 @@
   <h4><a href="#1.2" onclick="open_visibility('1.2');">
       M1.2 Distributed Computation of a Spanning Tree in an Extended LAN</a></h4>
   <div id="1.2">
-    <p><a href="https://www.it.uu.se/edu/course/homepage/datakom/ht06/slides/sta-perlman.pdf">
-      An Algorithm for Distributed Computation of a Spanning Tree in an Extended LAN</a>
+    <p>
+      Paper: An Algorithm for Distributed Computation of a Spanning Tree in an Extended LAN (ACM 1985)
+      [<a href="https://www.it.uu.se/edu/course/homepage/datakom/ht06/slides/sta-perlman.pdf">Link</a>]
     </p>
 
     <p>
       The author describes a algorithm to build a tree from an extended LAN.
-      As networks began to grow, with LANs interconnected with bridges to build
+      As networks began to grow, with LANs interconnected using bridges to build
       an extended LAN, manual configuration of the bridges increased the risk
-      of loops due to manual error. Similarly a user connecting LANs using a bridge
-      could create a Loop. The proposed algorithm allows the bridges to exchange
+      of loops. Similarly a user without proper knowledge could connect LANs with
+      a bridge
+      and create a Loop. The proposed algorithm allows the bridges to exchange
       data and  construct a tree without any additional configuration. Secondly
       the algorithm converges in O(mesh diameter) while imposing small memory
       requirements (proportional to the number of LANs the bridge is connected to)
@@ -216,10 +203,21 @@
       M1.3 (TODO) Network Protocol Folklore</a></h4>
   <div id="1.3">
     <p>
-    <a href="https://ccronline.sigcomm.org/wp-content/uploads/2019/10/acmdl19-336.pdf">
-      Network Protocol Folklore</a>
+    Paper: Network Protocol Folklore (ACM 2019) 
+    [<a href="https://ccronline.sigcomm.org/wp-content/uploads/2019/10/acmdl19-336.pdf">Link</a>]
     </p>
-    <p> Radia Perlman's reflections.
+
+    <p> Radia Perlman, having been working on internet protocols since it's
+    inception, shares a history of choices they made and their consequences on
+    the modern internet implementation. One line from the abstract which makes
+    the paper interesting is: <i>Some decisions have made today’s networks
+      unnecessarily complex and less functional. Surprisingly, mechanisms that
+      were created out of necessity, to compensate for previous decisions,
+      sometimes turn out to be useful for purposes other than the original
+      reason they were invented.</i>
+    </p>
+
+    <p> The first
     </p>
   </div>
 
