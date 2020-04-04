@@ -70,9 +70,8 @@
     include fragmentation using sequence numbers, which have now moved to TCP,
     while IP implements a blunt form of fragmentation.
   </p>
-  <p>
-    TODO: add a picture comparing the protocols.
-  </p>
+  
+  <img src="imgs/M1_interntwhdr.svg">
   <p>
     The authors describe the transmission control protocol as a means to transmit
     a stream of data, which it breaks into segments. Early TCP used the sequence
@@ -145,9 +144,8 @@
       requirements (proportional to the number of LANs the bridge is connected to)
       on each bridge.
     </p>
-    <p>
-      TODO: add a image of the extended LAN.
-    </p>
+
+    <img src="imgs/M1_extended_LAN.svg" style="width:400px">
 
     <p>
       In the final tree, each LAN has a designated bridge. On receiving data from
@@ -170,6 +168,11 @@
       Also, the HELLO messages timeout letting the bridge detect failures in the
       network. This has been described in detail in the paper and I cannot
       sufficiently describe it in a single paragraph.
+    </p>
+    <img src="imgs/M1_ex_LAN_tree2.svg" style="width:400px">
+    <p>
+      Bridge 1 becomes the leader, dotted links are in backup state. Arrows are
+      links in forwarding state, pointing towards non leader bridges.
     </p>
 
     <p>
