@@ -203,7 +203,7 @@
   </div>
 
   <h4><a href="#1.3" onclick="open_visibility('1.3');">
-      M1.3 (TODO) Network Protocol Folklore</a></h4>
+      M1.3 Network Protocol Folklore</a></h4>
   <div id="1.3">
     <p>
     Paper: Network Protocol Folklore (ACM 2019) 
@@ -220,9 +220,80 @@
       reason they were invented.</i>
     </p>
 
-    <p> The first
+    <p> Ethernet addresses were designed to be 6 bytes long so that nodes
+      connected over ethernet would not need any other address configuration.
+      But ethernets never have more than a few thousand nodes attached. Each
+      ethernet address is unique and location independent, but are simply used
+      for link to link transfer. It is interesting that IPv4, which was designed
+      so each node would get a unique address dynamically has a smaller length
+      of just 4 Bytes. People even envisioned ethernet as Layer 3 replacement, 
+      implementing end to end connections over ethernet due to the uniqueness
+      property of the ethernet address.
+    </p>
+    <p>
+      DEC had developed an alternate to IP called IS-IS which adopted CLNP
+      (ConnectionLess Network Protocol)
+      addressing. CNLP has very large 20 Byte addresses ( larger than 16Byte
+      IPv6). Though it did not catch on CNLP supported features that were later
+      built into IPv6.
+    </p>
+    <p>
+      The paper has a brief overview of the history behind the spanning tree protocol.
+      Customers expected nodes in different ethernets to work.
+      DEC sold routers which routed based on Layer 3 addresses, but expected
+      end nodes to implement Layer 3 to route between different ethernets.
+      The author argues that the right solution was for all endpoints to
+      put Layer 3 into the stack for such inter ethernet communication. But,
+      DEC decided that instead of waiting for endpoints to upgrade, it was easier
+      to build a network box which routed based on ethernet addresses, i.e. the
+      <i>bridge</i>. Radia Perlman was asked to design an algorithm to break
+      ethernet routing loops. The resulting algorithm, the spanning tree algorithm,
+      a temporary fix till endpoints upgrade their network stacks is still being
+      widely deployed.
+    </p>
+    <p>
+      The paper compares CLNP and modern IPv6. A few features of CLNP are:
+      <ul>
+        <li> Autoconfiguration by appending 14 byte network prefix with the
+             6 Byte ethernet address to build a complete 20Byte address.</li>
+        <li> The network prefix is hierchically assigned based on region.</li>
+        <li> Within an area since the prefix is common, nodes can move anywhere
+          in the area without changing the address.</li>
+        <li> Since CLNP had ethernet address, ethernet header could be dropped
+          so CLNP is used for both Layer 2 and 3 routing.<li>
+      </ul>
+      
+      IPv4 addressing was not as scalable as CLNP and does not support movement
+      within an area without address reconfiguration (especially helpful with
+      Datacenters migrating VMs). IP is a flat address space with ethernet
+      providing functionality of a region. One consequence of IP and ethernet being
+      completely independent is that we need the ARP protocol to discover the
+      endnode's ethernet address. CLNP on the other hand needed each node to
+      anounce it's location.
+    </p>
+
+    <p>
+      The paper then moves to the final section which are surprising outcomes
+      of the decisions people took.
+      <ul>
+        <li> Seperation of IP and Ethernet allowed VLAN, which provides the
+          ability to configure which nodes can talk. This is used in datacenters
+          to build a LAN for a group of VMs</li>
+        <li> Since CLNP uses a unique ethernet address which is then announced
+          to everyone, tracking using CLNP would have been easier making it a
+          major privacy issue. Instead since IP is ephemeral, tracking though
+          possible is less intrusive.</li>
+        <li> NATs were built to fix IPv4's inability to scale, not necessary
+          for CLNP. But NATs have become a major security feature to obfusicate
+          users behind a NAT. Also since users behind a NAT cannot be contacted
+          without the user initiating a connection, the users are protected from
+          external nodes.</li>
+      </ul>
     </p>
   </div>
+
+  <br><br><br>
+  <h4> The ones below are incomplete </h4>
 
   <h4><a href="#1.4" onclick="open_visibility('1.4');">
       M1.4 Classic Multicast Routing</a></h4>
