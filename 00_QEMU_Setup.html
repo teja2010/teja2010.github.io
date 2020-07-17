@@ -116,6 +116,7 @@ else
 		-S -s \
 		-cpu host \
 		-append "root=/dev/sda1" \
+		-net user,hostfwd=tcp::5555-:22 -net nic \
 fi
   </pre>
 
@@ -171,6 +172,29 @@ fi
   to those of UML. Thses options have been commented in the above script.
   </p>
 
+  <h3>Network setup</h3>
+  <p>
+  By default the script provides an interface via which the VM can access both
+  internet and the host machine (over ssh). This is
+  the <a href="https://wiki.qemu.org/Documentation/Networking#User_Networking_.28SLIRP.29">SLIRP</a>
+  networking mode. Follow the above link to read more.
+  </p>
+
+  <p>
+  The interface will be provided but the interface will not have an address. Run
+  dhclient on the interface so it is assigned an address. Next install an sshserver,
+  if not installed, so we can access the guest over ssh.
+  </p>
+
+  <pre>
+  sudo dhclient eth0  # provide the right interface name.
+  sudo apt update     # needed to update apt cache.
+  sudo apt install openssh-server </pre>
+
+  <p>
+  Finally to login into the guest machine, run:
+  </p>
+  <pre> ssh -p 5555 localhost </pre>
 
   <!--
 # got it from www.youtube.com/watch?v=unizGCcZg3Y
