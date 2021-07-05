@@ -1,0 +1,120 @@
+<html>
+  <head>
+    <link rel=stylesheet type="text/css" href="all_css.css">
+    <title>teja's notes</title>
+</head>
+
+<body onload="javascript:afterLoad(1,9);afterLoad(1,9);"style="margin-left:10%">
+  <h1> Category Theory for Programmers. </h1>
+<!--
+  <p><a href=index.html>INDEX</a>&emsp;
+  <a href="#" onclick="afterLoad(1,9);">Toggle Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('block');">Open All Sections</a>&emsp;
+  <a href="#" onclick="changeall_visibility('none');">Collapse All Sections</a>
+  </p>
+-->
+
+  <h3>Motivation</h3>
+  <p>Abstraction:<br>
+  From assembly to procedural programming:
+      Divide program into smaller procedures.
+  Procedural to Object oriented programming:
+      Construct objects and stop looking into the object.
+      The interface to objects hides the implementation.
+
+  Concurrency does not mix well with OOP concepts. Hiding implementations makes
+  building concurrency harder.
+      Objects hide mutation
+      Objects hide sharing
+          Therefore prone to data races.
+
+      This makes reasoning about data races difficult.
+
+      Locks solve concurrency, but composing locks is again difficult.
+
+  Next level of abstraction:
+  Procedural to Functional programming.
+      Since all objects are functions, they are also immutable.
+      That allows fewer data races.
+
+      Abstracting over the types of a function's values:
+          CPP's template metaprogramming is a translation of TypeClasses from Haskell.
+
+  From Functional Programming to Category theory:
+      Haskell's boundaries are being pushed by adding features from category theory.
+      The features are being added to Haskell by binding it to a category that
+      Haskell supports.
+
+
+  Moving up in the abstraction chain, let us express ideas in a simpler way.
+
+  Even mathematicians discovered that areas of math can be abstracted using
+  Category Theory.
+  Curry-Howard-Lambek correspondence:
+          types in programming languages,
+          propositions in logic and
+          objects in specific category theory
+      have a 1:1:1 correspondence.
+
+  https://wiki.haskell.org/Curry-Howard-Lambek_correspondence
+
+
+  Three tools:
+      Abstraction: Complicated instructions are hidden behind interfaces.
+          The interface remains the same across objects, creating an abstraction.
+          Abstractions allow us to treat different objects as the same object.
+
+      Composability:
+          dividing into smaller parts which are used to built larger parts
+
+
+      Identity:
+          Objects are either completely equal or are equal for our purposes.
+          Abstracted objects are equal for our purposes, but not completely equal.
+
+
+  ---------
+
+  Category:
+      A Category is a bunch of objects.
+      (bunch /= set, some objects cannot be placed in sets,
+       e.g. collection of all possible sets cannot be a set.)
+
+      A Category contains objects and Morphisms.
+
+      An Object is the primitive, with no properties.
+      A Morphism or Arrow is something that goes between two objects.
+      A morphism is also a primitive except it has an start and an end.
+      Objects have no other purpose except to define the ends of an arrow.
+
+      objects a,b ; arrow a -> b
+
+      Any two objects can be connected by zero or more arrows.
+      An object can also be connected to itself by zero or more arrows too.
+
+      An Category is defined by declaring the objects and the arrows.
+      It can be visualized as a graph, is much more than a graph.
+
+    Composition:
+      Given objects a, b, c; and arrows a->b and b->c;
+      there must exist an arrow a->c, which is a composition of arrows.
+
+      arrow f : a->b
+      arrow g : b->c
+      arrow g . f : a->c
+
+      (g . f is called g after f)
+
+      For all arrows from a to b ; and for all arrows from b to c,
+      there must exist an composition arrows between a to c.
+
+
+
+
+  </p>
+
+  <br><br><br><br>
+  <a href=index.html>INDEX</a>
+</body>
+
+</html>
