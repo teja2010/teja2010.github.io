@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="Appendix.html">A. Appendix</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/2_1-3_top_half_processing.html">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="N/2_6-7_ip_and_udp_processing.html">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="Appendix.html">A. Appendix</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -179,7 +179,7 @@ mark them with a ​&quot;WIP&quot;​ tag.</p>
 <h3 id="n02-visualizing-packet-processing"><a class="header" href="#n02-visualizing-packet-processing">N.0.2 Visualizing Packet Processing</a></h3>
 <p>This is not a standard way of visualizing, but I think this is the right way to visualize packet processing and cant visualize in any other way. Receiving packets is in the bottom to top direction. And transmitting packets is in the top to bottom direction. Forwarding to a different layer is left to right.
 While receiving packets, drivers receive data first. The bottom most layer where the drivers stay. The drivers hand over the packet to the core network. The core networking code then passes it over to the right protocol stack(s). After the protocol stack processing is done, it enters socket layer, from where the user picks up the packet. </p>
-<img src="imgs/visualize_pkt_proc.svg" alt="visualize"  />
+<img src="imgs/visualize_pkt_proc.png" alt="visualize"  />
 <h4 id="n021-top-half-and-bottom-half-processing"><a class="header" href="#n021-top-half-and-bottom-half-processing">N.0.2.1 Top half and bottom half processing</a></h4>
 <p>The path from the driver to the socket queue is divided into two halves.</p>
 <p>The top half happens first, the driver gets the raw packet and creates a skb. After an skb is created it calls functions to hand it over to the core networking code. The top half before exiting schedules the bottom half. Top half runs per packet and exits.</p>
@@ -191,9 +191,551 @@ While receiving packets, drivers receive data first. The bottom most layer where
 <li>Softirq processing done while receiving packets is also called NET_RX processing. I can use this as well. :)</li>
 <li>Core network code runs in both these halves. But most of it is in softirq processing. </li>
 </ol>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="setup-qemu"><a class="header" href="#setup-qemu">Setup Qemu</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="n0-setup-uml-older"><a class="header" href="#n0-setup-uml-older">N0. Setup UML (older)</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="n1-packet-rx-path-1--basic"><a class="header" href="#n1-packet-rx-path-1--basic">N1. Packet RX path 1 : Basic</a></h1>
+<p>With this, basic information we can start describing the RX and TX processing paths.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n1-setup-qemu"><a class="header" href="#n1-setup-qemu">N1 Setup Qemu</a></h1>
+<p>These notes are based on the following videos:</p>
+<ol>
+<li><a href="https://www.youtube.com/watch?v=kQFYfIXhahs">Create an Arch Linux QEMU installation</a>: Installing arch is too involved, so I chose to install ubuntu.</li>
+<li><a href="https://www.youtube.com/watch?v=unizGCcZg3Y">GDB on the Linux Kernel</a>. The script below is the same as the one described in this video.</li>
+</ol>
+<p>Like described in the article on UML Setup, I like to learn by running a VM and attaching it via GDB. KVM and QEMU are the newer well supported VM solutions. This page is a tutorial on how to launch a debug instance in QEMU and attach to it using GDB.</p>
+<p>Install QEMU (check Qemu download page for distribution specific instructions). </p>
+<h3 id="n11-setup--build-a-kernel-with-debug-symbols"><a class="header" href="#n11-setup--build-a-kernel-with-debug-symbols">N1.1 Setup &amp; build a kernel with debug symbols</a></h3>
+<p>Clone the kernel from kernel git repo. </p>
+<pre><code class="language-shell">git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
+cd linux 
+</code></pre>
+<p>Next run &quot;make menuconfig&quot; to modify a few configurations. On running the command a ncurses interface to enable/disable options will open. Use the arrow keys to move between options and 'Y' and 'N' keys to include/exclude options.
+First enable CONFIG_DEBUG_KERNEL. It is located under &quot;Kernel hacking&quot; as &quot;Kernel debugging&quot;.
+Next disable RANDOMIZE_MEMORY_PHYSICAL_PADDING. It is located under &quot;Processor type and features&quot; as &quot;Randomize the kernel memory sections&quot;.
+After making the changes save the changes and exit the menuconfig interface. A lot of youtube videos explain the same in detail, check them if confused. To reset any changes delete the &quot;.config&quot; file and start over by running &quot;make defconfig&quot;. Finally run make.
+It will take some to compile the kernel. Meanwhile move to the next step and install a VM in qemu. </p>
+<pre><code>make defconfig
+make menuconfig     # enable CONFIG_DEBUG_KERNEL,
+                    # disable RANDOMIZE_MEMORY_PHYSICAL_PADDING
+
+make -j1            # replace 1 with the number of CPUs that make
+                    # should use to build the kernel.  
+</code></pre>
+<h3 id="n12-create-an-image-for-qemu"><a class="header" href="#n12-create-an-image-for-qemu">N1.2 Create an image for QEMU</a></h3>
+<p>Move out of the linux directory and create an image for QEMU.</p>
+<p><code>qemu-img create kernel-dev.img 20G</code> </p>
+<p>Next download ubuntu's minimal iso image from here. It is a small 64MB file which can be used for a minimal Linux Installation. Move the downloaded mini.iso file into the same directory.
+Finally save the script below as start.sh.</p>
+<pre><code class="language-bash">#!/bin/bash
+
+#startup.sh
+
+KERNEL=&quot;linux/arch/x86_64/boot/bzImage&quot;
+RAM=1G
+CPUS=2
+DISK=&quot;kernel-dev.img&quot;
+
+if [ $# -eq 1 ]
+then
+	qemu-system-x86_64 \
+		-enable-kvm \
+		-smp $CPUS \
+		-drive file=$DISK,format=raw,index=0,media=disk \
+		-m $RAM \
+		-serial stdio \
+		-drive file=$1,index=2,media=cdrom  ## comment to run vanilla install
+		# use this option to boot using a cd iso
+else
+	qemu-system-x86_64 \
+		-enable-kvm \
+		-smp $CPUS \
+		-drive file=$DISK,format=raw,index=0,media=disk \
+		-m $RAM \
+		-serial stdio \
+		-kernel $KERNEL \
+		-S -s \
+		-cpu host \
+		-append &quot;root=/dev/sda1&quot; \
+		-net user,hostfwd=tcp::5555-:22 -net nic \
+fi
+</code></pre>
+<p>The above script when given an ISO file passes it as an CD to the QEMU instance. This way we can install ubuntu into &quot;kernel-dev.img&quot;. </p>
+<p>If no arguments are provided it tries to run the OS installed on kernel-dev.img. This way we can use the script to start the VM after we have completed installing ubuntu. At this point the directory structure should look like this:</p>
+<pre><code>  .
+  ├── kernel-dev.img
+  ├── linux
+  ├── mini.iso
+  └── startup.sh 
+</code></pre>
+<p>First to install ubuntu run: (if superuser privileges needed, run with sudo) </p>
+<pre><code>./startup.sh mini.iso
+</code></pre>
+<p>Go through all the steps and install ubuntu. A lot of YouTube videos show the  complete process. Use them as a reference if necessary.</p>
+<p>Once the installation is complete, comment out  the line which provides the cdrom option to boot into an vanilla ubuntu install.</p>
+<pre><code>./startup.sh mini.iso  #cdrom line commented
+</code></pre>
+<p>Now wait for the kernel installation to complete. Then run the script without and arguments to boot into the kernel we built.</p>
+<pre><code>./startup.sh
+</code></pre>
+<p>The boot will wait for GDB to connect. On a separate terminal run:</p>
+<pre><code class="language-bash">gdb linux/vmlinux
+</code></pre>
+<p>Within the gdb prompt then run &quot;target remote :1234&quot; to connect to QEMU. The <code>bt</code> command should then show some stack within QEMU.
+Run &quot;hbreak start_kernel&quot; to add a hardware breakpoint at start_kernel() and then run &quot;continue&quot;. The VM would then begin booting and will stop in the start_kernel function.</p>
+<p>Add other hardware breakpoints (since QEMU uses hardware acceleration for Virtualization, normal SW breakpoints will not work) and start tinkering.
+The network options are similar to those of UML. Thses options have been commented in the above script. </p>
+<h3 id="n13-network-setup"><a class="header" href="#n13-network-setup">N1.3 Network setup</a></h3>
+<p>By default the script provides an interface via which the VM can access both internet and the host machine (over ssh). This is the SLIRP networking mode. Follow the link <a href="https://wiki.qemu.org/Documentation/Networking#User_Networking_.28SLIRP.29">here</a> to read more.</p>
+<p>The interface will be provided but the interface will not have an address. Run dhclient on the interface so it is assigned an address. Next install an sshserver, if not installed, so we can access the guest over ssh.</p>
+<pre><code class="language-bash">sudo dhclient eth0  # provide the right interface name.
+sudo apt update     # needed to update apt cache.
+sudo apt install openssh-server
+</code></pre>
+<p>Finally to login into the guest machine, run:</p>
+<pre><code>ssh -p 5555 localhost 
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n1-setup-uml-older"><a class="header" href="#n1-setup-uml-older">N1. Setup UML (older)</a></h1>
+<p>SKIP THIS IF YOU WERE ABLE TO SETUP QEMU. This page is here only for completeness, but is not necessary to experiment with a kernel.</p>
+<hr />
+<p>I prefer to learn/tinker with linux using UML. UML is User mode linux, which is a simple VM. It emulates a uniprocessor linux system, and can run even on machines with very old hardware (like my laptop). Check the UML homepage for additional details. This page is just to a simple tutorial on how to build and run it. I have also added sections on how to attach it to GDB for easy debugging and a section on how to setup basic networking between multiple UMLs which you can skip in the first read. </p>
+<h3 id="n01-clone-and-build-the-kernel"><a class="header" href="#n01-clone-and-build-the-kernel">N0.1 Clone and build the kernel</a></h3>
+<p>Clone the kernel, and build it.
+Make defconfig sets up the default kernel config. The kernel config is a set of kernel features which will either be compiled into the kernel or will be compiled as modules. The architecture for which we are configuring is the UM (user mode) architechture. While building the config, you may be prompted to choose a configuration. Press enter to choose the default configuration.
+Once the configuration is done, a &quot;.config&quot; file will be populated with the chosen options.
+Begin compiling the code. Based on your machine's CPU capabities, replace 1 with the number of parallel compilation jobs you want make to run. Please remain patient as the very first compilation will take some time.</p>
+<pre><code class="language-bash">git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
+cd linux
+make defconfig ARCH=um
+make -j1 ARCH=um 
+</code></pre>
+<p>A new file &quot;linux&quot; will be created. This is the UML executable which runs as an application on the host machine. It needs a few other files and arguments to run, which will be explained in the next section.</p>
+<h3 id="n011-kernel-config-optional"><a class="header" href="#n011-kernel-config-optional">N0.1.1 Kernel config [OPTIONAL]</a></h3>
+<p>The kernel src includes a neat way to configure the kernel. Run make menuconfig to configure various options. A ncurses interface should start up, with the instructions provided in the top. Pressing Y includes a config and N excludes a config. After configuring the kernel, save and exit the config. The .config file will get updated with the necessary configuration.
+To build the uml binary with debug symbols, edit KBUILD_HOSTCFLAGS in the Makefile. Just add a '-g' option at the end. The kernel can then be rebuilt with the new configuration.</p>
+<pre><code>make menuconfig ARCH=um
+make -j1 ARCH=um 
+</code></pre>
+<p>Makefile diff:</p>
+<pre><code> HOSTCC       = gcc
+ HOSTCXX      = g++
+-KBUILD_HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 \
++KBUILD_HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -g \
+                -fomit-frame-pointer -std=gnu89 $(HOST_LFS_CFLAGS) \
+                $(HOSTCFLAGS)
+ KBUILD_HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS) 
+</code></pre>
+<h3 id="n02-rootfs-setup"><a class="header" href="#n02-rootfs-setup">N0.2 Rootfs setup</a></h3>
+<p>We have a compiled kernel but we still need a init script and other userspace  programs. We need a rootfs to emulate the disk. There are a lot of blogs  which describe how to build a rootfs. We will download a debian rootfs that is  provided by google. 
+Run the following command to download the rootfs and uncompress it. On  uncompressing it a 1GiB net_test.rootfs.20150203 should be available.</p>
+<pre><code>wget -nv https://dl.google.com/dl/android/net_test.rootfs.20150203.xz
+unxz net_test.rootfs.20150203.xz 
+</code></pre>
+<p>Note: If the above download does not work, check the <a href="https://android.googlesource.com/kernel/tests/+/master/net/test/run_net_test.sh#83">Google nettest script</a> where the rootfs link can be found. Google uses    UML to run nettests on the kernels OEMs ship to check for possible bugs.<br />
+We now have everything needed to run the UML.</p>
+<p>.2.1 Adding files/programs to rootfs [OPTIONAL]</p>
+<p>The rootfs now contains certain programs and a init script which can be used to boot into the UML. We may need to install programs for our testing or need to move files between UML and the host OS. By mounting it into a directory the rootfs contents can be accessed.</p>
+<pre><code>mkdir temp
+sudo mount net_test.rootfs.20150203 temp
+</code></pre>
+<p>Copying from/to the directory is equivalent to copying files from/to the UML. In the below example I am copying my tmux configuration files into the rootfs. When I boot into UML, I will find the config file in the home directory. (Super user privilages are needed to add/remove files from the rootfs). </p>
+<pre><code>sudo cp ~/.tmux.conf temp/home/ 
+</code></pre>
+<p>By chroot-ing into the mounted directory, any necessary programs can be installed. On running chroot, you will able to edit the rootfs with super user privilages. I am installing tmux in the below code and then exiting the chroot shell.</p>
+<pre><code>sudo chroot temp
+apt-get update
+apt-get install tmux
+exit  
+</code></pre>
+<p>Once all the changes are done, unmount the rootfs.</p>
+<pre><code>sudo umount temp
+</code></pre>
+<h4 id="0211-apt-get-is-failing"><a class="header" href="#0211-apt-get-is-failing">0.2.1.1 apt-get is failing</a></h4>
+<p>Note: apt-get update may fail printing the following error:</p>
+<pre><code>Err http://ftp.jp.debian.org wheezy Release.gpg
+Connection failed
+</code></pre>
+<p>If the /etc/hosts file contains an address for a particular hostname, the  system will not do an additional DNS lookup. In this case, the address  corresponding to ftp.jp.debian.org is incorrect, causing apt-get to fail.  Run the command &quot;dig ftp.jp.debian.org&quot; in the host machine (not within chroot) to get the right address. Update the IP address to &quot;133.5.166.3&quot;.  Finally <code>/etc/hosts</code> should contain the following entries:</p>
+<pre><code>127.0.0.1       localhost
+::1             localhost ip6-localhost ip6-loopback
+fe00::0         ip6-localnet
+ff00::0         ip6-mcastprefix
+ff02::1         ip6-allnodes
+ff02::2         ip6-allrouters
+
+133.5.166.3 ftp.jp.debian.org  
+</code></pre>
+<h4 id="0212-apt-get-is-still-failing-"><a class="header" href="#0212-apt-get-is-still-failing-">0.2.1.2 apt-get is still failing !!!</a></h4>
+<p>OK, dont worry, download my rootfs from my github repo <a href="https://github.com/teja2010/teja2010.github.io/tree/master/old/extra">here</a>.</p>
+<h4 id="03-take-it-for-a-spin"><a class="header" href="#03-take-it-for-a-spin">0.3 Take it for a spin</a></h4>
+<p>Finally if all this works out you are ready to start a UML instance.    Just run the following command, where you provide path to rootfs as the value    against &quot;ubda&quot;, and 256MiB as the RAM. DO NOT forget the &quot;M&quot; in 256M, else    UML will try to boot with just to 256Bytes of RAM, and fail :). I usually    provide 256MiB RAM, you can go as low as 100 or 50MiB.</p>
+<pre><code>./linux ubda=net_test.rootfs.20150203 mem=256M 
+</code></pre>
+<p>You will see the VM booting, printing dmesg, bringing up the various kernel    susbsystems.    Finally when a promt to enter the password appears, enter root as the    password. Play around with the tiny VM. When the fun ends, run &quot;halt&quot; to    shutdown UML.</p>
+<h4 id="04-attach-gdb"><a class="header" href="#04-attach-gdb">0.4 Attach GDB</a></h4>
+<p>It is fun to add breakpoints and view specific code in GDB. To do this,    we have to first find the process id (PID) of the main UML process.    Run the following command to find the UML pid. The output should show multiple PIDs</p>
+<pre><code class="language-bash">$ ps aux | grep ubda
+
+0 t teja     27089 12160  2  80   0 - 17629 ptrace 16:52 pts/6    00:00:18 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 S teja     27094 27089  0  80   0 - 17629 read_e 16:52 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 S teja     27095 27089  0  80   0 - 17629 poll_s 16:52 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 S teja     27096 27089  0  80   0 - 17629 poll_s 16:52 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 t teja     27097 27089  0  80   0 -  5206 ptrace 16:52 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 t teja     27288 27089  0  80   0 -  5339 ptrace 16:52 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 t teja     27352 27089  0  80   0 -  4990 ptrace 16:52 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 t teja     27353 27089  0  80   0 -  5294 ptrace 16:52 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 t teja     29405 27089  0  80   0 -  5003 ptrace 16:53 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 t teja     29408 27089  0  80   0 -  5390 ptrace 16:53 pts/6    00:00:00 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+1 t teja     29410 27089  1  80   0 -  5717 ptrace 16:53 pts/6    00:00:08 ./linux ubda=../rootfs_pool/net_test.rootfs.20150203 mem=50M
+0 S teja     30278  3682  0  80   0 -  5500 pipe_w 17:05 pts/1    00:00:00 grep --color=auto ubda 
+</code></pre>
+<p>The third column is the process id and the fourth column is the parent PID.  In the above output PID 27089 starts and then spawns the other threads. Attach gdb to the the main parent thread, which is 27089 in the above example.</p>
+<pre><code>sudo gdb -p 27089
+</code></pre>
+<p>GDB will read the symbols from linux and attach itself. Play around, check    the backtrace, etc. All globals are now accessable.</p>
+<h3 id="05-a-private-uml-subnet"><a class="header" href="#05-a-private-uml-subnet">0.5 A private UML subnet</a></h3>
+<p>In most cases we want to play around with two UMLs connected to each other    and ignorant of the rest of the world. In such cases, the simplest way is to    connect them using the mcast transport.
+Make copies of the rootfs, for each UML instance. In this case have two    copies ready, and run them with one additional argument &quot;eth0&quot;. This will    add an additional eth0 interface. We set eth0 to mcast. i.e. the eth0    interfaces in both the instances are connected over mcast.</p>
+<pre><code>./linux ubda=net_test.rootfs.20150203_1 mem=256M eth0=mcast
+./linux ubda=net_test.rootfs.20150203_2 mem=256M eth0=mcast 
+</code></pre>
+<p>Assign addresses to the eth0 interfaces, and they are ready. You try pinging    the other UML. Command to assign address is:</p>
+<pre><code>ip address add 192.168.1.1/24 dev eth0  
+</code></pre>
+<p>The full mcast readme is    <a href="http://user-mode-linux.sourceforge.net/old/text/mcast.txt">here</a>.    It contains details to create more complex mcast networks.</p>
+<p>On assigning mcast to a eth device, each UML instance opens sockets which    listen to multicast traffic. If a multicast address is not assigned (like    above), all the instances listen to 239.192.168.1 . All packets are received    and then filtered out based on destination MAC address. The packets    can even be seen in packetdumps collected in the host OS.    Quoting from the above readme, &quot;It's basically like an ethernet    where all machines have promiscuous mode turned on&quot;. Bad for performance,    but very easy to setup.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n2-packet-rx-path-1--basic"><a class="header" href="#n2-packet-rx-path-1--basic">N2. Packet RX path 1 : Basic</a></h1>
+<p>This page describes the code flow while receiving a packet. It begins with the packet just entering the core networking code, top half and bottom half processing, basic flow through the IP and UDP layers and finally the packet is enqueued into a socket queue.</p>
+<p>Additionally hash based software packet steering across CPUs (RPS and RSS), Inter Processor Interrupts (IPI) and scheduling softirq processing is described. They can be ignored in the first read and can be revisited in later runs after gaining additional context. These sections have been marked OPTIONAL.
+NAPI will be described in later pages, all NAPI APIs are ignored now.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n21-n22-top-half-processing"><a class="header" href="#n21-n22-top-half-processing">N2.1-N2.2 Top Half Processing</a></h1>
+<h3 id="n21-enter-the-core-top-half-processing"><a class="header" href="#n21-enter-the-core-top-half-processing">N2.1 Enter the Core, top half processing</a></h3>
+<p>We assume that the driver has already picked up the packet data and has created a skb. (We will look at how drivers create skbs in the page describing NAPI). This packet needs to be sent up to the core. The kernel provides two simple function calls to do this.</p>
+<pre><code>netif_rx()
+netif_rx_ni() 
+</code></pre>
+<p>netif_rx() does two things,</p>
+<ol>
+<li>
+<p>Enqueue the packet into a queue which contains packets that need processing.
+The kernel maintains a softnet_data structure for each CPU. It is the core structure that facilitates network processing. Each softnet_data struct contains a &quot;input_pkt_queue&quot; into which packets that need to be processed will be enqueued. This queue is protected by a spinlock that is part of the queue (calls to rps_lock() and rps_unlock() are to lock/unlock the spinlock). The input_pkt_queue is of type sk_buff_head, which is used within by kernel to represent skb lists.
+Before enqueuing, if the queue length is more than <code>netdev_max_backlog</code> (whose default length is 1000), the packet is dropped. This value can be modified by changing <code>/proc/sys/net/core/netdev_max_backlog</code>.
+For each each packet drop sd-&gt;dropped is incremented. Certain numbers are maintained by softnet_data, I'll add a page describing the struct. TODO</p>
+</li>
+<li>
+<p>After successfully enqueueing the packet, netif_rx schedules softirq processing if it has not already been scheduled. The next section describes how softirq is scheduled.</p>
+</li>
+</ol>
+<p>Parts of the code have been added below. All the core networking functions are described in <code>net/core/dev.c</code>.</p>
+<pre><code class="language-c">netif_rx()
+{
+    netif_rx_internal()
+    {
+        enqueue_to_backlog()
+        {
+            // checks on queue length
+            rps_lock(sd);
+            __skb_queue_tail(&amp;sd-&gt;input_pkt_queue, skb);
+            rps_unlock(sd);
+
+            ____napi_schedule(sd, &amp;sd-&gt;backlog)
+            {
+                // if not scheduled already schedule softirq
+                __raise_softirq_irqoff(NET_RX_SOFTIRQ);
+            }
+        }
+    }
+
+}
+</code></pre>
+<p>netif_rx() and netif_rx_ni() are very similar except the later additionally begins softirq processing immediately, which will be explained in subsequent section.</p>
+<p>This ends the top half processing, bottom half was scheduled, which will undertake rest of the packet processing.</p>
+<h3 id="n22-softirqs-softirq-scheduling-optional"><a class="header" href="#n22-softirqs-softirq-scheduling-optional">N2.2 Softirqs, Softirq Scheduling [OPTIONAL]</a></h3>
+<p>One detail that I have ignored in the previous discussion is to specify which CPU the top and bottom half actually run.</p>
+<p>The top half runs in the hardware interrupt (IRQ) context, which is a kernel thread which can be on any CPU. (This description is not really true, I have a separate page planned on interrupts where this will be described in more detail. Till then this way of visualizing it is not really wrong). Say it runs on CPU0, i.e. netif_rx() is called on CPU0. The packet will be enqueued onto CPU0's input_packet_queue. The kernel thread will then schedule softirq processing on CPU0 and exit. The bottom half will also run on the same CPU. This section describes how the bottom half is scheduled by the top half and how softirq begins.</p>
+<p>Just Google what hard interrupts (IRQ) and soft interrupts (softirq) are for some background. Hardware interrupts (IRQs) will stop all processing. For interrupts that take very long to run, some work is done in IRQ and the rest is done in a softirq. Packet processing is one such task that takes very long to complete so NET_RX is the corresponding soft interrupt which takes care of packet processing.</p>
+<p>Linux currently has the following softirqs declared in <code>include/linux/interrupt.h</code></p>
+<pre><code class="language-c">enum
+{
+    HI_SOFTIRQ=0,
+    TIMER_SOFTIRQ,
+    NET_TX_SOFTIRQ,
+    NET_RX_SOFTIRQ,
+    BLOCK_SOFTIRQ,
+    IRQ_POLL_SOFTIRQ,
+    TASKLET_SOFTIRQ,
+    SCHED_SOFTIRQ,
+    HRTIMER_SOFTIRQ, /* Unused */
+    RCU_SOFTIRQ,
+
+    NR_SOFTIRQS
+
+}; 
+</code></pre>
+<p>The names are mostly indicative of the subsystem each softirq serves. During kernel initialization, a function is registered for each of these softirqs. When softirq processing is needed, this function is called.
+For example after core networking init is done, <code>net_dev_init()</code> registers <code>net_rx_action</code> and <code>net_tx_action</code> as the functions corresponding to <code>NET_RX</code> and <code>NET_TX</code>.</p>
+<pre><code class="language-c">  open_softirq(NET_TX_SOFTIRQ, net_tx_action);
+  open_softirq(NET_RX_SOFTIRQ, net_rx_action); 
+</code></pre>
+<p>A softirq is scheduled by calling <code>raise_softirq()</code>, which internally disables irqs and calls <code>__raise_softirq_irqoff()</code>. This function sets a bit corresponding to the softirq in the percpu bitmask <code>irq_stat.__softirq_pending</code>. The bitmask is used to track all pending softirqs on the CPU. This operation must be done with all interrupts are disabled on the CPU. Without interrupts disabled, the same bitmask can be overwritten by another interrupt handler, undoing the current change.</p>
+<p>Grepping for <code>ksoftirqd</code> in ps, should show multiple threads, one for each CPU. These are threads spawned during init to process pending softirqs on each of the CPUs. Periodically the scheduler will allow ksoftirqd to run, and if any of the bits are set, it's registered function is called.</p>
+<p>During packet RX, <code>net_rx_action()</code> is called.</p>
+<p>The CFS scheduler makes sure that all threads get their fair share of CPU time. So ksoftirqd and an application thread will both get their fair share. But, during softirq processing, ksoftirqd disables all irqs and the scheduler has no way of interrupting the thread. Hence all registered functions are have checks to prevent the ksoftirqd from high-jacking the CPU for too long.
+In this case, a buggy <code>net_rx_action()</code> function may be able to push packets into the socket queue but the application never will never get a chance to actually read the packets.</p>
+<p>To conclude, <code>netif_rx()</code> calls <code>__raise_softirq_irqoff(NET_RX_SOFTIRQ)</code> to schedule softirq processing on the current CPU. The ksoftirqd running on the current CPU will check the bitmask, since <code>NET_RX_SOFTIRQ</code> is pending will call <code>net_rx_action()</code></p>
+<h4 id="n221-run-softirq-now"><a class="header" href="#n221-run-softirq-now">N2.2.1 Run Softirq Now</a></h4>
+<p>Other than softirq being scheduled by the scheduler, it is sometimes necessary to kick start processing. For example when a sudden burst of packets arrive, due to delays in softirq processing, packets might be dropped. In such cases, when a burst is detected, kick-starting packet processing is helpful. In the above example, calling <code>netif_rx_ni()</code> will kick start packet processing, in addition to enqueuing the packet .</p>
+<h3 id="n23-packet-steering-rss-and-rps-optional"><a class="header" href="#n23-packet-steering-rss-and-rps-optional">N2.3 Packet Steering (RSS and RPS) [OPTIONAL]</a></h3>
+<p>RSS and RPS are techniques that help with scaling packet processing across multiple CPUs. They allow distribution of packet processing across CPUs, while restricting a flow to a single CPU. i.e. each flow is assigned a CPU and flows are distributed across CPUs.</p>
+<h4 id="n231-packet-flow-hash"><a class="header" href="#n231-packet-flow-hash">N2.3.1 Packet flow hash</a></h4>
+<p>Firstly To identify packet flows, a hash is computed based on the following 4-tuple.
+(source address, destination address, source port, destination port).
+For certain protocols that do not support ports, a tuple containing just the source and destination addresses is used to compute the hash.
+The hash is computed in <code>__skb_get_hash()</code>. After computing the hash, it is updated in skb-&gt;hash.
+Some drivers have the hardware to offload hash computation, which is then set by the driver before passing the packet to the core networking layer.</p>
+<h4 id="n232-rss-receive-side-scaling"><a class="header" href="#n232-rss-receive-side-scaling">N2.3.2 RSS: Receive Side Scaling</a></h4>
+<p>RSS acheives packet steering by configuring receive queues (usually one for each CPU), and by configuring seperate interrupts for each queue and pinning the interrupts to the specific CPU. On receiving a packet, based on it's hash the packet is put in the right queue and the corresponding interrupt is raised.</p>
+<h3 id="n233-rps-receive-packet-steering"><a class="header" href="#n233-rps-receive-packet-steering">N2.3.3 RPS: Receive Packet Steering</a></h3>
+<p>RPS is RSS in software. While pushing the packet into the core network through <code>netif_rx()</code> or <code>netif_receive_skb()</code>, a CPU is chosen for the packet based on the <code>skb-&gt;hash</code>. The packet is then enqueued into the target CPU's input_packet_queue. Since the operation must have all interrupts disabled, a softirq cannot be directly scheduled on different core. So an Inter Processor Interrupt is used to schedule softirq processing on the other core.</p>
+<p>After RSS decides to put the packet on a remote core, in the <code>rps_ipi_queued()</code> function, the target CPU's softnet struct is added to the current core's <code>sd-&gt;rps_ipi_next</code> which is a list to softnet structs for which an IPI has to be sent. During the current core's softirq processing, all the accumulated IPIs are sent to those cores by traversing the rps_ipi_next list.</p>
+<p>IPIs are actually sent by scheduling a job on a remote core by  calling <code>smp_call_function_single_async()</code> during NET_RX processing.</p>
+<pre><code class="language-c">netif_rx_internal(skb)
+{
+    cpu = get_rps_cpu(skb-&gt;dev, skb, &amp;rflow);
+    enqueue_to_backlog(skb, cpu)
+    {
+        sd = &amp;per_cpu(softnet_data, cpu);    //get remote cpu sd
+        __skb_queue_tail(&amp;sd-&gt;input_pkt_queue, skb); //enqueue
+        rps_ipi_queued(sd);        //add sd to rps_ipi_next
+    }
+} 
+</code></pre>
+<p>Kernel documentation describes these methods and also provides instructions to configure them.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n24-n25-bottom-half-processing"><a class="header" href="#n24-n25-bottom-half-processing">N2.4-N2.5 Bottom Half Processing</a></h1>
+<h3 id="n24-softirq-processing-net_rx"><a class="header" href="#n24-softirq-processing-net_rx">N2.4 Softirq processing NET_RX</a></h3>
+<p>Softirq processing was scheduled by the bottom half, and NET_RX begins. All of NET_RX processing is done in <code>net_rx_action()</code>. The logic is to process packets until one of the following events occurs:</p>
+<ol>
+<li>The packet queue is empty. In this case NET_RX softirq stops.</li>
+<li>NET_RX has been running for longer than <code>netdev_budget_usecs</code>, whose default value is 2 milliseconds.</li>
+<li>NET_RX has processed more than <code>netdev_budget</code> (fixed value of 300) packets. (We will revist this constraint while looking at NAPI)</li>
+</ol>
+<p>In cases 2 and 3, there still might be packets to process, in which case NET_RX will schedule itself before exiting, (i.e. set the NET_RX_SOFTIRQ bit before exiting), so it can process some more packets in another session. In cases 2 and 3 NET_RX processing is almost at it's limits. To indicate this <code>sd-&gt;time_squeeze</code> is incremented, so that a few parameters can be tuned. We will revisit this while discussing NAPI.</p>
+<p>Softirq processing is done with elevated privilages, which can easily cause it to high-jack the complete CPU. The above constraints are to make sure that softirq processing allows the applications run. If the softirq were to high-jack the CPU, the user application would never run, and the end user would see applications not responding.</p>
+<p>The actual function that dequeues packets from <code>input_pkt_queue</code> and begins processing them is <code>process_backlog()</code>. After dequeueing the packet it calls <code>__netif_receive_skb()</code> which pushes the packet up into the protocol stacks.</p>
+<p>For now ignore the napi part of <code>net_rx_action()</code>, it calls <code>napi_poll()</code> which will call the registered poll function <code>n-&gt;poll()</code>. The poll function is set to process_backlog. For now believe me even if it does not make much sense. It will make sense one we look at the NAPI framework.</p>
+<pre><code class="language-c">net_rx_action()
+{
+    unsigned long time_limit = jiffies +
+                               usecs_to_jiffies(netdev_budget_usecs);
+    int budget = netdev_budget;
+
+    budget -= napi_poll(n, &amp;repoll)
+    {
+        work = n-&gt;poll(n, weight) // same as process_backlog
+        process_backlog(n, weight)
+        {
+            skb_queue_splice_tail_init(&amp;sd-&gt;input_pkt_queue,
+                                       &amp;sd-&gt;process_queue);
+            while ((skb = __skb_dequeue(&amp;sd-&gt;process_queue)))
+                __netif_receive_skb(skb);
+        }
+    }
+    // time and budget constraints
+    if (unlikely(budget &lt;= 0 ||
+                 time_after_eq(jiffies, time_limit))) {
+        sd-&gt;time_squeeze++;
+        break;
+    }
+} 
+</code></pre>
+<h3 id="n25-__netif_receive_skb_core"><a class="header" href="#n25-__netif_receive_skb_core">N2.5 __netif_receive_skb_core()</a></h3>
+<p><code>__netif_receive_skb()</code> internally calls <code>__netif_receive_skb_core()</code> for the main packet processing. <code>__netif_receive_skb_core()</code> is large function which handles multiple ways in which a packet can be processed. This section tries to cover some of them.</p>
+<ol>
+<li>
+<p>skb timestamp:
+<code>skb-&gt;tstamp</code> field is filled with the time at which the kernel began processing the packet. This information is used in various protocol stacks. One example is it's usage by AF_PACKET, which is the protocol tools like wireshark use to collect packet dumps. AF_PACKET extracts the timestamp from <code>skb-&gt;tstamp</code> and provides to userspace as part of struct tpacket_uhdr. This timestamp is the one that wireshark reports as the time at which the packet was received.</p>
+</li>
+<li>
+<p>Increment softnet stat:
+<code>sd-&gt;processed</code> is incremented, which is representative of the number of packets that were processed on a particular core. The packets might be dropped by the kernel for various reasons later, but they were processed on a particular core.</p>
+</li>
+<li>
+<p>packet types:
+At this point the packet is sent to all modules that want to process packets. The list of packet types that the kernel supports is defined in <code>include/linux/netdevice.h</code>, just above PTYPE_HASH_SIZE macro definition. Other than the ones described above, promiscuous packet types (processes packets irrespective of protocol) like AF_PACKET and custom packet_types added by various drivers and subsystems are all supported. Each of them fill up a packet_type structure and register it by calling <code>dev_add_pack()</code>. Based on the type and netdevice the struct is added to the respective packet_type list. <code>__netif_receive_skb()</code> based on the skb's protocol and netdevice traverses the particular list, delivering the packet by calling <code>packet_type-&gt;func()</code>.
+All registered packet_types can be seen at <code>/proc/net/ptype</code>.</p>
+</li>
+</ol>
+<pre><code class="language-bash">$ cat /proc/net/ptype
+
+Type Device      Function
+ALL           tpacket_rcv
+0800          ip_rcv
+0011          llc_rcv [llc]
+0004          llc_rcv [llc]
+0806          arp_rcv
+86dd          ipv6_rcv 
+</code></pre>
+<p>The ptype lists are described below:</p>
+<ol>
+<li>
+<p><code>ptype_all</code>: It is a global variable containing promiscuous packet_types irrespective of netdevice. Each AF_PACKET socket adds a packet_type to this list. packet_rcv() is called to pass the packet to userspace.</p>
+</li>
+<li>
+<p><code>skb-&gt;dev-&gt;ptype_all</code>: Per netdevice list containing promiscuous packet_types specific to the netdevice. TODO: find an example.</p>
+</li>
+<li>
+<p><code>ptype_base</code>: It is a global hash table, with key as the last 16bits of <code>packet_type-&gt;type</code> and value as a list of packet_type. For example <code>ip_packet_type</code> will be added to ptype_base[00], with <code>ptype-&gt;func</code> set to ip_rcv. While traversing, based on <code>skb-&gt;protocol</code> 's last 16bits, a list is chosen and the packet is delivered to all packet_types whose type matches skb-&gt;protocol.</p>
+</li>
+<li>
+<p><code>skb-&gt;dev-&gt;ptype_specific</code>: Per netdevice list containing protocol specific packet types. The packet is delivered to if the skb-&gt;protocol matches ptype_type. Mellanox for example adds a <code>packet_type</code> with type set to <code>ETH_P_IP</code>, to process all UDP packets received by the driver. See <code>mlx5e_test_loopback()</code>. The name suggests some sort of loopback test. I am not really sure how. IDK.</p>
+<p>One important detail is that the same packet will be sent to all applicable packet_type-s. Before delivering the skb, <code>skb-&gt;users</code> is incremented. <code>skb-&gt;users</code> is the number users that are (ONLY) reading the packet. Each module after completing necessary processing call <code>kfree_skb()</code>, which will first decrement users, and then free the skb only if skb-&gt;users hits zero. So the same skb pointer is shared by all the modules, and the last user will free the skb.</p>
+</li>
+<li>
+<p>RX handler:
+Drivers can register a rx handler, which will be called if a packet is received on the device. The <code>rx_handler</code> can return values based on which packet processing can stop or continue. If RX_HANDLER_CONSUMED is returned, the driver has completed processing the packet and <code>__netif_receive_skb_core()</code> can stop processing further. If RX_HANDLER_PASS is returned, skb processing will continue. The other values supported and ways to register/unregister a rx handler are available in <code>include/linux/netdevice.h</code> , above enum rx_handler_result.
+For example if the driver wants to support a custom protocol header over IP, a rx handler can be registered which will process the outer header and return RX_HANDLER_PASS. Futher IP processing can continue when the packet is delivered to ip_packet_type. Note that the packet dumps collected will still contain the custom header. (It is actually better to return RX_HANDLER_CONSUMED and enqueue the packet by calling netif_receive_skb. This will allow the driver to run the packet through GRO offload engine and to distribute packet processing with RPS. Ignore this comment for now.)</p>
+</li>
+<li>
+<p>Ingress Qdisc processing. We will look at it in a different page, after we have looking at Qdiscs and TX. Similar to RX handler, certain registered functions run on the packet and based on the return value, the processing can stop or continue. But unlike a RX handler, the functions to run are added from userspace.</p>
+</li>
+</ol>
+<p>The order in which the <code>__netif_receive_skb_core()</code> delivers (if applicable) the packets is:</p>
+<ul>
+<li>Promiscuous packet_type</li>
+<li>Ingress qdisc</li>
+<li>RX handler</li>
+<li>Protocol specific packet_type</li>
+</ul>
+<p>Finally if if none of them consume the packet, the packet is dropped and netdevice stats are incremented.</p>
+<pre><code class="language-c">__netif_receive_skb_core()
+{
+    net_timestamp_check(!netdev_tstamp_prequeue, skb)
+    {
+        __net_timestamp(SKB);
+    }
+
+    __this_cpu_inc(softnet_data.processed);
+    
+    //Promiscuous packet_type
+    list_for_each_entry_rcu(ptype, &amp;ptype_all, list) {
+        if (pt_prev)
+            ret = deliver_skb(skb, pt_prev, orig_dev);
+        pt_prev = ptype;
+    }
+    list_for_each_entry_rcu(ptype, &amp;skb-&gt;dev-&gt;ptype_all, list) {
+        if (pt_prev)
+            ret = deliver_skb(skb, pt_prev, orig_dev);
+        pt_prev = ptype;
+    }
+    
+    //Ingress qdisc
+    skb = sch_handle_ingress(skb, &amp;pt_prev, &amp;ret, orig_dev);
+    
+    //RX handler
+    rx_handler = rcu_dereference(skb-&gt;dev-&gt;rx_handler);
+    switch (rx_handler(&amp;skb)) {
+    case RX_HANDLER_CONSUMED:
+        ret = NET_RX_SUCCESS;
+        goto out;
+    case RX_HANDLER_PASS:
+        break;
+    default:
+        BUG();
+    }
+    
+    //Protocol specific packet_type
+    deliver_ptype_list_skb(skb, &amp;pt_prev, orig_dev, type,
+                           &amp;ptype_base[ntohs(type) &amp; PTYPE_HASH_MASK]);
+    deliver_ptype_list_skb(skb, &amp;pt_prev, orig_dev, type,
+                           &amp;skb-&gt;dev-&gt;ptype_specific);
+
+} 
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n26-n27-ip-and-udp-processing"><a class="header" href="#n26-n27-ip-and-udp-processing">N2.6-N2.7 IP and UDP Processing</a></h1>
+<h3 id="n26-ip-layer"><a class="header" href="#n26-ip-layer">N2.6 IP layer</a></h3>
+<p>Assuming the skb is an IP packet, the skb will enter <code>ip_rcv()</code>, which then calls <code>ip_rcv_core()</code>. <code>ip_rcv_core</code> validates the IP header (checksum, checks on ip header length, etc), updates ip stats and based on the transport header set in the IP header will set <code>skb-&gt;transport_header</code>.</p>
+<p>The protocol stacks maintain counts when packets enter and counts of the number of packets that were dropped. These numbers can be seen at <code>/proc/net/snmp</code>. The correspnding enum can be found at <code>include/uapi/linux/snmp.h</code>.</p>
+<pre><code>ip_rcv_core()
+{
+    __IP_UPD_PO_STATS(net, IPSTATS_MIB_IN, skb-&gt;len);
+
+    iph = ip_hdr(skb);
+    
+    if (unlikely(ip_fast_csum((u8 *)iph, iph-&gt;ihl)))
+        goto csum_error;
+    
+    skb-&gt;transport_header = skb-&gt;network_header + iph-&gt;ihl*4;
+    return skb;
+
+csum_error:
+    __IP_INC_STATS(net, IPSTATS_MIB_CSUMERRORS);
+    return NULL;
+}
+</code></pre>
+<p>ip_rcv then sends the packet through the netfilter PREROUTING chain. The netfilter subsystem allows the userspace to filter/modify/drop packets based on the packet's attributes. Tools iptables/ip6tables are used to add/remove IP/IPv6 rules. The netfilter subsystem contains 5 chains, PREROUTING, INPUT, FORWARD, OUTPUT and POSTROUTING. Each chain contains rules and corresponding actions. If a rule matches a packet, the corresponding action is taken. We will look at them in a separate page dedicated to iptables. An easy example is that it is used to act as a firewall to drop unwanted traffic.</p>
+<pre><code>	                transport layer (TCP/UDP)
+
+   ip_local_deliver_finish()
+	        🠕                                   |
+	      INPUT                               OUTPUT
+	        |                                   🠗
+	ROUTING DECISION  -----  FORWARDING  -----  +
+	        🠕                                   |
+	    PREROUTING                         POSTROUTING
+	        |                                   🠗
+	     ip_rcv()
+
+	                     CORE NETWORKING 
+</code></pre>
+<p>While receiving a packet, at the end of <code>ip_rcv()</code> it enters the PREROUTING chain, at the end of which it enters <code>ip_rcv_finish()</code>. Based on the packet's ip address, a routing decision is taken if the packet should be locally consumed or if it is to forwarded to a different system. (I'll describe this in more detail in a separate page). If the packet should be locally consumed <code>ip_local_deliver()</code> is called. The packet then enters the INPUT chain, and finally comes out at <code>ip_local_deliver_finish()</code>.</p>
+<p>Based on the protocol set in the IP header, the corresponding protocol handler is called. If a transport protocol is supported over IP, the corresponding handler is registered by calling inet_add_protocol().</p>
+<p>Yes, this section skips a lot of content, I'll add a separate sections for IP processing, netfilter (esp. nftables) and routing.</p>
+<h3 id="n27-udp-layer"><a class="header" href="#n27-udp-layer">N2.7 UDP layer</a></h3>
+<p>If the packet is an UDP packet, <code>udp_rcv</code> is the protocol handler called, which internally calls <code>__udp4_lib_rcv()</code>. First the packet header is validated, pseudo ip checksum is checked and then if the packet is unicast, based on the port numbers the socket is looked up, and then <code>udp_unicast_rcv_skb()</code> is called, which then calls <code>udp_queue_rcv_skb()</code>.</p>
+<p><code>udp_queue_rcv_skb()</code> checks if the udp socket has a registered function to handle encapsulated packets. If the handler is found the corresponding handler is called, which processes the packet further. For example in case of XFRM encapsulation <code>xfrm4_udp_encap_rcv()</code> is registered as the handler. (XRFM short for transform, adds support to add encrypted tunnels in the kernel).</p>
+<p>If no encap_rcv handler is found, full udp checksum is done and <code>__udp_queue_rcv_skb()</code> is called. Internally it calls <code>__udp_enqueue_schedule_skb()</code> which checks if the sk memory is sufficient to add the packet and then calls <code>__skb_queue_tail()</code> to enqueue the packet into <code>sk_receive_queue</code>. If the application has called the recv() system call and is waiting for the packet the process moves to __TASK_STOPPED state and the scheduler no longer schedules it. <code>sk-&gt;sk_data_ready(sk)</code> is called so that it's state is set to TASK_INTERRUPTIBLE, and the scheduler then schedules the application. On waking up, the packet is dequeued from the queue and the application recv()s the packet data. Receiving a packet and socket calls will be described in a separate page.</p>
+<pre><code class="language-c">__udp4_lib_rcv()
+{
+    uh   = udp_hdr(skb);
+    if (udp4_csum_init(skb, uh, proto)) //pseudo ip csum
+        goto csum_error;
+
+    sk = __udp4_lib_lookup_skb(skb, uh-&gt;source, uh-&gt;dest, udptable);
+    if (sk) {
+        return udp_unicast_rcv_skb(sk, skb, uh)
+        {
+            ret = udp_queue_rcv_skb(sk, skb);
+                  //continued below..
+        }
+    }
+
+}
+
+udp_queue_rcv_skb(sk, skb)
+{
+    struct udp_sock *up = udp_sk(sk);
+
+    encap_rcv = READ_ONCE(up-&gt;encap_rcv);
+    if (encap_rcv) {
+        if (udp_lib_checksum_complete(skb))
+            goto csum_error;
+    
+        ret = encap_rcv(sk, skb);
+    }
+    
+    udp_lib_checksum_complete(skb);
+    return __udp_queue_rcv_skb(sk, skb)
+    {
+        rc = __udp_enqueue_schedule_skb(sk, skb)
+        {
+    
+            rmem = atomic_read(&amp;sk-&gt;sk_rmem_alloc);
+            if (rmem &gt; sk-&gt;sk_rcvbuf)
+                goto drop;
+    
+            __skb_queue_tail(&amp;sk-&gt;sk_receive_queue, skb);
+            sk-&gt;sk_data_ready(sk);
+            // == sock_def_readable()
+        }
+    }
+
+} 
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n2-packet-tx-path-1--basic"><a class="header" href="#n2-packet-tx-path-1--basic">N2. Packet TX path 1 : Basic</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n3-wip-socket-programming-bts"><a class="header" href="#n3-wip-socket-programming-bts">N3. (WIP) Socket Programming BTS</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="m-miscellaneous"><a class="header" href="#m-miscellaneous">M. Miscellaneous</a></h1>

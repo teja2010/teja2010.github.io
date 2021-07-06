@@ -1,0 +1,301 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>N2.1-N2.3 Top Half Processing - teja&#x27;s notes</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+                <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/2_1-3_top_half_processing.html" class="active">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_6-7_ip_and_udp_processing.html">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="../M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">teja&#x27;s notes</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="n21-n22-top-half-processing"><a class="header" href="#n21-n22-top-half-processing">N2.1-N2.2 Top Half Processing</a></h1>
+<h3 id="n21-enter-the-core-top-half-processing"><a class="header" href="#n21-enter-the-core-top-half-processing">N2.1 Enter the Core, top half processing</a></h3>
+<p>We assume that the driver has already picked up the packet data and has created a skb. (We will look at how drivers create skbs in the page describing NAPI). This packet needs to be sent up to the core. The kernel provides two simple function calls to do this.</p>
+<pre><code>netif_rx()
+netif_rx_ni() 
+</code></pre>
+<p>netif_rx() does two things,</p>
+<ol>
+<li>
+<p>Enqueue the packet into a queue which contains packets that need processing.
+The kernel maintains a softnet_data structure for each CPU. It is the core structure that facilitates network processing. Each softnet_data struct contains a &quot;input_pkt_queue&quot; into which packets that need to be processed will be enqueued. This queue is protected by a spinlock that is part of the queue (calls to rps_lock() and rps_unlock() are to lock/unlock the spinlock). The input_pkt_queue is of type sk_buff_head, which is used within by kernel to represent skb lists.
+Before enqueuing, if the queue length is more than <code>netdev_max_backlog</code> (whose default length is 1000), the packet is dropped. This value can be modified by changing <code>/proc/sys/net/core/netdev_max_backlog</code>.
+For each each packet drop sd-&gt;dropped is incremented. Certain numbers are maintained by softnet_data, I'll add a page describing the struct. TODO</p>
+</li>
+<li>
+<p>After successfully enqueueing the packet, netif_rx schedules softirq processing if it has not already been scheduled. The next section describes how softirq is scheduled.</p>
+</li>
+</ol>
+<p>Parts of the code have been added below. All the core networking functions are described in <code>net/core/dev.c</code>.</p>
+<pre><code class="language-c">netif_rx()
+{
+    netif_rx_internal()
+    {
+        enqueue_to_backlog()
+        {
+            // checks on queue length
+            rps_lock(sd);
+            __skb_queue_tail(&amp;sd-&gt;input_pkt_queue, skb);
+            rps_unlock(sd);
+
+            ____napi_schedule(sd, &amp;sd-&gt;backlog)
+            {
+                // if not scheduled already schedule softirq
+                __raise_softirq_irqoff(NET_RX_SOFTIRQ);
+            }
+        }
+    }
+
+}
+</code></pre>
+<p>netif_rx() and netif_rx_ni() are very similar except the later additionally begins softirq processing immediately, which will be explained in subsequent section.</p>
+<p>This ends the top half processing, bottom half was scheduled, which will undertake rest of the packet processing.</p>
+<h3 id="n22-softirqs-softirq-scheduling-optional"><a class="header" href="#n22-softirqs-softirq-scheduling-optional">N2.2 Softirqs, Softirq Scheduling [OPTIONAL]</a></h3>
+<p>One detail that I have ignored in the previous discussion is to specify which CPU the top and bottom half actually run.</p>
+<p>The top half runs in the hardware interrupt (IRQ) context, which is a kernel thread which can be on any CPU. (This description is not really true, I have a separate page planned on interrupts where this will be described in more detail. Till then this way of visualizing it is not really wrong). Say it runs on CPU0, i.e. netif_rx() is called on CPU0. The packet will be enqueued onto CPU0's input_packet_queue. The kernel thread will then schedule softirq processing on CPU0 and exit. The bottom half will also run on the same CPU. This section describes how the bottom half is scheduled by the top half and how softirq begins.</p>
+<p>Just Google what hard interrupts (IRQ) and soft interrupts (softirq) are for some background. Hardware interrupts (IRQs) will stop all processing. For interrupts that take very long to run, some work is done in IRQ and the rest is done in a softirq. Packet processing is one such task that takes very long to complete so NET_RX is the corresponding soft interrupt which takes care of packet processing.</p>
+<p>Linux currently has the following softirqs declared in <code>include/linux/interrupt.h</code></p>
+<pre><code class="language-c">enum
+{
+    HI_SOFTIRQ=0,
+    TIMER_SOFTIRQ,
+    NET_TX_SOFTIRQ,
+    NET_RX_SOFTIRQ,
+    BLOCK_SOFTIRQ,
+    IRQ_POLL_SOFTIRQ,
+    TASKLET_SOFTIRQ,
+    SCHED_SOFTIRQ,
+    HRTIMER_SOFTIRQ, /* Unused */
+    RCU_SOFTIRQ,
+
+    NR_SOFTIRQS
+
+}; 
+</code></pre>
+<p>The names are mostly indicative of the subsystem each softirq serves. During kernel initialization, a function is registered for each of these softirqs. When softirq processing is needed, this function is called.
+For example after core networking init is done, <code>net_dev_init()</code> registers <code>net_rx_action</code> and <code>net_tx_action</code> as the functions corresponding to <code>NET_RX</code> and <code>NET_TX</code>.</p>
+<pre><code class="language-c">  open_softirq(NET_TX_SOFTIRQ, net_tx_action);
+  open_softirq(NET_RX_SOFTIRQ, net_rx_action); 
+</code></pre>
+<p>A softirq is scheduled by calling <code>raise_softirq()</code>, which internally disables irqs and calls <code>__raise_softirq_irqoff()</code>. This function sets a bit corresponding to the softirq in the percpu bitmask <code>irq_stat.__softirq_pending</code>. The bitmask is used to track all pending softirqs on the CPU. This operation must be done with all interrupts are disabled on the CPU. Without interrupts disabled, the same bitmask can be overwritten by another interrupt handler, undoing the current change.</p>
+<p>Grepping for <code>ksoftirqd</code> in ps, should show multiple threads, one for each CPU. These are threads spawned during init to process pending softirqs on each of the CPUs. Periodically the scheduler will allow ksoftirqd to run, and if any of the bits are set, it's registered function is called.</p>
+<p>During packet RX, <code>net_rx_action()</code> is called.</p>
+<p>The CFS scheduler makes sure that all threads get their fair share of CPU time. So ksoftirqd and an application thread will both get their fair share. But, during softirq processing, ksoftirqd disables all irqs and the scheduler has no way of interrupting the thread. Hence all registered functions are have checks to prevent the ksoftirqd from high-jacking the CPU for too long.
+In this case, a buggy <code>net_rx_action()</code> function may be able to push packets into the socket queue but the application never will never get a chance to actually read the packets.</p>
+<p>To conclude, <code>netif_rx()</code> calls <code>__raise_softirq_irqoff(NET_RX_SOFTIRQ)</code> to schedule softirq processing on the current CPU. The ksoftirqd running on the current CPU will check the bitmask, since <code>NET_RX_SOFTIRQ</code> is pending will call <code>net_rx_action()</code></p>
+<h4 id="n221-run-softirq-now"><a class="header" href="#n221-run-softirq-now">N2.2.1 Run Softirq Now</a></h4>
+<p>Other than softirq being scheduled by the scheduler, it is sometimes necessary to kick start processing. For example when a sudden burst of packets arrive, due to delays in softirq processing, packets might be dropped. In such cases, when a burst is detected, kick-starting packet processing is helpful. In the above example, calling <code>netif_rx_ni()</code> will kick start packet processing, in addition to enqueuing the packet .</p>
+<h3 id="n23-packet-steering-rss-and-rps-optional"><a class="header" href="#n23-packet-steering-rss-and-rps-optional">N2.3 Packet Steering (RSS and RPS) [OPTIONAL]</a></h3>
+<p>RSS and RPS are techniques that help with scaling packet processing across multiple CPUs. They allow distribution of packet processing across CPUs, while restricting a flow to a single CPU. i.e. each flow is assigned a CPU and flows are distributed across CPUs.</p>
+<h4 id="n231-packet-flow-hash"><a class="header" href="#n231-packet-flow-hash">N2.3.1 Packet flow hash</a></h4>
+<p>Firstly To identify packet flows, a hash is computed based on the following 4-tuple.
+(source address, destination address, source port, destination port).
+For certain protocols that do not support ports, a tuple containing just the source and destination addresses is used to compute the hash.
+The hash is computed in <code>__skb_get_hash()</code>. After computing the hash, it is updated in skb-&gt;hash.
+Some drivers have the hardware to offload hash computation, which is then set by the driver before passing the packet to the core networking layer.</p>
+<h4 id="n232-rss-receive-side-scaling"><a class="header" href="#n232-rss-receive-side-scaling">N2.3.2 RSS: Receive Side Scaling</a></h4>
+<p>RSS acheives packet steering by configuring receive queues (usually one for each CPU), and by configuring seperate interrupts for each queue and pinning the interrupts to the specific CPU. On receiving a packet, based on it's hash the packet is put in the right queue and the corresponding interrupt is raised.</p>
+<h3 id="n233-rps-receive-packet-steering"><a class="header" href="#n233-rps-receive-packet-steering">N2.3.3 RPS: Receive Packet Steering</a></h3>
+<p>RPS is RSS in software. While pushing the packet into the core network through <code>netif_rx()</code> or <code>netif_receive_skb()</code>, a CPU is chosen for the packet based on the <code>skb-&gt;hash</code>. The packet is then enqueued into the target CPU's input_packet_queue. Since the operation must have all interrupts disabled, a softirq cannot be directly scheduled on different core. So an Inter Processor Interrupt is used to schedule softirq processing on the other core.</p>
+<p>After RSS decides to put the packet on a remote core, in the <code>rps_ipi_queued()</code> function, the target CPU's softnet struct is added to the current core's <code>sd-&gt;rps_ipi_next</code> which is a list to softnet structs for which an IPI has to be sent. During the current core's softirq processing, all the accumulated IPIs are sent to those cores by traversing the rps_ipi_next list.</p>
+<p>IPIs are actually sent by scheduling a job on a remote core by  calling <code>smp_call_function_single_async()</code> during NET_RX processing.</p>
+<pre><code class="language-c">netif_rx_internal(skb)
+{
+    cpu = get_rps_cpu(skb-&gt;dev, skb, &amp;rflow);
+    enqueue_to_backlog(skb, cpu)
+    {
+        sd = &amp;per_cpu(softnet_data, cpu);    //get remote cpu sd
+        __skb_queue_tail(&amp;sd-&gt;input_pkt_queue, skb); //enqueue
+        rps_ipi_queued(sd);        //add sd to rps_ipi_next
+    }
+} 
+</code></pre>
+<p>Kernel documentation describes these methods and also provides instructions to configure them.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../N/2_Packet_RX_Basic.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../N/2_4-5_bottom_half_processing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../N/2_Packet_RX_Basic.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../N/2_4-5_bottom_half_processing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

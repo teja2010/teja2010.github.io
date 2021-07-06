@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="N_Linux_Networking.html" class="active">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="Appendix.html">A. Appendix</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="N_Linux_Networking.html" class="active">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/2_1-3_top_half_processing.html">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="N/2_6-7_ip_and_udp_processing.html">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="Appendix.html">A. Appendix</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -159,7 +159,7 @@
 <h3 id="n02-visualizing-packet-processing"><a class="header" href="#n02-visualizing-packet-processing">N.0.2 Visualizing Packet Processing</a></h3>
 <p>This is not a standard way of visualizing, but I think this is the right way to visualize packet processing and cant visualize in any other way. Receiving packets is in the bottom to top direction. And transmitting packets is in the top to bottom direction. Forwarding to a different layer is left to right.
 While receiving packets, drivers receive data first. The bottom most layer where the drivers stay. The drivers hand over the packet to the core network. The core networking code then passes it over to the right protocol stack(s). After the protocol stack processing is done, it enters socket layer, from where the user picks up the packet. </p>
-<img src="imgs/visualize_pkt_proc.svg" alt="visualize"  />
+<img src="imgs/visualize_pkt_proc.png" alt="visualize"  />
 <h4 id="n021-top-half-and-bottom-half-processing"><a class="header" href="#n021-top-half-and-bottom-half-processing">N.0.2.1 Top half and bottom half processing</a></h4>
 <p>The path from the driver to the socket queue is divided into two halves.</p>
 <p>The top half happens first, the driver gets the raw packet and creates a skb. After an skb is created it calls functions to hand it over to the core networking code. The top half before exiting schedules the bottom half. Top half runs per packet and exits.</p>
@@ -171,6 +171,7 @@ While receiving packets, drivers receive data first. The bottom most layer where
 <li>Softirq processing done while receiving packets is also called NET_RX processing. I can use this as well. :)</li>
 <li>Core network code runs in both these halves. But most of it is in softirq processing. </li>
 </ol>
+<p>With this, basic information we can start describing the RX and TX processing paths.</p>
 
                     </main>
 

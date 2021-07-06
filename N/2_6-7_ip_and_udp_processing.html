@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Cache Side Channel Attacks - teja&#x27;s notes</title>
+        <title>N2.6-N2.7 IP and UDP Processing - teja&#x27;s notes</title>
                 
 
         <!-- Custom HTML head -->
@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/2_1-3_top_half_processing.html">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_6-7_ip_and_udp_processing.html">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="../M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="../M/2_Cache_Side_Channel_Attacks.html" class="active">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/2_1-3_top_half_processing.html">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_6-7_ip_and_udp_processing.html" class="active">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="../M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -145,17 +145,106 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="cache-side-channel-attacks"><a class="header" href="#cache-side-channel-attacks">Cache Side Channel Attacks</a></h1>
+                        <h1 id="n26-n27-ip-and-udp-processing"><a class="header" href="#n26-n27-ip-and-udp-processing">N2.6-N2.7 IP and UDP Processing</a></h1>
+<h3 id="n26-ip-layer"><a class="header" href="#n26-ip-layer">N2.6 IP layer</a></h3>
+<p>Assuming the skb is an IP packet, the skb will enter <code>ip_rcv()</code>, which then calls <code>ip_rcv_core()</code>. <code>ip_rcv_core</code> validates the IP header (checksum, checks on ip header length, etc), updates ip stats and based on the transport header set in the IP header will set <code>skb-&gt;transport_header</code>.</p>
+<p>The protocol stacks maintain counts when packets enter and counts of the number of packets that were dropped. These numbers can be seen at <code>/proc/net/snmp</code>. The correspnding enum can be found at <code>include/uapi/linux/snmp.h</code>.</p>
+<pre><code>ip_rcv_core()
+{
+    __IP_UPD_PO_STATS(net, IPSTATS_MIB_IN, skb-&gt;len);
+
+    iph = ip_hdr(skb);
+    
+    if (unlikely(ip_fast_csum((u8 *)iph, iph-&gt;ihl)))
+        goto csum_error;
+    
+    skb-&gt;transport_header = skb-&gt;network_header + iph-&gt;ihl*4;
+    return skb;
+
+csum_error:
+    __IP_INC_STATS(net, IPSTATS_MIB_CSUMERRORS);
+    return NULL;
+}
+</code></pre>
+<p>ip_rcv then sends the packet through the netfilter PREROUTING chain. The netfilter subsystem allows the userspace to filter/modify/drop packets based on the packet's attributes. Tools iptables/ip6tables are used to add/remove IP/IPv6 rules. The netfilter subsystem contains 5 chains, PREROUTING, INPUT, FORWARD, OUTPUT and POSTROUTING. Each chain contains rules and corresponding actions. If a rule matches a packet, the corresponding action is taken. We will look at them in a separate page dedicated to iptables. An easy example is that it is used to act as a firewall to drop unwanted traffic.</p>
+<pre><code>	                transport layer (TCP/UDP)
+
+   ip_local_deliver_finish()
+	        🠕                                   |
+	      INPUT                               OUTPUT
+	        |                                   🠗
+	ROUTING DECISION  -----  FORWARDING  -----  +
+	        🠕                                   |
+	    PREROUTING                         POSTROUTING
+	        |                                   🠗
+	     ip_rcv()
+
+	                     CORE NETWORKING 
+</code></pre>
+<p>While receiving a packet, at the end of <code>ip_rcv()</code> it enters the PREROUTING chain, at the end of which it enters <code>ip_rcv_finish()</code>. Based on the packet's ip address, a routing decision is taken if the packet should be locally consumed or if it is to forwarded to a different system. (I'll describe this in more detail in a separate page). If the packet should be locally consumed <code>ip_local_deliver()</code> is called. The packet then enters the INPUT chain, and finally comes out at <code>ip_local_deliver_finish()</code>.</p>
+<p>Based on the protocol set in the IP header, the corresponding protocol handler is called. If a transport protocol is supported over IP, the corresponding handler is registered by calling inet_add_protocol().</p>
+<p>Yes, this section skips a lot of content, I'll add a separate sections for IP processing, netfilter (esp. nftables) and routing.</p>
+<h3 id="n27-udp-layer"><a class="header" href="#n27-udp-layer">N2.7 UDP layer</a></h3>
+<p>If the packet is an UDP packet, <code>udp_rcv</code> is the protocol handler called, which internally calls <code>__udp4_lib_rcv()</code>. First the packet header is validated, pseudo ip checksum is checked and then if the packet is unicast, based on the port numbers the socket is looked up, and then <code>udp_unicast_rcv_skb()</code> is called, which then calls <code>udp_queue_rcv_skb()</code>.</p>
+<p><code>udp_queue_rcv_skb()</code> checks if the udp socket has a registered function to handle encapsulated packets. If the handler is found the corresponding handler is called, which processes the packet further. For example in case of XFRM encapsulation <code>xfrm4_udp_encap_rcv()</code> is registered as the handler. (XRFM short for transform, adds support to add encrypted tunnels in the kernel).</p>
+<p>If no encap_rcv handler is found, full udp checksum is done and <code>__udp_queue_rcv_skb()</code> is called. Internally it calls <code>__udp_enqueue_schedule_skb()</code> which checks if the sk memory is sufficient to add the packet and then calls <code>__skb_queue_tail()</code> to enqueue the packet into <code>sk_receive_queue</code>. If the application has called the recv() system call and is waiting for the packet the process moves to __TASK_STOPPED state and the scheduler no longer schedules it. <code>sk-&gt;sk_data_ready(sk)</code> is called so that it's state is set to TASK_INTERRUPTIBLE, and the scheduler then schedules the application. On waking up, the packet is dequeued from the queue and the application recv()s the packet data. Receiving a packet and socket calls will be described in a separate page.</p>
+<pre><code class="language-c">__udp4_lib_rcv()
+{
+    uh   = udp_hdr(skb);
+    if (udp4_csum_init(skb, uh, proto)) //pseudo ip csum
+        goto csum_error;
+
+    sk = __udp4_lib_lookup_skb(skb, uh-&gt;source, uh-&gt;dest, udptable);
+    if (sk) {
+        return udp_unicast_rcv_skb(sk, skb, uh)
+        {
+            ret = udp_queue_rcv_skb(sk, skb);
+                  //continued below..
+        }
+    }
+
+}
+
+udp_queue_rcv_skb(sk, skb)
+{
+    struct udp_sock *up = udp_sk(sk);
+
+    encap_rcv = READ_ONCE(up-&gt;encap_rcv);
+    if (encap_rcv) {
+        if (udp_lib_checksum_complete(skb))
+            goto csum_error;
+    
+        ret = encap_rcv(sk, skb);
+    }
+    
+    udp_lib_checksum_complete(skb);
+    return __udp_queue_rcv_skb(sk, skb)
+    {
+        rc = __udp_enqueue_schedule_skb(sk, skb)
+        {
+    
+            rmem = atomic_read(&amp;sk-&gt;sk_rmem_alloc);
+            if (rmem &gt; sk-&gt;sk_rcvbuf)
+                goto drop;
+    
+            __skb_queue_tail(&amp;sk-&gt;sk_receive_queue, skb);
+            sk-&gt;sk_data_ready(sk);
+            // == sock_def_readable()
+        }
+    }
+
+} 
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="../M/1_CSE222a_Notes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="../N/2_4-5_bottom_half_processing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="../Appendix.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="../N/3_Packet_TX_Basic.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -165,11 +254,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="../M/1_CSE222a_Notes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="../N/2_4-5_bottom_half_processing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="../Appendix.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="../N/3_Packet_TX_Basic.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>

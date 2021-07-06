@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_qemu.html" class="active">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="../M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_qemu.html" class="active">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/2_1-3_top_half_processing.html">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_6-7_ip_and_udp_processing.html">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="../M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -145,7 +145,104 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="setup-qemu"><a class="header" href="#setup-qemu">Setup Qemu</a></h1>
+                        <h1 id="n1-setup-qemu"><a class="header" href="#n1-setup-qemu">N1 Setup Qemu</a></h1>
+<p>These notes are based on the following videos:</p>
+<ol>
+<li><a href="https://www.youtube.com/watch?v=kQFYfIXhahs">Create an Arch Linux QEMU installation</a>: Installing arch is too involved, so I chose to install ubuntu.</li>
+<li><a href="https://www.youtube.com/watch?v=unizGCcZg3Y">GDB on the Linux Kernel</a>. The script below is the same as the one described in this video.</li>
+</ol>
+<p>Like described in the article on UML Setup, I like to learn by running a VM and attaching it via GDB. KVM and QEMU are the newer well supported VM solutions. This page is a tutorial on how to launch a debug instance in QEMU and attach to it using GDB.</p>
+<p>Install QEMU (check Qemu download page for distribution specific instructions). </p>
+<h3 id="n11-setup--build-a-kernel-with-debug-symbols"><a class="header" href="#n11-setup--build-a-kernel-with-debug-symbols">N1.1 Setup &amp; build a kernel with debug symbols</a></h3>
+<p>Clone the kernel from kernel git repo. </p>
+<pre><code class="language-shell">git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
+cd linux 
+</code></pre>
+<p>Next run &quot;make menuconfig&quot; to modify a few configurations. On running the command a ncurses interface to enable/disable options will open. Use the arrow keys to move between options and 'Y' and 'N' keys to include/exclude options.
+First enable CONFIG_DEBUG_KERNEL. It is located under &quot;Kernel hacking&quot; as &quot;Kernel debugging&quot;.
+Next disable RANDOMIZE_MEMORY_PHYSICAL_PADDING. It is located under &quot;Processor type and features&quot; as &quot;Randomize the kernel memory sections&quot;.
+After making the changes save the changes and exit the menuconfig interface. A lot of youtube videos explain the same in detail, check them if confused. To reset any changes delete the &quot;.config&quot; file and start over by running &quot;make defconfig&quot;. Finally run make.
+It will take some to compile the kernel. Meanwhile move to the next step and install a VM in qemu. </p>
+<pre><code>make defconfig
+make menuconfig     # enable CONFIG_DEBUG_KERNEL,
+                    # disable RANDOMIZE_MEMORY_PHYSICAL_PADDING
+
+make -j1            # replace 1 with the number of CPUs that make
+                    # should use to build the kernel.  
+</code></pre>
+<h3 id="n12-create-an-image-for-qemu"><a class="header" href="#n12-create-an-image-for-qemu">N1.2 Create an image for QEMU</a></h3>
+<p>Move out of the linux directory and create an image for QEMU.</p>
+<p><code>qemu-img create kernel-dev.img 20G</code> </p>
+<p>Next download ubuntu's minimal iso image from here. It is a small 64MB file which can be used for a minimal Linux Installation. Move the downloaded mini.iso file into the same directory.
+Finally save the script below as start.sh.</p>
+<pre><code class="language-bash">#!/bin/bash
+
+#startup.sh
+
+KERNEL=&quot;linux/arch/x86_64/boot/bzImage&quot;
+RAM=1G
+CPUS=2
+DISK=&quot;kernel-dev.img&quot;
+
+if [ $# -eq 1 ]
+then
+	qemu-system-x86_64 \
+		-enable-kvm \
+		-smp $CPUS \
+		-drive file=$DISK,format=raw,index=0,media=disk \
+		-m $RAM \
+		-serial stdio \
+		-drive file=$1,index=2,media=cdrom  ## comment to run vanilla install
+		# use this option to boot using a cd iso
+else
+	qemu-system-x86_64 \
+		-enable-kvm \
+		-smp $CPUS \
+		-drive file=$DISK,format=raw,index=0,media=disk \
+		-m $RAM \
+		-serial stdio \
+		-kernel $KERNEL \
+		-S -s \
+		-cpu host \
+		-append &quot;root=/dev/sda1&quot; \
+		-net user,hostfwd=tcp::5555-:22 -net nic \
+fi
+</code></pre>
+<p>The above script when given an ISO file passes it as an CD to the QEMU instance. This way we can install ubuntu into &quot;kernel-dev.img&quot;. </p>
+<p>If no arguments are provided it tries to run the OS installed on kernel-dev.img. This way we can use the script to start the VM after we have completed installing ubuntu. At this point the directory structure should look like this:</p>
+<pre><code>  .
+  ├── kernel-dev.img
+  ├── linux
+  ├── mini.iso
+  └── startup.sh 
+</code></pre>
+<p>First to install ubuntu run: (if superuser privileges needed, run with sudo) </p>
+<pre><code>./startup.sh mini.iso
+</code></pre>
+<p>Go through all the steps and install ubuntu. A lot of YouTube videos show the  complete process. Use them as a reference if necessary.</p>
+<p>Once the installation is complete, comment out  the line which provides the cdrom option to boot into an vanilla ubuntu install.</p>
+<pre><code>./startup.sh mini.iso  #cdrom line commented
+</code></pre>
+<p>Now wait for the kernel installation to complete. Then run the script without and arguments to boot into the kernel we built.</p>
+<pre><code>./startup.sh
+</code></pre>
+<p>The boot will wait for GDB to connect. On a separate terminal run:</p>
+<pre><code class="language-bash">gdb linux/vmlinux
+</code></pre>
+<p>Within the gdb prompt then run &quot;target remote :1234&quot; to connect to QEMU. The <code>bt</code> command should then show some stack within QEMU.
+Run &quot;hbreak start_kernel&quot; to add a hardware breakpoint at start_kernel() and then run &quot;continue&quot;. The VM would then begin booting and will stop in the start_kernel function.</p>
+<p>Add other hardware breakpoints (since QEMU uses hardware acceleration for Virtualization, normal SW breakpoints will not work) and start tinkering.
+The network options are similar to those of UML. Thses options have been commented in the above script. </p>
+<h3 id="n13-network-setup"><a class="header" href="#n13-network-setup">N1.3 Network setup</a></h3>
+<p>By default the script provides an interface via which the VM can access both internet and the host machine (over ssh). This is the SLIRP networking mode. Follow the link <a href="https://wiki.qemu.org/Documentation/Networking#User_Networking_.28SLIRP.29">here</a> to read more.</p>
+<p>The interface will be provided but the interface will not have an address. Run dhclient on the interface so it is assigned an address. Next install an sshserver, if not installed, so we can access the guest over ssh.</p>
+<pre><code class="language-bash">sudo dhclient eth0  # provide the right interface name.
+sudo apt update     # needed to update apt cache.
+sudo apt install openssh-server
+</code></pre>
+<p>Finally to login into the guest machine, run:</p>
+<pre><code>ssh -p 5555 localhost 
+</code></pre>
 
                     </main>
 
