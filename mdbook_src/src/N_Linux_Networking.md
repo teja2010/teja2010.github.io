@@ -25,7 +25,7 @@ I'll add a page which describes the skb and it's fields in greater detail. TODO.
 This is not a standard way of visualizing, but I think this is the right way to visualize packet processing and cant visualize in any other way. Receiving packets is in the bottom to top direction. And transmitting packets is in the top to bottom direction. Forwarding to a different layer is left to right.
 While receiving packets, drivers receive data first. The bottom most layer where the drivers stay. The drivers hand over the packet to the core network. The core networking code then passes it over to the right protocol stack(s). After the protocol stack processing is done, it enters socket layer, from where the user picks up the packet. 
 
-<img src="imgs/visualize_pkt_proc.svg" alt="visualize"  />
+<img src="imgs/visualize_pkt_proc.png" alt="visualize"  />
 
 #### N.0.2.1 Top half and bottom half processing
 
@@ -40,3 +40,7 @@ IMPORTANT:
 2. I can use bottom half OR softirq processing interchangeably.
 3. Softirq processing done while receiving packets is also called NET_RX processing. I can use this as well. :)
 4. Core network code runs in both these halves. But most of it is in softirq processing. 
+
+
+
+With this, basic information we can start describing the RX and TX processing paths.
