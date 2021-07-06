@@ -10,7 +10,7 @@ mathjax-support = true
 no-section-label = true
 
 [output.html.fold]
-enable = false
+enable = true
 
 [output.html.playground]
 copyable = true
