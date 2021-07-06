@@ -133,7 +133,7 @@ You will see the VM booting, printing dmesg, bringing up the various kernel    s
 #### 0.4 Attach GDB
 
 It is fun to add breakpoints and view specific code in GDB. To do this,    we have to first find the process id (PID) of the main UML process.    Run the following command to find the UML pid. The output should show multiple PIDs
- 
+
 
 ```bash
 $ ps aux | grep ubda
