@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/2_1-3_top_half_processing.html">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="N/2_6-7_ip_and_udp_processing.html">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li class="chapter-item expanded "><a href="N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="Appendix.html">A. Appendix</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/2_1-3_top_half_processing.html">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="N/2_6-7_ip_and_udp_processing.html">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item expanded "><a href="N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item expanded "><a href="N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item expanded "><a href="N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="Appendix.html">A. Appendix</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -737,11 +737,469 @@ udp_queue_rcv_skb(sk, skb)
 } 
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n2-packet-tx-path-1--basic"><a class="header" href="#n2-packet-tx-path-1--basic">N2. Packet TX path 1 : Basic</a></h1>
+<p>This page contains the basic code flow while transmitting a packet. It    begins with the userspace sendmsg, enters the UDP and IP stacks, finds    a route, enters core networking and finally being handed over to the driver    which pushes    it out. TX, unlike RX, can happen without a softirq being raised. The    processing happens completely in the application context. In this page I    describe packet transmission without a softirq being raised. I'll cover    how qdiscs are used in a separate page, after which NET_TX with qdiscs    will be described.</p>
+<p>UDP &amp; IP stack processing and routing will be described in detail in a    separate page, this is just a basic overview.    We will end the discussion by handling over the packet to the driver. How    the driver actually transmits the packet will be described in later pages.  </p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n31-32-sendmsg-from-userspace"><a class="header" href="#n31-32-sendmsg-from-userspace">N3.1-3.2 sendmsg() from userspace</a></h1>
+<h3 id="31-sendmsg"><a class="header" href="#31-sendmsg">3.1 sendmsg()</a></h3>
+<p>After opening a UDP socket the application gets a fd as a handle for the  underlying kernel socket. The application sends data into the socket by calling <code>send()</code> or <code>sendmsg()</code> or <code>sendto()</code>, all of which will send out UDP data.</p>
+<p>​      On calling the <code>sendmsg()</code> system call, the syscall trap will save the application's process context and switch to running the kernel code. Kernel code runs in the application context, i.e. any traces that print the pid of the process will return the application's pid. If you do not know this, believe me for now, signals &amp; syscalls are explained in a  separate page. The kernel registers functions that are run for each system call. The registered function's name is <code>__do_sys_</code> + <code>syscall</code> name. In this case the function is <code>__do_sys_sendmsg()</code>, which internally      calls <code>__sys_sendmsg()</code>. The arguments passed to the call are the <code>fd</code>, the  <code>msghdr</code> struct and flags.</p>
+<p>The first step is to get the kernel socket from the fd. Each fd the application  holds is a handle to a kernel socket. The socket can be for an open file, a  UDP socket, UNIX socket, etc. The socket is usually represented  with the var <code>sock</code>. <code>___sys_sendmsg</code> is called with the sock, msghdr and      flags. It simply checks if the arguments are valid, copies the msghdr      (allocated in userspace) into kernel memory and then calls <code>sock_sendmsg()</code>.</p>
+<p>sock_sendmsg() checks if the application is allowed to proceed. Linux      has kernel modules like SELinux and AppArmour which audit each system      call and based on the configured rules allow or reject the system call.      If <code>security_socket_sendmsg()</code> does not return any errors, <code>sock_sendmsg_nosec()</code>      is called, which internally calls the <code>sock-&gt;ops-&gt;sendmsg()</code>.      socket ops are registered during socket creation based on the protocol family (<code>AF_INET</code>, <code>AF_INET6</code>, <code>AF_UNIX</code>) and socket type (<code>SOCK_DGRAM</code>, <code>SOCK_STREAM</code>).      Since a udp socket is a SOCK_DGRAM socket of AF_INET family the ops      registered are <code>inet_dgram_ops</code>, defined in <code>net/ipv4/af_inet.c</code>. And      <code>sock-&gt;ops-&gt;sendmsg()</code> is <code>inet_sendmsg()</code>.</p>
+<pre><code class="language-c">SYSCALL_DEFINE3(sendmsg, int, fd, struct user_msghdr __user *, msg,
+                unsigned int, flags)
+{
+    return __sys_sendmsg(fd, msg, flags) {
+        sock = sockfd_lookup_light(fd, &amp;err, &amp;fput_needed);
+
+        err = ___sys_sendmsg(sock, msg, &amp;msg_sys, flags) {
+
+            //copy msg (usr mem) into msg_sys (kernel mem)
+            err = copy_msghdr_from_user(msg_sys, msg, NULL, &amp;iov);
+            sock_sendmsg(sock, msg_sys) {
+                int err = security_socket_sendmsg();
+                if(err)
+                    return;
+
+                sock_sendmsg_nosec(sock, msg_sys) {
+                    sock-&gt;ops-&gt;sendmsg(sock, msg_sys);
+                             //inet_sendmsg();
+                }
+            }
+        }
+    }
+} 
+</code></pre>
+<h3 id="22-udp--ip-sendmsg"><a class="header" href="#22-udp--ip-sendmsg">2.2 UDP &amp; IP sendmsg</a></h3>
+<p>At this point we will begin using the networking struct sock (different from a <code>socket</code>), represented usually with the var <code>sk</code>. Each socket will either have a valid sock or a file. In our case a <code>sock-&gt;sk</code> will contain a valid sock. We check if socket needs to be bound to a ephemeral port, and then call      <code>sk-&gt;sk_prot-&gt;sendmsg()</code>. During socket creation, the sock is added to the socket, and protocol handlers are registered to the sock. In this case,      for a UDP socket, <code>sk_prot</code> is set to <code>udp_prot</code> (defined in <code>net/ipv4/udp.c</code>).      And <code>sk_prot-&gt;sendmsg</code> is set to <code>udp_sendmsg()</code>. The arguments      have not changed, we will pass sk and msghdr.</p>
+<p>​      Till this point we have not begun constructing the packet, the focus was more on socket options. <code>udp_sendmsg</code> will first extract the destination address      (usually variable <code>daddr</code>) and dest port (usually  <code>dport</code>), from  the <code>msghdr-&gt;msg_name</code>. The source port is extracted from the sock. This information is passed to find a route for the packet. The first time a      packet is sent out of a sock, the route has to be found by going through      the routing tables. This route result is saved in <code>sk-&gt;sk_dst_cache</code>,      which is used for packets that are sent later. At this point the packet's      source address is extracted from the route. All the details about the      packet's flow are saved in <code>struct flowi4</code>, which are saddr, daddr, sport,      dport, protocol, tos (type of service), sock mark, UID (user identifier),      etc. We now have all the information, the addresses, ports and certain      information to fill in the IP header with. We can begin filling in the      packet. <code>ip_make_skb()</code> will create the skb, and the skb will be sent out by calling <code>udp_send_skb()</code>.</p>
+<pre><code class="language-c">int inet_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
+{
+    inet_autobind(sk)
+    DECLARE_SOCKADDR(struct sockaddr_in *, usin, msg-&gt;msg_name);
+
+    daddr = usin-&gt;sin_addr.s_addr; // get daddr from msghdr
+    dport = usin-&gt;sin_port;
+
+    rt = (struct rtable *)sk_dst_check(sk, 0);
+    if (!rt) {
+        flowi4_init_output();
+        // pass daadr, dport...
+        rt = ip_route_output_flow(net, fl4, sk);
+
+        sk_dst_set(sk, dst_clone(&amp;rt-&gt;dst));
+        //next time sendmsg is called, sk_dst_check() will return the rt
+    }
+
+    saddr = fl4-&gt;saddr; // route lookup complete, saddr is known
+
+    skb = ip_make_skb(); // create skb(s)
+    err = udp_send_skb(skb, fl4, &amp;cork); // send it to ip layer
+} 
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n33-34-alloc-skb-and-send_skb"><a class="header" href="#n33-34-alloc-skb-and-send_skb">N3.3-3.4 alloc skb and send_skb</a></h1>
+<h3 id="n33-alloc-skb-fill-it-up-optional"><a class="header" href="#n33-alloc-skb-fill-it-up-optional">N3.3 Alloc skb, fill it up (OPTIONAL)</a></h3>
+<p><code>ip_make_skb()</code> is called to create a skb and is provided flowi4, sk, msg ptr, msg length and route as  the arguments. This is a generic function that can be called from any tranport layer, here UDP calls it and the argument <code>tranhdrlen</code> (transport header length) is equal to sizeof an udp header. Additionally, the length field is equal to the amount of data below the      ip header, i.e. length contains payload length plus udp header length. </p>
+<p>A skb queue head is inited, which      contains a list of skbs. Note that a head itself DOES NOT contain data. It      is a handle to a skb list. On init, the list is empty, with <code>sk_buff_head-&gt;next</code>      equal to <code>sk_buff_head-&gt;prev</code> equal to its own address, and <code>sk_buff_head-&gt;qlen</code>      is zero. Multiple skbs will be added to it if the msg size is greater      than the MTU, forcing IP fragmentation. For now, we will ignore ip fragmentation, so a single skb will be added to it later. </p>
+<p>​      Next <code>__ip_append_data()</code> is called to fill in the queue with the skb(s).      The primary goal of <code>__ip_append_data</code> is to estimate memory necessary for  the packet(s) and accordingly create and enqueue skb(s) into the queue.  The skb needs memory necessary to accommodate:</p>
+<ol>
+<li>link layer headers: each device during init sets <code>dev-&gt;hh_len</code>. Hardware header length (usually represented by var <code>hh_len</code>) is the maximum space the driver will need to fill in header(s) below the network header. e.g. ethernet header is added by ethernet drivers.</li>
+<li>IP and UDP headers. The function also handles the case where the packet needs IP fragmentation. In that case, additional logic to allocate memory for fragmentation headers is necessary.</li>
+<li>Payload. Obviously.</li>
+</ol>
+<p>Additionally some extra tail space is also      provided while allocating the skb. The allocation logic is shown in the      code below. Once  the calculation is done, <code>sock_alloc_send_skb()</code> is called, which internally  calls <code>sock_alloc_send_pskb()</code> to allocate the skb. Each skb must be accounted for in the sock where it was created (TX) or in the sock where it is destined to (RX). This is to control the memory used by packets. Each sock will have restrictions on the amount of memory it can use. In this case <code>wmem</code>, the amount of data written into the socket that hasn't transmitted yet, is a constraint      while allocating data. If      wmem is full, <code>sendmsg()</code> call can get blocked (unless the socket is set to non blocking mode) till sock memory is freed. Once data is allocated, the  udp payload data is written into the skb. <code>skb-&gt;transport_header</code> and <code>skb-&gt;network_header</code> are set. IP and UDP headers haven't been filled yet, but pointers to where they have to be  filled are set. The skb is added to the skb queue and finally sock wmem is updated.</p>
+<p>Next __ip_make_skb() will fill in ip header. (ignore fragmentation code for now, which will run if the queue has more than one skb). Finally it returns the created skb's pointer. </p>
+<pre><code class="language-c">struct sk_buff *ip_make_skb()
+{
+    struct sk_buff_head queue;
+    __skb_queue_head_init(&amp;queue);
+
+    err = __ip_append_data()
+    {
+        hh_len = LL_RESERVED_SPACE(rt-&gt;dst.dev);
+
+        fragheaderlen = sizeof(struct iphdr) + (opt ? opt-&gt;optlen : 0);
+        // opt is NULL, fragheaderlen is equal to sizeof(struct iphdr)
+
+        datalen = length + fraggap; //fraggap is zero
+        // length = udphdr len + payload length
+        fraglen = datalen + fragheaderlen;
+
+        alloclen = fraglen;
+        skb = sock_alloc_send_skb(sk,
+                alloclen + hh_len + 15,
+                (flags &amp; MSG_DONTWAIT), &amp;err);// ------- Step 0
+
+        skb_reserve(skb, hh_len);  // -------------------------- Step 1
+        data = skb_put(skb, fraglen + exthdrlen - pagedlen);
+        // exthdrlen &amp; pagedlen are zero.  --------------------- Step 2
+        skb_set_network_header(skb, exthdrlen);
+        skb-&gt;transport_header = (skb-&gt;network_header +
+                fragheaderlen); // --------------------- Step 3
+
+        data += fragheaderlen + exthdrlen; // ------------------ Step 4
+        // move pointer to where payload starts
+        copy = datalen - transhdrlen - fraggap - pagedlen;
+        // amount of payload data that needs to be copied.
+        // datalen = payload len + udp header len.
+        // transhdrlen = udp header len
+
+        getfrag(from, data + transhdrlen, offset, copy, fraggap, skb);
+        // getfrag is set to ip_generic_getfrag()
+        {    //copy and update csum
+            csum_and_copy_from_iter_full(to, len, &amp;csum, &amp;msg-&gt;msg_iter);
+            skb-&gt;csum = csum_block_add(skb-&gt;csum, csum, odd);
+        }
+
+        length -= copy + transhdrlen; // copied length is subtracted
+
+        skb-&gt;sk = sk;
+        __skb_queue_tail(queue, skb);
+
+        refcount_add(wmem_alloc_delta, &amp;sk-&gt;sk_wmem_alloc);
+    }
+
+    return __ip_make_skb(sk, fl4, &amp;queue, cork)
+    {
+        skb = __skb_dequeue(queue);
+
+        iph = ip_hdr(skb);
+        iph-&gt;version = 4;
+        iph-&gt;ihl = 5;
+        iph-&gt;tos = (cork-&gt;tos != -1) ? cork-&gt;tos : inet-&gt;tos;
+        iph-&gt;frag_off = df;
+        iph-&gt;ttl = ttl;
+        iph-&gt;protocol = sk-&gt;sk_protocol;
+        ip_copy_addrs(iph, fl4); // copy addresses from flow info
+    }
+} 
+</code></pre>
+<h4 id="n331-older-skb-allocation-logic"><a class="header" href="#n331-older-skb-allocation-logic">N3.3.1 (Older?) Skb allocation logic</a></h4>
+<p>The figure below which shows how pointers in skb meta data are being updated corresponding to steps commented in the code above. These pictures are from  <a href="http://vger.kernel.org/%7Edavem/skb_data.html">davem's skb_data page</a> which describes udp packet data being filled in a skb. This logic is very different from what I have described above. It is possible that this was the allocation logic earlier. It is entirely possible I have missed something. Comments are welcome.</p>
+<p><img src="N/imgs/02_skb_creation2.svg" alt="skb_creation" /></p>
+<h4 id="34-udp-and-ip-send_skb"><a class="header" href="#34-udp-and-ip-send_skb">3.4 UDP and IP send_skb</a></h4>
+<p>​      <code>udp_send_skb()</code> is simple, it fills in the UDP header, computes the checksum (<code>csum</code>),      and sends the skb to <code>ip_send_skb()</code>. If ip_send_skb returns an error,      SNMP value SNDBUFERRORS is incremented. And if everything goes well OUTDATAGRAMS      is incremented.</p>
+<p><code>ip_send_skb()</code> calls <code>ip_local_out()</code>, which calls <code>__ip_local_out()</code> The packet      then enters the OUTPUT chain, at the end of which <code>dst_output()</code> is called.      On finding the packet's route, <code>skb_dst(dst)-&gt;output</code> is set to <code>ip_output</code>.</p>
+<p>The skb then enters the POSTROUTING chain, at the end of which <code>ip_finish_output()</code>      is called. <code>ip_finish_output()</code> checks if the packet needs fragmentation (in  certain cases, the packet might have modified or the packet route might change, which may require ip fragmentation). Ignoring the fragmentation, <code>ip_finish_output2()</code> is called.</p>
+<pre><code>		            transport layer (TCP/UDP)
+
+					                        🠗       __ip_local_out()
+                                          OUTPUT
+		      INPUT                         🠗       dst_output()
+		        |                           |
+		ROUTING DECISION --- FORWARDING --- +
+		        |                           |
+		    PREROUTING                      🠗       ip_output()
+		        |                      POSTROUTING
+		                                    🠗       ip_finish_output() 
+
+		             CORE NETWORKING 
+</code></pre>
+<p>​      <code>ip_finish_output2()</code> first checks if the interface the packet is being  routed out to has a corresponding neighbour entry (<code>neigh</code>). The neighbour subsystem is how the kernel manages link local connections corresponding to IP addresses. i.e. ARP to manage ipv4 addresses and NDISC for ipv6 addresses. If the next hop for an interface is not known, the corresponding messages      are triggered, and is added to the corresponding cache. The current arp      cache can be checked by printing <code>/proc/net/arp</code>. For now, the assuming      the neigh can be found, we will proceed. <code>neigh_output</code> is called, which      calls <code>neigh_hh_output()</code>. (An output function is registered in the neigh entry, which will be called if the neigh entry has expired. Ignoring this for now.)</p>
+<p>​     <code>neigh_hh_output()</code> adds the hardware header necessary into the headroom. The neigh entry contains a cached hardware header, which is added while      adding a neigh entry into the neigh cache (after a successful ARP resolution      or neighbour discovery) is complete. More of this will be covered in a      separate page covering the neigh subsystem.</p>
+<p>Now the skb has all necessary headers, pass it to the core networking subsystem which will let the driver send the packet out.</p>
+<pre><code>static int ip_finish_output2()
+{
+    neigh = __ipv4_neigh_lookup_noref(dev, nexthop);
+    neigh_output(neigh, skb)
+    {
+        hh_alen = HH_DATA_ALIGN(hh_len); //align hard header
+        memcpy(skb-&gt;data - hh_alen, hh-&gt;hh_data,
+                hh_alen);
+    }
+    __skb_push(skb, hh_len); // add the hh header
+    return dev_queue_xmit(skb);
+} 
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="n35-38-net_tx-and-driver-xmit"><a class="header" href="#n35-38-net_tx-and-driver-xmit">N3.5-3.8 NET_TX and driver xmit</a></h1>
+<h3 id="n35-core-networking"><a class="header" href="#n35-core-networking">N3.5 Core networking</a></h3>
+<p>​      The current section will cover the simplest case of sending out a packet.      NET_TX softirq will not be scheduled, in most cases packets will be sent      out this way.</p>
+<p>​      Every real network device on creation has atleast one TX queue (var &quot;txq&quot;).      By real I mean actual physical devices: ethernet or wifi interfaces.      Virtual network devices like loopback, tun interfaces, etc are &quot;queueless&quot;,      i.e. they have a txq and a default Queue Discipline (<code>qdisc</code>), but a function is not added to      enqueue packets.</p>
+<p>Run &quot;tc qdisc show dev lo&quot;, and it should show &quot;noqueue&quot; as the only queue. Other real devices have queues with  specific properties, as shown below eth0 has a <code>fq_codel</code> queue. I'll add a separate page for qdiscs, for now ignore them.</p>
+<pre><code class="language-bash">$ tc qdisc show dev lo
+qdisc noqueue 0: root refcnt 2
+
+$ tc qdisc show dev eth0
+qdisc fq_codel 0: root refcnt 2 limit 10240p flows 1024 quantum 1514 target 5.0ms
+interval 100.0ms memory_limit 32Mb ecn 
+</code></pre>
+<p>A small optional section on how loopback's xmit works is added next. For now assume our device has a queue.</p>
+<p><code>__dev_queue_xmit()</code> finds the tx queue and qdisc and if a enqueue function      is present, calls <code>__dev_xmit_skb()</code> which calls the function to enqueue the      skb into the <code>qdisc</code>. At this point the skb is in the queue. We move  forward without any skb pointer held. After enqueueing the skb,      <code>__qdisc_run()</code> is called to process packets (if possible) that have been      enqueued. If no other process needs the cpu and less than 64 packets      have been processed in the current context, <code>__qdisc_run()</code> will continue      processing packets. <code>__qdisc_run</code> calls <code>qdisc_restart()</code> internally, which      dequeues skbs from the queue and calls <code>sch_direct_xmit()</code>, which calls      <code>dev_hard_start_xmit()</code> and it finally calls <code>xmit_one()</code>. <code>xmit_one()</code> will transmit one skb from the queue. </p>
+<pre><code class="language-c">__dev_queue_xmit()
+{
+    struct netdev_queue *txq;
+    struct Qdisc *q;
+
+    txq = netdev_pick_tx(dev, skb, sb_dev);
+    q = rcu_dereference_bh(txq-&gt;qdisc);
+    rc = __dev_xmit_skb(skb, q, dev, txq)
+    {
+        rc = q-&gt;enqueue(skb, q, &amp;to_free) &amp; NET_XMIT_MASK;
+        __qdisc_run(q)
+        {
+            //while constraints allow
+            qdisc_restart(q, &amp;packets)
+            {
+                skb = dequeue_skb(q);
+                sch_direct_xmit(skb);
+            }
+        }
+        qdisc_run_end(q);
+    }
+} 
+</code></pre>
+<h3 id="n36-net_tx-optional"><a class="header" href="#n36-net_tx-optional">N3.6 NET_TX (OPTIONAL)</a></h3>
+<p>Ironic that the article on NET_TX has this section marked as OPTIONAL. But      in simple scenarios, NET_TX softirq is almost never raised. After enqueueing      the packet,  <code>__qdisc_run()</code> cannot process packets because if one of these conditions is not met:</p>
+<ol>
+<li>no other process is waiting for this CPU</li>
+<li>the current process has enqueued less than 64 packets.</li>
+</ol>
+<p>Then a NET_TX is scheduled to run. <code>__netif_schedule()</code> will raise a      NET_TX softirq if it was not already triggered on the CPU. <code>net_tx_action()</code>, the      registered function will run <code>__qdisc_run()</code> on the qdisc, after which the      flow is same as the case without a softirq raised.</p>
+<p>Though we have not covered NAPI yet, <code>net_tx_action()</code> is a dual of <code>net_rx_action()</code>,  a root <code>qdisc</code> is a dual of a <code>napi</code> structure, and <code>xmit_one()</code> is a dual of <code>__netif_receive_skb()</code>, with very similar logic but in opposite directions.</p>
+<h3 id="n37-driver-xmit_one"><a class="header" href="#n37-driver-xmit_one">N3.7 driver xmit_one()</a></h3>
+<p>​      <code>xmit_one()</code> is the final function, which like <code>__netif_receive_skb()</code> shares      the packet with all registered promiscuous packet_types, i.e. the      global list <code>ptype_all</code> and per netdevice list <code>dev-&gt;ptype_all</code>. This is done      within <code>dev_queue_xmit_nit()</code> function. After this, <code>xmit_one</code> calls      <code>netdev_start_xmit()</code> which internally calls <code>__netdev_start_xmit()</code> to      hand over the packet to the driver by calling <code>ops-&gt;ndo_start_xmit()</code>      (ndo stands for NetDevice Ops). A <code>net_device_ops</code> struct is registered      during netdevice creation, where this function pointer is set by the driver. The driver will then send the packet out via the physical interface.</p>
+<pre><code class="language-c">sch_direct_xmit() -&gt; dev_hard_start_xmit() -&gt; xmit_one()
+{
+    dev_queue_xmit_nit();
+    //deliver skb to promisc packet types
+
+    netdev_start_xmit()
+    {
+        const struct net_device_ops *ops = dev-&gt;netdev_ops;
+        return ops-&gt;ndo_start_xmit(skb, dev);
+    }
+} 
+</code></pre>
+<h3 id="n38-loopback-xmit-optional"><a class="header" href="#n38-loopback-xmit-optional">N3.8 loopback xmit (OPTIONAL)</a></h3>
+<p>​      Like described earlier, each device during creation registers certain      functions using the <code>net_device_ops</code> structure. Loopback registers      <code>loopback_xmit</code> as the function. On sending a packet to loopback, when      <code>ops-&gt;ndo_start_xmit</code> is called, the packet enters <code>loopback_xmit()</code>. It is      a very simple function, which increments stats and calls <code>netif_rx_ni()</code>      to begin the RX path of the packet. The end of TX coincides with the start of RX in this function. </p>
+<p>​      The loopback device is described in <code>drivers/net/loopback.c</code> .</p>
+<pre><code class="language-c">loopback_xmit()
+{
+    skb_tx_timestamp(skb);
+    skb_orphan(skb);    // remove all links to the skb.
+    skb-&gt;protocol = eth_type_trans(skb, dev);    // set protocol
+
+    netif_rx(skb);    //RX!!
+} 
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n3-wip-socket-programming-bts"><a class="header" href="#n3-wip-socket-programming-bts">N3. (WIP) Socket Programming BTS</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="m-miscellaneous"><a class="header" href="#m-miscellaneous">M. Miscellaneous</a></h1>
 <p>Either notes that I have not sorted or ones that don't require a dedicated section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cse-222a-notes"><a class="header" href="#cse-222a-notes">CSE 222a, Notes</a></h1>
+<p>This page contains summaries of the various papers I read as a part of CSE222a, at UCSD. It was taught by Prof. George Porter. The course focused on reading classical and current papers followed by in class discussions. The following are papers that I found interesting. Most of the summaries usually consist of four paragraphs:</p>
+<ol>
+<li>the introduction, problem its trying to solve, the pain points</li>
+<li>the idea, how it solves the problem</li>
+<li>their implementation</li>
+<li>their results and my thoughts</li>
+</ol>
+<p>Some of these papers cannot be uploaded/shared. I have provided links to some of the papers if I was able to find a public link off DuckDuckGo. Else I have provided a private link which needs subscription. In case you cannot access them, send me a mail and if possible I'll share the paper.</p>
+<h3 id="m11-early-internet-darpa-internet-protocols"><a class="header" href="#m11-early-internet-darpa-internet-protocols">M1.1 Early Internet, Darpa Internet Protocols</a></h3>
+<p>These papers describe the structure of an early internet. The first paper is a description of the components in building a packet switching network. The second one, published 14 years later is a description the design goals and the protocols developed.</p>
+<h5 id="paper-1-a-protocol-for-packet-network-incommunication-ieee-1974-a-hrefhttpswwwcsprincetoneducoursesarchivefall06cos561paperscerf74pdflinka"><a class="header" href="#paper-1-a-protocol-for-packet-network-incommunication-ieee-1974-a-hrefhttpswwwcsprincetoneducoursesarchivefall06cos561paperscerf74pdflinka">Paper 1. A Protocol for Packet Network Incommunication (IEEE 1974) [<a href="https://www.cs.princeton.edu/courses/archive/fall06/cos561/papers/cerf74.pdf">Link</a>]</a></h5>
+<p>The paper first clearly defines the components of the network viz Hosts, networks and gateways. The hosts as the end points which are connected to each other. Multiple hosts are connected to internetwork. And internetworks are connected via Gateways. Each internetwork can use its own protocol for communication. But communication across internetworks needed a common protocol. The protocol for internetwork communication is the early IP protocol. The authors then describe a protocol over the internetwork protocol to transfer data between end points.</p>
+<p>The protocols described are similar to modern implementations of IP and TCP headers. The original vision of the packet switching network remains very similar to our current networks. The paper clearly explains their choice for a common internetwork protocol, while each network was free to develop protocols for communication within the network. Th Gateway simply handled translation between the network protocols. This is very clearly the design that we still adopt, except that hosts very rarely communicate on bare link local protocol. Most communication, even between hosts within a network, is over IP. The authors choice to have a common IP protocol implemented by all hosts which we have acknowledge today as the narrow waist of the internet. Other differences include fragmentation using sequence numbers, which have now moved to TCP, while IP implements a blunt form of fragmentation.</p>
+<p><img src="M/imgs/M1_interntwhdr.svg" alt="M1_interntwhdr" /></p>
+<p>The authors describe the transmission control protocol as a means to transmit a stream of data, which it breaks into segments. Early TCP used the sequence numbers provided by internetwork protocol, and both the protocols worked closely to transmit data. Modern IP and TCP have been separated into distinct protocols with independent functions. The authors also have a section which describes early address format and address assignment which have completely changed. The authors also envision a central repository that provides addresses for each node within a network, which in way the current DHCP implementation.</p>
+<p>The paper is a description of the network that the authors envisioned, some of their decisions have formed the basis of the current internet.</p>
+<h5 id="paper-2-the-design-philosophy-of-the-darpa-internet-protocols-acm-1988-a-hrefhttpsgroupscsailmiteduanapublicationspubpdfsthe20design20philosophy20of20the20darpa20internet20protocolspdflinka"><a class="header" href="#paper-2-the-design-philosophy-of-the-darpa-internet-protocols-acm-1988-a-hrefhttpsgroupscsailmiteduanapublicationspubpdfsthe20design20philosophy20of20the20darpa20internet20protocolspdflinka">Paper 2. The Design Philosophy of the DARPA Internet Protocols (ACM 1988) [<a href="https://groups.csail.mit.edu/ana/Publications/PubPDFs/The%20design%20philosophy%20of%20the%20DARPA%20internet%20protocols.pdf">Link</a>]</a></h5>
+<p>The second paper describes the philosophy behind the design of the Internet protocols after the protocols had standardised. The paper first describes the fundamental goals of the network. Then they describe how these goals influence the design.</p>
+<p>One of the foremost goals was for the network to and continue working despite loss. This goal was adopted since the network was initially a military project that was later released for civil use. This made the internet fault tolerant at the expense of performance. To achieve this, the state necessary for internet functioning is moved to the endpoints. This approach is described as &quot;fate sharing&quot; since both entity and the state share the same fate. A consequence of this approach was the stateless design of switches and gateways. Also, each end node is responsible for maintaining any state necessary for the connection. It is interesting that the goal and the chosen approach is applied in current network designs.</p>
+<p>The paper then describes the services supported over IP and the need for a protocol that allows the user to use the datagram services offered by IP. This created a need for decoupling IP and TCP, and building the User Datagram Protocol as the protocol which offers these services. The paper then describes the division into layers which offer services independently using services offered by lower layers. The classical OSI model is the modern form of this idea, with clear abstractions of the functions provided by each layer.</p>
+<h3 id="m12-distributed-computation-of-a-spanning-tree-in-an-extended-lan"><a class="header" href="#m12-distributed-computation-of-a-spanning-tree-in-an-extended-lan">M1.2 Distributed Computation of a Spanning Tree in an Extended LAN</a></h3>
+<h5 id="paper-an-algorithm-for-distributed-computation-of-a-spanning-tree-in-an-extended-lan-acm-1985-a-hrefhttpswwwituuseeducoursehomepagedatakomht06slidessta-perlmanpdflinka"><a class="header" href="#paper-an-algorithm-for-distributed-computation-of-a-spanning-tree-in-an-extended-lan-acm-1985-a-hrefhttpswwwituuseeducoursehomepagedatakomht06slidessta-perlmanpdflinka">Paper: An Algorithm for Distributed Computation of a Spanning Tree in an Extended LAN (ACM 1985) [<a href="https://www.it.uu.se/edu/course/homepage/datakom/ht06/slides/sta-perlman.pdf">Link</a>]</a></h5>
+<p>The author describes a algorithm to build a tree from an extended LAN. As networks began to grow, with LANs interconnected using bridges to build an extended LAN, manual configuration of the bridges increased the risk of loops. Similarly a user without proper knowledge could connect LANs with a bridge and create a Loop. The proposed algorithm allows the bridges to exchange data and construct a tree without any additional configuration. Secondly the algorithm converges in O(mesh diameter) while imposing small memory requirements (proportional to the number of LANs the bridge is connected to) on each bridge.</p>
+<p><img src="M/imgs/M1_extended_LAN.svg" alt="extended_lan" /></p>
+<p>In the final tree, each LAN has a designated bridge. On receiving data from a LAN, a bridge forwards the data to all other LANs on which it is a designated bridge. The complete mesh is transformed into a tree by choosing the designated bridges. The root of the tree is a designated bridge on all of it's LANs. The algorithm chooses a very simple way to choose the root. The bridge with the smallest MAC value is chosen as the root. The bridges exchange HELLO messages to find the root. Once a root is found, the root sends out periodic HELLO messages. These HELLO messages are forwarded on all connected LANs. The bridges based on the HELLO messages share information and choose the designated bridge on each LAN. The algorithm works by each bridge first trying to become the root and then trying to become the designated brigde on each of the LANs it is connected to.</p>
+<p>The paper also describes states maintained by the bridge for each LAN and transitions between states to prevent loops due to new bridges being added. Also, the HELLO messages timeout letting the bridge detect failures in the network. This has been described in detail in the paper and I cannot sufficiently describe it in a single paragraph.</p>
+<p><img src="M/imgs/M1_ex_LAN_tree2.svg" alt="ext_bridge" /></p>
+<p>Bridge 1 becomes the leader, dotted links are in backup state. Arrows are links in forwarding state, pointing towards non leader bridges.</p>
+<p>It is always nice to see a simple distributed algorithm which solves the problem. What is especially refreshing is the poem she wrote as a part of the abstract, which summarises the algorithm succinctly.</p>
+<p><em>I think that I shall never see</em>
+<em>A graph more lovely than a tree</em></p>
+<p><em>A tree whose crucial property</em>
+<em>Is loop-free connectivity.</em></p>
+<p><em>A tree which must be sure to span</em>
+<em>So packets can reach every LAN.</em></p>
+<p><em>First the Root must be selected</em>
+<em>By ID it is elected.</em></p>
+<p><em>Least cost paths from Root are traced.</em>
+<em>In the tree these paths are placed</em></p>
+<p><em>A mesh is made by folks like me</em>
+<em>Then bridges find a spanning tree.</em></p>
+<h3 id="m13-network-protocol-folklore"><a class="header" href="#m13-network-protocol-folklore">M1.3 Network Protocol Folklore</a></h3>
+<h5 id="paper-network-protocol-folklore-acm-2019-a-hrefhttpsccronlinesigcommorgwp-contentuploads201910acmdl19-336pdflinka"><a class="header" href="#paper-network-protocol-folklore-acm-2019-a-hrefhttpsccronlinesigcommorgwp-contentuploads201910acmdl19-336pdflinka">Paper: Network Protocol Folklore (ACM 2019) [<a href="https://ccronline.sigcomm.org/wp-content/uploads/2019/10/acmdl19-336.pdf">Link</a>]</a></h5>
+<p>Radia Perlman, having been working on internet protocols since it's inception, shares a history of choices they made and their consequences on the modern internet implementation. One line from the abstract which makes the paper interesting is: Some decisions have made today’s networks unnecessarily complex and less functional. Surprisingly, mechanisms that were created out of necessity, to compensate for previous decisions, sometimes turn out to be useful for purposes other than the original reason they were invented.</p>
+<p>Ethernet addresses were designed to be 6 bytes long so that nodes connected over ethernet would not need any other address configuration. But ethernets never have more than a few thousand nodes attached. Each ethernet address is unique and location independent, but are simply used for link to link transfer. It is interesting that IPv4, which was designed so each node would get a unique address dynamically has a smaller length of just 4 Bytes. People even envisioned ethernet as Layer 3 replacement, implementing end to end connections over ethernet due to the uniqueness property of the ethernet address.</p>
+<p>DEC had developed an alternate to IP called IS-IS which adopted CLNP (ConnectionLess Network Protocol) addressing. CNLP has very large 20 Byte addresses ( larger than 16Byte IPv6). Though it did not catch on CNLP supported features that were later built into IPv6.</p>
+<p>The paper has a brief overview of the history behind the spanning tree protocol. Customers expected nodes in different ethernets to work. DEC sold routers which routed based on Layer 3 addresses, but expected end nodes to implement Layer 3 to route between different ethernets. The author argues that the right solution was for all endpoints to put Layer 3 into the stack for such inter ethernet communication. But, DEC decided that instead of waiting for endpoints to upgrade, it was easier to build a network box which routed based on ethernet addresses, i.e. the bridge. Radia Perlman was asked to design an algorithm to break ethernet routing loops. The resulting algorithm, the spanning tree algorithm, a temporary fix till endpoints upgrade their network stacks is still being widely deployed.</p>
+<p>The paper compares CLNP and modern IPv6. A few features of CLNP are:</p>
+<ul>
+<li>Autoconfiguration by appending 14 byte network prefix with the 6 Byte ethernet address to build a complete 20Byte address.</li>
+<li>The network prefix is hierchically assigned based on region.</li>
+<li>Within an area since the prefix is common, nodes can move anywhere in the area without changing the address.</li>
+<li>Since CLNP had ethernet address, ethernet header could be dropped so CLNP is used for both Layer 2 and 3 routing.</li>
+</ul>
+<p>IPv4 addressing was not as scalable as CLNP and does not support movement within an area without address reconfiguration (especially helpful with Datacenters migrating VMs). IP is a flat address space with ethernet providing functionality of a region. One consequence of IP and ethernet being completely independent is that we need the ARP protocol to discover the endnode's ethernet address. CLNP on the other hand needed each node to anounce it's location.</p>
+<p>The paper then moves to the final section which are surprising outcomes of the decisions people took.</p>
+<ul>
+<li>Seperation of IP and Ethernet allowed VLAN, which provides the ability to configure which nodes can talk. This is used in datacenters to build a LAN for a group of VMs.</li>
+<li>Since CLNP uses a unique ethernet address which is then announced to everyone, tracking using CLNP would have been easier making it a major privacy issue. Instead since IP is ephemeral, tracking though possible is less intrusive.</li>
+<li>NATs were built to fix IPv4's inability to scale, not necessary for CLNP. But NATs have become a major security feature to obfusicate users behind a NAT. Also since users behind a NAT cannot be contacted without the user initiating a connection, the users are protected from external nodes.</li>
+</ul>
+<hr />
+<h3 id="the-ones-below-are-incomplete"><a class="header" href="#the-ones-below-are-incomplete">The ones below are incomplete</a></h3>
+<h3 id="m14-classic-multicast-routing"><a class="header" href="#m14-classic-multicast-routing">M1.4 Classic Multicast Routing</a></h3>
+<p>Multicast Routing in Datagram Internetworks and Extended LANs</p>
+<p>The paper is the seminal paper on how multicast can be implemented with support from the bridges. The paper proposes minor modifcations to routing algorithms to facilitate multicast.</p>
+<h3 id="m15-bgp-interdomain-routing"><a class="header" href="#m15-bgp-interdomain-routing">M1.5 BGP: Interdomain Routing</a></h3>
+<p>eBGP and iBGP, sharing routing information.</p>
+<h3 id="m16-end-to-end-routing-behavior"><a class="header" href="#m16-end-to-end-routing-behavior">M1.6 End to End Routing Behavior</a></h3>
+<p>Radia Perlman</p>
+<h3 id="m17-narada-end-system-multicast"><a class="header" href="#m17-narada-end-system-multicast">M1.7 Narada: End System Multicast</a></h3>
+<p>Radia Perlman</p>
+<h3 id="m18-active-network-architecture"><a class="header" href="#m18-active-network-architecture">M1.8 Active Network Architecture</a></h3>
+<p>Radia Perlman</p>
+<h3 id="m19-click-modular-router"><a class="header" href="#m19-click-modular-router">M1.9 Click Modular Router</a></h3>
+<p>Radia Perlman</p>
+<h3 id="m110-open-flow"><a class="header" href="#m110-open-flow">M1.10 Open Flow</a></h3>
+<p>Radia Perlman</p>
+<h3 id="m111-congestion-avoidance-and-control"><a class="header" href="#m111-congestion-avoidance-and-control">M1.11 Congestion Avoidance and Control</a></h3>
+<p>Reno TCP</p>
+<h3 id="m112-fast-switched-backplane-for-a-gigabit-switched-router"><a class="header" href="#m112-fast-switched-backplane-for-a-gigabit-switched-router">M1.12 Fast Switched Backplane for a Gigabit Switched Router</a></h3>
+<p>iSlip</p>
+<h3 id="m113-p4-programming-protocol-independent-packet-processors"><a class="header" href="#m113-p4-programming-protocol-independent-packet-processors">M1.13 P4: Programming Protocol Independent Packet Processors</a></h3>
+<p>p4
+M1.14 SWAN</p>
+<h3 id="swan-achieving-high-utilization-with-software-driven-wan"><a class="header" href="#swan-achieving-high-utilization-with-software-driven-wan">SWAN: Achieving High Utilization with Software Driven WAN</a></h3>
+<p>M1.15 Fat Trees</p>
+<h3 id="scalable-commodity-data-center-network-arch"><a class="header" href="#scalable-commodity-data-center-network-arch">scalable commodity data center network arch</a></h3>
+<h3 id="m116-portland"><a class="header" href="#m116-portland">M1.16 PortLand</a></h3>
+<p>fault tolerant l2 data center</p>
+<h3 id="m117-jellyfish"><a class="header" href="#m117-jellyfish">M1.17 Jellyfish</a></h3>
+<h3 id="m118-dctcp"><a class="header" href="#m118-dctcp">M1.18 DCTCP</a></h3>
+<h3 id="m119-mptcp"><a class="header" href="#m119-mptcp">M1.19 MPTCP</a></h3>
+<h3 id="m120-open-vswitch"><a class="header" href="#m120-open-vswitch">M1.20 Open vSwitch</a></h3>
+<h3 id="m121-eyeq"><a class="header" href="#m121-eyeq">M1.21 EyeQ</a></h3>
+<h3 id="m122-censorship-in-china"><a class="header" href="#m122-censorship-in-china">M1.22 Censorship in China</a></h3>
+<p>great firewall</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cache-side-channel-attacks"><a class="header" href="#cache-side-channel-attacks">Cache Side Channel Attacks</a></h1>
+<p>By design caches are transparent, but processes can create contention resulting in timing variations.    CPU data cache timing attacks are to exploit cache timing to expose cache's internal state. </p>
+<p>Caches are one place where time variations can be exposed.  Caches are built to bridge the gap between main memory and Processor  registers. Since it takes fewer cycles to read from cache than from main memory, recording time differences makes reading from cache detectable.</p>
+<h3 id="caches-recap"><a class="header" href="#caches-recap">Caches Recap:</a></h3>
+<ul>
+<li>Caches are designed to exploit spatial locality in memory access</li>
+<li>For each read, check if the data is present in one of the  caches. If present, read from the cache or load from lower memory. LRU  to evict old entries. </li>
+<li>Cold cache misses are when the cache is empty, happens during program load.</li>
+<li>Data can only be added to certain regions in the cache.  Multiple address lines in lower memory map to a subset in the cache.  Conflict miss happens when data that map to the same region are being  loaded, causing unnecessary cache evictions.</li>
+<li>If cache size is larger than the working set of memory, we face capacity misses.</li>
+<li>Write through cache: each write is immediately written to lower levels. Simple logic, but increases bus traffic</li>
+<li>Write-back cache: write to cache, defer updating lower levels till it is evicted from the cache.</li>
+<li>Cache Coherence: The same data can be present on multiple  caches, if one of the processors makes a change to common data, the  processor needs to make sure that cached data is consistent.</li>
+<li>A Cache Coherence protocol makes sure of cache coherence  among caches. Cache coherence protocols described below are snooping  protocols, i.e. changes to cache traffic is visible to all cores.</li>
+<li>Write-invalidate: On detecting a write to another cached location, invalidate local copy, forcing a read from main memory.</li>
+<li>Write-update: On detecting a write, update local copy.</li>
+<li>Any cache coherence protocol increases bus traffic. </li>
+<li>Article on cache coherence : <a href="https://fgiesen.wordpress.com/2014/07/07/cache-coherency/">https://fgiesen.wordpress.com/2014/07/07/cache-coherency/</a> </li>
+<li>Notes on CPU caches: <a href="https://www.cse.iitb.ac.in/%7Emythili/os/notes/notes-cache.txt">https://www.cse.iitb.ac.in/~mythili/os/notes/notes-cache.txt</a>
+<ul>
+<li>has a clean explanation of MESI cache coherence protocol.</li>
+</ul>
+</li>
+<li>Code patterns to improve cache performance:
+<ul>
+<li>Build loops, which operate on the same data. Merge loops if necessary</li>
+<li>Within a data structure, make sure critical (read/write heavy) elements are cache aligned and at the top.</li>
+<li>Reduce branches so code can be prefetched.</li>
+<li>Atomic variables are allowed to be present only in one  cache. Use of atomic variables (and hence locks and synchronization  mechanisms) on multiple cores increases cache coherence traffic. </li>
+<li>Instead try to use per CPU data structures.</li>
+</ul>
+</li>
+</ul>
+<h3 id="flushreload-paradigm"><a class="header" href="#flushreload-paradigm">Flush+Reload Paradigm.</a></h3>
+<ul>
+<li>Exploits Cache behavior to leak information about victim process.</li>
+<li>Flush a line, wait for some time, measure access time. If  the victim has accessed the memory, access time will be in cache and  access will be fast. Else will be slow.</li>
+<li>Repeat to identify victim's memory regions.</li>
+<li>Slides Link: <a href="https://cs.adelaide.edu.au/%7Eyval/CHES16/">https://cs.adelaide.edu.au/~yval/CHES16/</a></li>
+</ul>
+<h3 id="spectre-1-bounds-check-bypass"><a class="header" href="#spectre-1-bounds-check-bypass">Spectre 1: Bounds Check Bypass:</a></h3>
+<ul>
+<li>
+<p>Modern CPUs can speculatively execute instructions in a branch, before a branch true execution starts. </p>
+</li>
+<li>
+<pre><code>int some_function(int user_input)
+{
+    int x = 0;
+    int flush_reload_buffer[256];
+    if (check user_input) {  // on checking user_input, undo changes to x
+        x = secret_array[user_input];  // this is executed. before check.
+                                       // contents leak into the cache.
+    }
+    y = flush_reload_buffer[x];
+    leak = measure_access_time_of_all_elements(flush_reload_buffer);
+} 
+</code></pre>
+</li>
+<li>
+<p>The CPU based on historic data, tries to predict branches and  executes instructions in the branch. Later it checks the branch check,  if the instructions it ran were incorrect, it undoes all the changes.  These changes are transparent for the user. But the instructions in the  branch load data into the cache. This data can then be identified by  cache timing.</p>
+</li>
+<li>
+<p>This can be used to read data from the kernel via eBPF JIT.  Users can provide eBPF  bytecode which the kernel runs at certain kernel hooks. The bytecode is translated into machine code using a JIT engine.</p>
+</li>
+<li>
+<p>HW Solution is to clean up cache while undoing changes. </p>
+</li>
+</ul>
+<h3 id="spectre-2-branch-target-injection"><a class="header" href="#spectre-2-branch-target-injection">Spectre 2: Branch target injection:</a></h3>
+<ul>
+<li>Independent execution of the same code, can influence branch predictions. Earlier people worked on inferring  details about the  victim based on attacker's branch prediction. This attack instead forces victim's branch prediction due to attacker's choice of branch  execution.</li>
+<li>Most branch predictors maintain a table of branches to jump  addresses. The last 12 bits are used to identify the branches and  addresses.</li>
+<li>Since Only the last 12 bits are used, the attacker fills the table with branch and jump entries. The CPU while executing the victim  code enters the branch and loads the secret into the cache, which is  then read by the attacker. Note that the victim might itself have never  entered the branch, but the CPU speculatively executes the branch.</li>
+<li>This can be used to read the host's memory from a KVM guest.</li>
+<li>HW Solution: Update microcode so OS can control branch prediction table. </li>
+<li>SW Retpoline Solution: Retpoline = return + trampoline. An  indirect branch that is not subject to speculative execution. Instead of a &quot;jmp&quot; use a call and return. <a href="https://support.google.com/faqs/answer/7625886">Google Blog.</a></li>
+</ul>
+<h3 id="spectre-3-rogue-data-cache-load"><a class="header" href="#spectre-3-rogue-data-cache-load">Spectre 3: Rogue data cache load</a></h3>
+<ul>
+<li>
+<p>This attack exploits the fact that the CPU executes instructions in parallel, sometimes out of order to achieve parallelism.</p>
+</li>
+<li>
+<pre><code>mov rax, [Somekerneladdress]
+mov rbx, [someusermodeaddress] 
+</code></pre>
+</li>
+<li>
+<p>In the above example, the first instruction causes an  exception. But if the CPU runs both of them in parallel, the second one  can load user data into the cache before the exception occurs. Using  Flush+Reload data address can be identified.</p>
+</li>
+</ul>
+<h3 id="meltdown"><a class="header" href="#meltdown">Meltdown:</a></h3>
+<ul>
+<li>This attack specifically tries to read kernel data from  userspace. It does this by trying to load a kernel address. The CPU loads the address and then raises an exception. This loads the data into the  cache which is then read using Flush+Reload. Similar to Spectre v3 but  the implementation is specific to Intel.</li>
+</ul>
+<h3 id="ridl"><a class="header" href="#ridl">RIDL:</a></h3>
+<ul>
+<li>Other parts of the CPU from which similar data can leak. <a href="https://mdsattacks.com/">https://mdsattacks.com/</a></li>
+<li><a href="https://mdsattacks.com/slides/slides.html">https://mdsattacks.com/slides/slides.html</a></li>
+</ul>
+<h3 id="mitigations"><a class="header" href="#mitigations">Mitigations</a></h3>
+<p>KAISER: an implementation to hide kernel data from userspace. <a href="https://lwn.net/Articles/738975/">Link</a></p>
+<p>Meltdown and Spectre cause a performance Impact of 8 to 20% to IO intensive workloads, &lt;5 % impact on CPU intensive. (<a href="https://access.redhat.com/articles/3307751">Source</a>)</p>
+<p>On my AMD Ryzen 5 PRO 3500U Laptop:</p>
+<pre><code>$ grep . /sys/devices/system/cpu/vulnerabilities/*
+itlb_multihit:Not affected
+l1tf:Not affected
+mds:Not affected
+meltdown:Not affected
+spec_store_bypass:Mitigation: Speculative Store Bypass disabled via prctl and seccomp
+spectre_v1:Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+spectre_v2:Mitigation: Full AMD retpoline, IBPB: conditional, STIBP: disabled, RSB filling
+tsx_async_abort:Not affected 
+</code></pre>
+<ul>
+<li>Google zero blog <a href="https://googleprojectzero.blogspot.com/2018/01/reading-privileged-memory-with-side.html">link</a> .</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="a-appendix"><a class="header" href="#a-appendix">A. Appendix</a></h1>
 <p>These are a few links I think are useful.</p>
 <ol>

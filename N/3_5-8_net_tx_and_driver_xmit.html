@@ -1,0 +1,269 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>N3.5-3.8 NET_TX and driver xmit - teja&#x27;s notes</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+                <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/2_1-3_top_half_processing.html">N2.1-N2.3 Top Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_4-5_bottom_half_processing.html">N2.4-N2.5 Bottom Half Processing</a></li><li class="chapter-item expanded "><a href="../N/2_6-7_ip_and_udp_processing.html">N2.6-N2.7 IP and UDP Processing</a></li></ol></li><li class="chapter-item expanded "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item expanded "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item expanded "><a href="../N/3_5-8_net_tx_and_driver_xmit.html" class="active">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item expanded "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item expanded "><a href="../M_Miscellaneous.html">M. Miscellaneous</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item expanded "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item expanded "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">teja&#x27;s notes</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="n35-38-net_tx-and-driver-xmit"><a class="header" href="#n35-38-net_tx-and-driver-xmit">N3.5-3.8 NET_TX and driver xmit</a></h1>
+<h3 id="n35-core-networking"><a class="header" href="#n35-core-networking">N3.5 Core networking</a></h3>
+<p>​      The current section will cover the simplest case of sending out a packet.      NET_TX softirq will not be scheduled, in most cases packets will be sent      out this way.</p>
+<p>​      Every real network device on creation has atleast one TX queue (var &quot;txq&quot;).      By real I mean actual physical devices: ethernet or wifi interfaces.      Virtual network devices like loopback, tun interfaces, etc are &quot;queueless&quot;,      i.e. they have a txq and a default Queue Discipline (<code>qdisc</code>), but a function is not added to      enqueue packets.</p>
+<p>Run &quot;tc qdisc show dev lo&quot;, and it should show &quot;noqueue&quot; as the only queue. Other real devices have queues with  specific properties, as shown below eth0 has a <code>fq_codel</code> queue. I'll add a separate page for qdiscs, for now ignore them.</p>
+<pre><code class="language-bash">$ tc qdisc show dev lo
+qdisc noqueue 0: root refcnt 2
+
+$ tc qdisc show dev eth0
+qdisc fq_codel 0: root refcnt 2 limit 10240p flows 1024 quantum 1514 target 5.0ms
+interval 100.0ms memory_limit 32Mb ecn 
+</code></pre>
+<p>A small optional section on how loopback's xmit works is added next. For now assume our device has a queue.</p>
+<p><code>__dev_queue_xmit()</code> finds the tx queue and qdisc and if a enqueue function      is present, calls <code>__dev_xmit_skb()</code> which calls the function to enqueue the      skb into the <code>qdisc</code>. At this point the skb is in the queue. We move  forward without any skb pointer held. After enqueueing the skb,      <code>__qdisc_run()</code> is called to process packets (if possible) that have been      enqueued. If no other process needs the cpu and less than 64 packets      have been processed in the current context, <code>__qdisc_run()</code> will continue      processing packets. <code>__qdisc_run</code> calls <code>qdisc_restart()</code> internally, which      dequeues skbs from the queue and calls <code>sch_direct_xmit()</code>, which calls      <code>dev_hard_start_xmit()</code> and it finally calls <code>xmit_one()</code>. <code>xmit_one()</code> will transmit one skb from the queue. </p>
+<pre><code class="language-c">__dev_queue_xmit()
+{
+    struct netdev_queue *txq;
+    struct Qdisc *q;
+
+    txq = netdev_pick_tx(dev, skb, sb_dev);
+    q = rcu_dereference_bh(txq-&gt;qdisc);
+    rc = __dev_xmit_skb(skb, q, dev, txq)
+    {
+        rc = q-&gt;enqueue(skb, q, &amp;to_free) &amp; NET_XMIT_MASK;
+        __qdisc_run(q)
+        {
+            //while constraints allow
+            qdisc_restart(q, &amp;packets)
+            {
+                skb = dequeue_skb(q);
+                sch_direct_xmit(skb);
+            }
+        }
+        qdisc_run_end(q);
+    }
+} 
+</code></pre>
+<h3 id="n36-net_tx-optional"><a class="header" href="#n36-net_tx-optional">N3.6 NET_TX (OPTIONAL)</a></h3>
+<p>Ironic that the article on NET_TX has this section marked as OPTIONAL. But      in simple scenarios, NET_TX softirq is almost never raised. After enqueueing      the packet,  <code>__qdisc_run()</code> cannot process packets because if one of these conditions is not met:</p>
+<ol>
+<li>no other process is waiting for this CPU</li>
+<li>the current process has enqueued less than 64 packets.</li>
+</ol>
+<p>Then a NET_TX is scheduled to run. <code>__netif_schedule()</code> will raise a      NET_TX softirq if it was not already triggered on the CPU. <code>net_tx_action()</code>, the      registered function will run <code>__qdisc_run()</code> on the qdisc, after which the      flow is same as the case without a softirq raised.</p>
+<p>Though we have not covered NAPI yet, <code>net_tx_action()</code> is a dual of <code>net_rx_action()</code>,  a root <code>qdisc</code> is a dual of a <code>napi</code> structure, and <code>xmit_one()</code> is a dual of <code>__netif_receive_skb()</code>, with very similar logic but in opposite directions.</p>
+<h3 id="n37-driver-xmit_one"><a class="header" href="#n37-driver-xmit_one">N3.7 driver xmit_one()</a></h3>
+<p>​      <code>xmit_one()</code> is the final function, which like <code>__netif_receive_skb()</code> shares      the packet with all registered promiscuous packet_types, i.e. the      global list <code>ptype_all</code> and per netdevice list <code>dev-&gt;ptype_all</code>. This is done      within <code>dev_queue_xmit_nit()</code> function. After this, <code>xmit_one</code> calls      <code>netdev_start_xmit()</code> which internally calls <code>__netdev_start_xmit()</code> to      hand over the packet to the driver by calling <code>ops-&gt;ndo_start_xmit()</code>      (ndo stands for NetDevice Ops). A <code>net_device_ops</code> struct is registered      during netdevice creation, where this function pointer is set by the driver. The driver will then send the packet out via the physical interface.</p>
+<pre><code class="language-c">sch_direct_xmit() -&gt; dev_hard_start_xmit() -&gt; xmit_one()
+{
+    dev_queue_xmit_nit();
+    //deliver skb to promisc packet types
+
+    netdev_start_xmit()
+    {
+        const struct net_device_ops *ops = dev-&gt;netdev_ops;
+        return ops-&gt;ndo_start_xmit(skb, dev);
+    }
+} 
+</code></pre>
+<h3 id="n38-loopback-xmit-optional"><a class="header" href="#n38-loopback-xmit-optional">N3.8 loopback xmit (OPTIONAL)</a></h3>
+<p>​      Like described earlier, each device during creation registers certain      functions using the <code>net_device_ops</code> structure. Loopback registers      <code>loopback_xmit</code> as the function. On sending a packet to loopback, when      <code>ops-&gt;ndo_start_xmit</code> is called, the packet enters <code>loopback_xmit()</code>. It is      a very simple function, which increments stats and calls <code>netif_rx_ni()</code>      to begin the RX path of the packet. The end of TX coincides with the start of RX in this function. </p>
+<p>​      The loopback device is described in <code>drivers/net/loopback.c</code> .</p>
+<pre><code class="language-c">loopback_xmit()
+{
+    skb_tx_timestamp(skb);
+    skb_orphan(skb);    // remove all links to the skb.
+    skb-&gt;protocol = eth_type_trans(skb, dev);    // set protocol
+
+    netif_rx(skb);    //RX!!
+} 
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../N/3_3-4_alloc_and_send_skb.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../N/4_Socket_Programming_BTS.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../N/3_3-4_alloc_and_send_skb.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../N/4_Socket_Programming_BTS.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
