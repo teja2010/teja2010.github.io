@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>N2. Packet RX path 1 : Basic - teja&#x27;s notes</title>
+        <title>N2.2 Softirqs, Softirq Scheduling (OPTIONAL) - teja&#x27;s notes</title>
                 
 
         <!-- Custom HTML head -->
@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html" class="active">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="../N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item expanded "><a href="../N/2_2_softirq_sched.html" class="active">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li></ol></li><li class="chapter-item "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -145,20 +145,51 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="n2-packet-rx-path-1--basic"><a class="header" href="#n2-packet-rx-path-1--basic">N2. Packet RX path 1 : Basic</a></h1>
-<p>This page describes the code flow while receiving a packet. It begins with the packet just entering the core networking code, top half and bottom half processing, basic flow through the IP and UDP layers and finally the packet is enqueued into a socket queue.</p>
-<p>Additionally hash based software packet steering across CPUs (RPS and RSS), Inter Processor Interrupts (IPI) and scheduling softirq processing is described. They can be ignored in the first read and can be revisited in later runs after gaining additional context. These sections have been marked OPTIONAL.
-NAPI will be described in later pages, all NAPI APIs are ignored now.</p>
+                        <h1 id="n22-softirqs-softirq-scheduling-optional"><a class="header" href="#n22-softirqs-softirq-scheduling-optional">N2.2 Softirqs, Softirq Scheduling [OPTIONAL]</a></h1>
+<p>One detail that I have ignored in the previous discussion is to specify which CPU the top and bottom half actually run.</p>
+<p>The top half runs in the hardware interrupt (IRQ) context, which is a kernel thread which can be on any CPU. (This description is not really true, I have a separate page planned on interrupts where this will be described in more detail. Till then this way of visualizing it is not really wrong). Say it runs on CPU0, i.e. netif_rx() is called on CPU0. The packet will be enqueued onto CPU0's input_packet_queue. The kernel thread will then schedule softirq processing on CPU0 and exit. The bottom half will also run on the same CPU. This section describes how the bottom half is scheduled by the top half and how softirq begins.</p>
+<p>Just Google what hard interrupts (IRQ) and soft interrupts (softirq) are for some background. Hardware interrupts (IRQs) will stop all processing. For interrupts that take very long to run, some work is done in IRQ and the rest is done in a softirq. Packet processing is one such task that takes very long to complete so NET_RX is the corresponding soft interrupt which takes care of packet processing.</p>
+<p>Linux currently has the following softirqs declared in <code>include/linux/interrupt.h</code></p>
+<pre><code class="language-c">enum
+{
+    HI_SOFTIRQ=0,
+    TIMER_SOFTIRQ,
+    NET_TX_SOFTIRQ,
+    NET_RX_SOFTIRQ,
+    BLOCK_SOFTIRQ,
+    IRQ_POLL_SOFTIRQ,
+    TASKLET_SOFTIRQ,
+    SCHED_SOFTIRQ,
+    HRTIMER_SOFTIRQ, /* Unused */
+    RCU_SOFTIRQ,
+
+    NR_SOFTIRQS
+
+}; 
+</code></pre>
+<p>The names are mostly indicative of the subsystem each softirq serves. During kernel initialization, a function is registered for each of these softirqs. When softirq processing is needed, this function is called.
+For example after core networking init is done, <code>net_dev_init()</code> registers <code>net_rx_action</code> and <code>net_tx_action</code> as the functions corresponding to <code>NET_RX</code> and <code>NET_TX</code>.</p>
+<pre><code class="language-c">  open_softirq(NET_TX_SOFTIRQ, net_tx_action);
+  open_softirq(NET_RX_SOFTIRQ, net_rx_action); 
+</code></pre>
+<p>A softirq is scheduled by calling <code>raise_softirq()</code>, which internally disables irqs and calls <code>__raise_softirq_irqoff()</code>. This function sets a bit corresponding to the softirq in the percpu bitmask <code>irq_stat.__softirq_pending</code>. The bitmask is used to track all pending softirqs on the CPU. This operation must be done with all interrupts are disabled on the CPU. Without interrupts disabled, the same bitmask can be overwritten by another interrupt handler, undoing the current change.</p>
+<p>Grepping for <code>ksoftirqd</code> in ps, should show multiple threads, one for each CPU. These are threads spawned during init to process pending softirqs on each of the CPUs. Periodically the scheduler will allow ksoftirqd to run, and if any of the bits are set, it's registered function is called.</p>
+<p>During packet RX, <code>net_rx_action()</code> is called.</p>
+<p>The CFS scheduler makes sure that all threads get their fair share of CPU time. So ksoftirqd and an application thread will both get their fair share. But, during softirq processing, ksoftirqd disables all irqs and the scheduler has no way of interrupting the thread. Hence all registered functions are have checks to prevent the ksoftirqd from high-jacking the CPU for too long.
+In this case, a buggy <code>net_rx_action()</code> function may be able to push packets into the socket queue but the application never will never get a chance to actually read the packets.</p>
+<p>To conclude, <code>netif_rx()</code> calls <code>__raise_softirq_irqoff(NET_RX_SOFTIRQ)</code> to schedule softirq processing on the current CPU. The ksoftirqd running on the current CPU will check the bitmask, since <code>NET_RX_SOFTIRQ</code> is pending will call <code>net_rx_action()</code></p>
+<h4 id="n221-run-softirq-now"><a class="header" href="#n221-run-softirq-now">N2.2.1 Run Softirq Now</a></h4>
+<p>Other than softirq being scheduled by the scheduler, it is sometimes necessary to kick start processing. For example when a sudden burst of packets arrive, due to delays in softirq processing, packets might be dropped. In such cases, when a burst is detected, kick-starting packet processing is helpful. In the above example, calling <code>netif_rx_ni()</code> will kick start packet processing, in addition to enqueuing the packet .</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="../N/1_setup_uml.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="../N/2_1_top_half.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="../N/2_1_top_half.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="../N/2_3_rps_rss.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -168,11 +199,11 @@ NAPI will be described in later pages, all NAPI APIs are ignored now.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="../N/1_setup_uml.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="../N/2_1_top_half.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="../N/2_1_top_half.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="../N/2_3_rps_rss.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
