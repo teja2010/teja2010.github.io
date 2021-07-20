@@ -2,12 +2,18 @@
 
 These notes are based on the following videos:
 
-1. [Create an Arch Linux QEMU installation](https://www.youtube.com/watch?v=kQFYfIXhahs): Installing arch is too involved, so I chose to install ubuntu.
-2. [GDB on the Linux Kernel](https://www.youtube.com/watch?v=unizGCcZg3Y). The script below is the same as the one described in this video.
+1. [Running an external custom kernel in Fedora 32 under QEMU: Kernel Debugging Part 1](https://www.youtube.com/watch?v=OdybsP9cQNA) I am more used to Ubuntu, so I chose it instead.
+2. [GDB on the Linux Kernel](https://www.youtube.com/watch?v=unizGCcZg3Y). 
+
+The script below is the same as the one described in these videos. 
+
+**Please watch both the videos before continuing further.**
+
+----
 
 
 
-Like described in the article on UML Setup, I like to learn by running a VM and attaching it via GDB. KVM and QEMU are the newer well supported VM solutions. This page is a tutorial on how to launch a debug instance in QEMU and attach to it using GDB.
+Like described in the article on UML Setup, I like to learn by running a VM and attaching it via GDB. KVM and QEMU are the newer and well supported VM solutions. This page is a tutorial on how to launch a debug instance in QEMU and attach to it using GDB.
 
 Install QEMU (check Qemu download page for distribution specific instructions). 
 
@@ -41,7 +47,7 @@ Move out of the linux directory and create an image for QEMU.
 
  `qemu-img create kernel-dev.img 20G` 
 
-Next download ubuntu's minimal iso image from here. It is a small 64MB file which can be used for a minimal Linux Installation. Move the downloaded mini.iso file into the same directory.
+Next download ubuntu's server iso image from [here](https://ubuntu.com/download/server). It is a ~1GB file which can be used for a Linux server. You can alternatively install the desktop version if you are more comfortable with a GUI. Move the downloaded iso file into the same directory.
 Finally save the script below as start.sh.
 
 ```bash
@@ -72,10 +78,14 @@ else
 		-m $RAM \
 		-serial stdio \
 		-kernel $KERNEL \
+		-initrd initrd.img \
 		-S -s \
 		-cpu host \
-		-append "root=/dev/sda1" \
+		-append "root=/dev/mapper/ubuntu--vg-ubuntu--lv ro nokaslr" \
 		-net user,hostfwd=tcp::5555-:22 -net nic \
+		# use this option to run debug kernel
+		# see the video 1 on how to pull the initrd.img
+		# the "root=/dev/ ..." command needs to pulled from grub.cfg (see video 1)
 fi
 ```
 
@@ -87,7 +97,7 @@ If no arguments are provided it tries to run the OS installed on kernel-dev.img.
   .
   ├── kernel-dev.img
   ├── linux
-  ├── mini.iso
+  ├── ubuntu-21.04-live-server-amd64.iso
   └── startup.sh 
 ```
 
@@ -96,7 +106,7 @@ If no arguments are provided it tries to run the OS installed on kernel-dev.img.
 First to install ubuntu run: (if superuser privileges needed, run with sudo) 
 
 ```
-./startup.sh mini.iso
+./startup.sh ubuntu-21.04-live-server-amd64.iso
 ```
 
 Go through all the steps and install ubuntu. A lot of YouTube videos show the  complete process. Use them as a reference if necessary.  
@@ -104,10 +114,10 @@ Go through all the steps and install ubuntu. A lot of YouTube videos show the  c
 Once the installation is complete, comment out  the line which provides the cdrom option to boot into an vanilla ubuntu install.  
 
 ```
-./startup.sh mini.iso  #cdrom line commented
+./startup.sh ubuntu-21.04-live-server-amd64.iso  #cdrom line commented
 ```
 
-Now wait for the kernel installation to complete. Then run the script without and arguments to boot into the kernel we built.
+Now wait for the kernel compilation to complete. Then run the script without the arguments to boot into the kernel we built.
 
 ```
 ./startup.sh
@@ -129,7 +139,7 @@ The network options are similar to those of UML. Thses options have been comment
 
 By default the script provides an interface via which the VM can access both internet and the host machine (over ssh). This is the SLIRP networking mode. Follow the link [here](https://wiki.qemu.org/Documentation/Networking#User_Networking_.28SLIRP.29) to read more.
 
-The interface will be provided but the interface will not have an address. Run dhclient on the interface so it is assigned an address. Next install an sshserver, if not installed, so we can access the guest over ssh.
+The interface will be created. If the interface does not have an address, run dhclient on the interface so it is assigned an address. Next install an sshserver, if not installed during ubuntu installation, so we can access the guest over ssh.
 
 ```bash
 sudo dhclient eth0  # provide the right interface name.
