@@ -20,7 +20,7 @@
 	- [N5. (WIP) Netfilter Internals](./N/5_Netfilter_Internals.md)
 		- [N5.1 Rule Matching](./N/5_1_rule_matching.md)
 		- [N5.2 Rule deconstruction](./N/5_2_rule_deconstruction.md)
-		- [N5.3 Adding tables, chains, rules]()
+		- [N5.3 Adding tables, chains, rules](./N/5_3_Adding_tables_chains_rules.md)
 		- [N5.4 Atomic Transactions]()
 		- [N5.5 Sets]()
 		- [N5.6 Maps, vmaps]()
