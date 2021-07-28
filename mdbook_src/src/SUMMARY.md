@@ -21,5 +21,6 @@
 - [M. Miscellaneous](./M_Miscellaneous.md)
 	- [CSE 222a, Notes](./M/1_CSE222a_Notes.md)
 	- [Cache Side Channel Attacks](./M/2_Cache_Side_Channel_Attacks.md)
+	- [Memory Models](./M/3_Memory_Models.md)
 
 - [A. Appendix](./Appendix.md)
