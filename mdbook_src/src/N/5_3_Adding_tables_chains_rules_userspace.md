@@ -361,25 +361,7 @@ sendmsg(3,
 
 
 
-These messages are handled in `nf_tables_commit` which will be described in the next section.
 
-```c
-Breakpoint 2, nf_tables_commit (net=0xffffffff85085080 <init_net>,
-                                skb=0xffff88800c787dc0)
-    at net/netfilter/nf_tables_api.c:8483
-8483    {
-(gdb) bt
-#0  nf_tables_commit
-#1  nfnetlink_rcv_batch
-#2  nfnetlink_rcv_skb_batch
-#3  nfnetlink_rcv
-#4 netlink_unicast_kernel
-#5  netlink_unicast
-#6  netlink_sendmsg
-#7  sock_sendmsg_nosec
-#8  sock_sendmsg
-#9  ____sys_sendmsg
-```
 
 
 
