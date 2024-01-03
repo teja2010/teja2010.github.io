@@ -1,0 +1,2 @@
+1. to build run `mdbook build`
+2. copy contents in book into the root directory
