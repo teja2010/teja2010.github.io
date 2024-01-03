@@ -1,0 +1,548 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>N5.3 Adding tables, chains, rules (userspace) - teja&#x27;s notes</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+                <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="../N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item expanded "><a href="../N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/5_1_rule_matching.html">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="../N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item expanded "><a href="../N/5_3_Adding_tables_chains_rules_userspace.html" class="active">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item "><a href="../N/5_4_Adding_tables_chains_rules_kernel.html">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="../N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item "><a href="../M/3_Memory_Models.html">Memory Models</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">teja&#x27;s notes</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="n53-adding-tables-chains-rules-userspace"><a class="header" href="#n53-adding-tables-chains-rules-userspace">N5.3 Adding tables, chains, rules (userspace)</a></h1>
+<p>netlink messages are used to setup tables, chains, etc from userspace.</p>
+<p>Let us dissect the netlink message that is sent by <code>nft</code> by running <code>strace</code> .  Some parts of the netlink message that are not parsed by <code>strace</code>, have also been formatted here.</p>
+<pre><code class="language-sh">$ strace -f nft add table T2
+</code></pre>
+<p><code>nft</code> creates a netlink socket and first sends a request to get rule-set generation <code>NFT_MSG_GETGEN</code>. In response, we receive the generation, which in this case is 3.</p>
+<pre><code class="language-c">socket(AF_NETLINK, SOCK_RAW, NETLINK_NETFILTER) = 3
+sendto(3,
+	{
+        struct nlmsghdr {
+            nlmsg_len=20,
+            nlmsg_type=NFNL_SUBSYS_NFTABLES &lt;&lt; 8 | NFT_MSG_GETGEN, //&lt;- 0xa10
+            nlmsg_flags=NLM_F_REQUEST,
+            nlmsg_seq=0, nlmsg_pid=0
+        },
+        struct nfgenmsg{ // &lt;- &quot;\x00\x00\x00\x00&quot;
+            nfgen_family=AF_UNSPEC,
+            version = NFNETLINK_V0,
+            res_id = 0,
+        }
+        
+    },20,
+    0,{sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000},12) = 20
+    
+recvmsg(3,
+   {
+       msg_name={
+           sa_family=AF_NETLINK,
+           nl_pid=0,
+           nl_groups=00000000
+       },
+       msg_namelen=12,
+       msg_iov=[
+           {
+               iov_base={
+                   struct nlmsghdr {
+                       nlmsg_len=44,
+                       nlmsg_type=NFNL_SUBSYS_NFTABLES &lt;&lt; 8 | NFT_MSG_NEWGEN //&lt;- 0xa0f
+                       nlmsg_flags=0,
+                       nlmsg_seq=0,
+                       nlmsg_pid=214676 // pid
+                   },
+                   struct nfgenmsg{ // &lt;-  &quot;\x00\x00\x00\x03&quot;
+                            nfgen_family=AF_UNSPEC,
+                            version = NFNETLINK_V0,
+                            (be16) res_id = 0x0003, // nft_base_seq(net)
+                   },
+                   struct nlattr {
+                       nla_len = 8, //&lt;- \x08\x00
+                       nla_type = NFTA_GEN_ID, // &lt;- \x01\x00
+                   },
+                   data = htonl(nft_net-&gt;base_seq) &quot;\x00\x00\x00\x03&quot;,
+                   padding = &quot;&quot;,
+                   struct nlattr {
+                       nla_len = 8, //&lt;- \x08\x00
+                       nla_type = NFTA_GEN_PROC_PID, // &lt;- &quot;\x02\x00&quot;
+                   },
+                   data = htonl(pid), // &lt;- htonl(214676) = &quot;\x00\x03\x46\x94&quot;,
+                   padding = &quot;&quot;,
+                   struct nlattr {
+                       nla_len = 8, //&lt;- \x08\x00
+                       nla_type = NFTA_GEN_PROC_PID, // &lt;- &quot;\x03\x00&quot;
+                   },
+                   data=&quot;nft\0&quot;, // &lt;-&quot;\x6e\x66\x74\x00&quot;
+                   padding = &quot;&quot;,
+               },
+               iov_len=69631
+           }
+       ],
+       msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 44
+</code></pre>
+<p>netfilter stores the generation number in <code>struct nftables_pernet</code> , which is data that is maintained per network namespace.</p>
+<pre><code class="language-c">struct nftables_pernet *nft_net = nft_pernet(net);
+
+struct nftables_pernet {
+    struct list_head	tables; // list of tables
+    struct list_head    commit_list; // list of transactions that are pending
+    ...
+    struct mutex        commit_mutex;
+    unsigned int        base_seq; // generation number
+};
+</code></pre>
+<p>Next, nft constructs and sends a netlink message to setup the table. netlink messages have sections each with a netlink message header and it's attributes.  <code>nlmsghdr-&gt;nlmsg_type</code> lets the kernel handle the section accordingly. In the below message we have the following sections:</p>
+<ol>
+<li><code>NFNL_MSG_BATCH_BEGIN</code>: begin a batch of changes to the ruleset</li>
+<li><code>NFT_MSG_NEWTABLE</code> : create a new table, with attributes:
+<ol>
+<li><code>NFTA_TABLE_NAME</code>:  <code>&quot;T2\0&quot;</code></li>
+<li><code>NFTA_TABLE_FLAGS</code>: 0</li>
+</ol>
+</li>
+<li><code>NFNL_MSG_BATCH_END</code>: end of batch. Now commit these changes (which happens atomically as we will see in a later section).</li>
+</ol>
+<pre><code class="language-c">sendmsg(3,
+    {
+        msg_name={
+            sa_family=AF_NETLINK,
+            nl_pid=0,
+            nl_groups=00000000
+        },
+        msg_namelen=12,
+        msg_iov=[
+            {
+                iov_base=[
+                    {
+                        struct nlmsghdr {
+                            nlmsg_len=20,
+                            nlmsg_type=NFNL_MSG_BATCH_BEGIN, //&lt;- 0x10
+                            nlmsg_flags=NLM_F_REQUEST,
+                            nlmsg_seq=0, 
+                            nlmsg_pid=0
+                        },
+                        struct nfgenmsg{ // &lt;- &quot;\x00\x00\x0a\x00&quot;
+                            nfgen_family=AF_UNSPEC,
+                            version = NFNETLINK_V0,
+                            res_id = NFNL_SUBSYS_NFTABLES, /*resource id */
+                        }
+                    },
+                    {
+                        struct nlmsghdr {
+                            nlmsg_len=36,
+                            nlmsg_type=NFNL_SUBSYS_NFTABLES &lt;&lt; 8 | NFT_MSG_NEWTABLE, // &lt;- 0xa00
+                            nlmsg_flags=NLM_F_REQUEST,
+                            nlmsg_seq=1,
+                            nlmsg_pid=0
+                        },
+                         struct nfgenmsg{ // &lt;- &quot;\x02\x00\x00\x00&quot;
+                            nfgen_family=AF_INET,
+                            version = NFNETLINK_V0,
+                            res_id = 0, /*resource id */
+                        }
+                        struct nlattr {
+                            nla_len = 7, // &lt;- &quot;\x07\x00&quot;
+                            nla_type = NFTA_TABLE_NAME, //&lt;- &quot;\x01\x00&quot;
+                        },
+                        data = &quot;T2\0&quot;,  // &lt;- &quot;\x54\x32\x00&quot;
+                        padding = &quot;\x00&quot;, // 4 byte alignment
+                        
+                        struct nlattr {
+                            nla_len = 8, // &lt;- &quot;\x08\x00&quot;
+                            nla_type = NFTA_TABLE_FLAGS //  &quot;\x02\x00&quot;
+                        },
+                        (u32) flags = 0, // &lt;- \x00\x00\x00\x00&quot;,
+                    },
+                    {
+                        struct nlmsghdr {
+                            nlmsg_len=20,
+                            nlmsg_type=NFNL_MSG_BATCH_END,
+                            nlmsg_flags=NLM_F_REQUEST, 
+                            nlmsg_seq=2, 
+                            nlmsg_pid=0,
+                        }, 
+                        struct nfgenmsg{ // &lt;- &quot;\x00\x00\x0a\x00&quot;
+                            nfgen_family=AF_UNSPEC,
+                            version = NFNETLINK_V0,
+                            res_id = NFNL_SUBSYS_NFTABLES, /*resource id */
+                        }
+                    }
+                ], 
+                iov_len=76
+            }
+        ], 
+        msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 76
+</code></pre>
+<p>Though I wont show strace output, to setup a chain will have a netlink message with <code>NFT_MSG_NEWCHAIN</code>  and attributes <code>NFTA_CHAIN_TABLE</code>,  <code> NFTA_CHAIN_NAME</code> , <code>NFTA_CHAIN_HOOK</code> and<code>NFTA_CHAIN_POLICY</code>. </p>
+<p>And to setup a rule nft will send a message with <code>NFT_MSG_NEWRULE</code> and attributes <code>NFTA_RULE_TABLE</code>, <code>NFTA_RULE_CHAIN</code>  and most importantly <code>NFTA_RULE_EXPRESSIONS</code> which is shown below.</p>
+<p>Note: use <code>--string-limit</code> so strace dumps the complete msg data.</p>
+<pre><code class="language-sh">strace -f --string-limit=1024  -o one.txt nft add rule T C ip daddr 127.0.0.9 counter
+</code></pre>
+<pre><code class="language-c">sendmsg(3,
+   {msg_name=
+       {sa_family=AF_NETLINK,
+        nl_pid=0,
+        nl_groups=00000000},
+    msg_namelen=12,
+    msg_iov=[
+      {iov_base=[
+        {
+            struct nlmsghdr {
+                nlmsg_len=20,
+                nlmsg_type=NFNL_MSG_BATCH_BEGIN, // &lt;- 0x10,
+                nlmsg_flags=NLM_F_REQUEST,
+                nlmsg_seq=0,
+                nlmsg_pid=0},
+            struct nfgenmsg { // &lt;- &quot;\x00\x00\x0a\x00&quot;
+                nfgen_family=AF_UNSPEC,
+                version = NFNETLINK_V0,
+                res_id = NFNL_SUBSYS_NFTABLES, /*resource id */
+            }
+        },
+        {
+            struct nlmsghdr {
+                nlmsg_len=156,
+                nlmsg_type= NFNL_SUBSYS_NFTABLES &lt;&lt; 8 | NFT_MSG_NEWRULE, // &lt;- 0xa06
+                nlmsg_flags=NLM_F_REQUEST|0xc00,
+                nlmsg_seq=1,
+                nlmsg_pid=0
+            },
+            struct nfgenmsg { // &lt;- &quot;\x02\x00\x00\x00&quot;
+                nfgen_family=AF_INET,
+                version = NFNETLINK_V0,
+                res_id = 0,
+            },
+            struct nlattr {
+                nla_len = 6,       // &quot;\x06\x00&quot;
+                nla_type = NFTA_RULE_TABLE, // &lt;- &quot;\x01\x00&quot;
+            },                       
+            data =  &quot;T\0&quot;, //   &quot;\x54\x00
+            padding = &quot;\x00\x00&quot;,
+            struct nlattr {
+                nla_len = 6, // &lt;- \x06\x00
+                nla_type = NFTA_RULE_CHAIN, // &lt;- &quot;\x02\x00&quot;
+            },
+            data = &quot;C\0&quot;, // \x43\x00
+            padding = &quot;\x00\x00&quot;,
+            struct nlattr {
+                nla_len = 120, //&lt;-  \x78\x00,
+                nla_type = NLA_F_NESTED | NFTA_RULE_EXPRESSIONS, //&lt;-\x04\x80
+            }
+
+            {
+                // 1. payload load 4b @ network header + 16 =&gt; reg 1
+                struct nlattr {
+                    nla_len = 52, //&lt;- &quot;\x34\x00&quot;
+                    nla_type = NLA_F_NESTED | NFTA_LIST_ELEM,  //&lt;- \x01\x80
+                }
+                struct nlattr {
+                    nla_len = 12, //&lt;- \x0c\x00
+                    nla_type = NFTA_EXPR_NAME, // &lt;- \x01\x00
+                }
+                data = &quot;payload\0&quot;,  // &lt;- &quot;\x70\x61\x79\x6c\x6f\x61\x64\x00&quot;,
+                padding = &quot;&quot;,
+                struct nlattr {
+                    nla_len = 36, // \x24\x00
+                    nla_type = NLA_F_NESTED | NFTA_EXPR_DATA, //&lt;- &quot;\x02\x80&quot;
+                }
+                struct nlattr {
+                    nla_len = 8, // \x08\x00
+                    nla_type = NFTA_PAYLOAD_DREG // &lt;- \x01\x00
+                }
+                data = 1, //&lt;-  &quot;\x00\x00\x00\x01&quot;
+                payload = &quot;&quot;,
+                struct nlattr {
+                    nla_len = 8, //&lt;- \x08\x00
+                    nla_type = NFTA_PAYLOAD_BASE,//&lt;- \x02\x00
+                }
+                data = NFT_PAYLOAD_NETWORK_HEADER, //&lt;-\x00\x00\x00\x01
+                padding = &quot;&quot;,
+                struct nlattr {
+                    nla_len = 8, //\x08\x00
+                    nla_type = NFTA_PAYLOAD_OFFSET ,//\x03\x00
+                }
+                data = 16, // \x00\x00\x00\x0f,
+                padding = &quot;&quot;,
+                struct nlattr {
+                    nla_len = 8, //\x08\x00
+                    nla_type = NFTA_PAYLOAD_LEN // \x04\x00
+                }
+                data = 4, //&quot;\x00\x00\x00\x04&quot;
+                padding = &quot;&quot;,
+            }
+            {
+                //2. cmp eq reg 1 0x0900007f
+                struct nlattr {
+                    nla_len = 44, // &lt;-\x2c\x00
+                    nla_type = NLA_F_NESTED | NFTA_LIST_ELEM, //&lt;- \x01\x80
+                }
+                struct nlattr {
+                    nla_len = 8, // \x08\x00
+                    nla_type = NFTA_EXPR_NAME //\x01\x00
+                }
+                data = &quot;cmp\0&quot;, //&quot;\x63\x6d\x70\x00&quot;
+                payload = &quot;&quot;,
+                struct nlattr {
+                    nla_len = 32, // &lt;-\x20\x00
+                    nla_type = NLA_F_NESTED | NFTA_EXPR_DATA // \x02\x80
+                }
+                struct nlattr {
+                    nla_len = 8, //\x08\x00
+                    nla_type = NFTA_CMP_SREG // \x01\x00
+                }
+                data = 1, // \x00\x00\x00\x01
+                padding = &quot;&quot;,
+                struct nlattr {
+                    nla_len = 8, //\x08\x00,
+                    nla_type = NFTA_CMP_OP, //\x02\x00
+                }
+                data =NFT_CMP_EQ, // = 0 &lt;- &quot;\x00\x00\x00\x00&quot;,
+                padding = &quot;&quot;,
+                struct nlattr {
+                    nla_len = 12, //\x0c\x00
+                    nla_type = NLA_F_NESTED | NFTA_CMP_DATA, //\x03\x80
+                }
+                struct nlattr {
+                    nla_len = 8, //\x08\x00
+                    nla_type = NFTA_DATA_VALUE, // \x01\x00
+                }
+                data = 0x0900007f, //&quot;\x7f\x00\x00\x09&quot;
+                padding = &quot;&quot;,
+
+            }
+            {
+                // 3. counter pkts 0 bytes 0 
+                struct nlattr {
+                    nla_len = 20, //\x14\x00
+                    nla_type = NLA_F_NESTED | NFTA_LIST_ELEM, //\x01\x80
+                }
+                struct nlattr {
+                    nla_len = 12, //\x0c\x00
+                    nla_type = NFTA_EXPR_NAME, // \x01\x00
+                }
+                data = &quot;counter\0&quot;, // &quot;\x63\x6f\x75\x6e\x74\x65\x72\x00&quot;
+                padding = &quot;&quot;,
+                struct nlattr {
+                    nla_len = 4 , // \x04\x00
+                    nla_type = NLA_F_NESTED | NFTA_EXPR_DATA, //\x02\x80
+                    // nested but len is 4 =&gt; no additional data 
+                }
+            }
+        },
+        {
+            {
+                nlmsg_len=20,
+                nlmsg_type=NFNL_MSG_BATCH_END, // &lt;- 0x11,
+                nlmsg_flags=NLM_F_REQUEST,
+                nlmsg_seq=2,
+                nlmsg_pid=0},
+            struct nfgenmsg { // &lt;- &quot;\x00\x00\x0a\x00&quot;
+                nfgen_family=AF_UNSPEC,
+                version = NFNETLINK_V0,
+                res_id = NFNL_SUBSYS_NFTABLES, /*resource id */
+            }
+        }
+    ], iov_len=196}
+  ], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 1
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../N/5_2_rule_deconstruction.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../N/5_4_Adding_tables_chains_rules_kernel.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../N/5_2_rule_deconstruction.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../N/5_4_Adding_tables_chains_rules_kernel.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+                <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            var socket = new WebSocket("ws://localhost:3000/__livereload");
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

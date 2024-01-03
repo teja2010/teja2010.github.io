@@ -1,0 +1,392 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Memory Models - teja&#x27;s notes</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+                <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item "><a href="../Preface.html">Preface</a></li><li class="chapter-item "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="../N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item "><a href="../N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/5_1_rule_matching.html">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="../N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item "><a href="../N/5_3_Adding_tables_chains_rules_userspace.html">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item "><a href="../N/5_4_Adding_tables_chains_rules_kernel.html">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="../N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item expanded "><a href="../M/3_Memory_Models.html" class="active">Memory Models</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">teja&#x27;s notes</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="m3-memory-models"><a class="header" href="#m3-memory-models">M3 Memory Models</a></h1>
+<p>Notes from:</p>
+<ul>
+<li><a href="https://research.swtch.com/hwmm">Hardware Memory Models</a></li>
+<li><a href="https://research.swtch.com/plmm">Programming Language Memory Models</a></li>
+<li><a href="https://research.swtch.com/gomm">Updating the Go Memory Model</a></li>
+</ul>
+<hr />
+<p>Memory model decides the visibility and consistency of changes to data stored in memory. The hardware's memory model helps developers understand what the hardware guarantees.</p>
+<h2 id="m31-sequential-consistency"><a class="header" href="#m31-sequential-consistency">M3.1 Sequential Consistency</a></h2>
+<p>Essentially, if processors are running instructions</p>
+<ol>
+<li>
+<p>The order of instructions that a processor runs cannot be re-ordered. i.e. if a processor has instructions <code>I1, I2, I3</code> , they must be applied in the same order.</p>
+</li>
+<li>
+<p>Instructions accross processors can interleave in any way while the condition <code>1</code> is not violated</p>
+</li>
+</ol>
+<p>Mental model: Threads write to a shared memory, without any caches. Only one thread is allowed to read/write at a time.</p>
+<p><img src="imgs/mem-sc.png" alt="img" /></p>
+<h2 id="m32-x86-total-store-order-x86-tso"><a class="header" href="#m32-x86-total-store-order-x86-tso">M3.2 x86 Total Store Order (x86-TSO)</a></h2>
+<p>All threads are connected to a shared memory, but:</p>
+<ol>
+<li>each processor queues writes into a local write buffer</li>
+<li>each checks local write buffer before checking the shared memory.
+<ol>
+<li>i.e. a processor sees it writes before others do</li>
+</ol>
+</li>
+<li>All processors <strong>agree on the total order of writes</strong> to the shared memory.
+<ol>
+<li>corollary:  If we have N reader threads and 1 writer thread, then all the readers MUST see the written value together. i.e. either they  all see the old value or all see the new value.</li>
+</ol>
+</li>
+</ol>
+<p><img src="imgs/mem-tso.png" alt="img" /></p>
+<h2 id="m34-arm-relaxed-memory-model"><a class="header" href="#m34-arm-relaxed-memory-model">M3.4 ARM Relaxed Memory Model</a></h2>
+<ul>
+<li>Each processor reads/writes to its own copy of memory.</li>
+<li>The writes are propagated to other threads independently. Writes can propagate with any reordering.</li>
+<li>But write order is agreed by all the Threads. (i.e. it may happen at different times, but the order is the same)</li>
+<li>Each thread can also postpone a read until after a write. i.e. reordering within a thread's instructions.</li>
+</ul>
+<p><img src="imgs/mem-weak.png" alt="img" /></p>
+<h2 id="m34-litmus-tests"><a class="header" href="#m34-litmus-tests">M3.4 Litmus tests</a></h2>
+<p>A series of tests to show cases where the memory models differ. In each test, threads read/write to shared values x,y,z... and read to thread local registers r1,r2,... </p>
+<h5 id="m341-litmus-test-message-passing"><a class="header" href="#m341-litmus-test-message-passing">M3.4.1 Litmus test: Message Passing</a></h5>
+<pre><code>// Thread 1            // Thread 2
+x = 1                     r1 = y
+y = 1                     r2 = x
+</code></pre>
+<p>Q. Can this program see <code>r1=1</code> and <code>r2=0</code>?</p>
+<ul>
+<li>Seq Consistency: NO
+<ul>
+<li>because writes in Thread 1 must happen in the same order</li>
+</ul>
+</li>
+<li>TSO: NO
+<ul>
+<li>writes queue guarantees the x write happens before y write.</li>
+</ul>
+</li>
+<li>ARM: YES</li>
+</ul>
+<h5 id="m342-litmus-test-write-queue"><a class="header" href="#m342-litmus-test-write-queue">M3.4.2 Litmus test: Write Queue</a></h5>
+<pre><code>// Thread 1            // Thread 2
+x = 1                     y = 1
+r1 = y                    r2 = x
+</code></pre>
+<p>Q. Can this program see <code>r1 =0</code> and <code>r2 = 0</code>?</p>
+<ul>
+<li>Seq Consistency : NO
+<ul>
+<li>read to registers can only happen after atleast one of x or y are written.</li>
+</ul>
+</li>
+<li>TSO: YES
+<ul>
+<li>if x and y writes are still in the queue, both processors can read old values.</li>
+</ul>
+</li>
+<li>ARM: YES</li>
+</ul>
+<h5 id="m343-litmus-test-independent-reads-of-independent-writes-iriw"><a class="header" href="#m343-litmus-test-independent-reads-of-independent-writes-iriw">M3.4.3 Litmus Test: Independent Reads of Independent Writes (IRIW)</a></h5>
+<pre><code>// Thread 1      // Thread 2      //Thread 3      //Thread 4
+x = 1            y = 1            r1 = x          r3 = y
+                                  r2 = y          r4 = x
+</code></pre>
+<p>Q. Can this program see <code>r1=1</code>, <code>r2=0</code>, <code>r3=1</code> and <code>r4=0</code> ?</p>
+<ul>
+<li>Seq Consistency: NO
+<ul>
+<li>writes to x and y must be appear to all threads in same order.</li>
+</ul>
+</li>
+<li>TSO: NO
+<ul>
+<li>write order is agreed by all processors</li>
+</ul>
+</li>
+<li>ARM: YES</li>
+</ul>
+<h5 id="m344-litmus-test-n6-paul-lowenstein"><a class="header" href="#m344-litmus-test-n6-paul-lowenstein">M3.4.4 Litmus Test: n6 (Paul Lowenstein)</a></h5>
+<pre><code>// Thread 1         //Thread 2
+x = 1               y = 1
+r1 = x              x = 2
+r2 = y
+</code></pre>
+<p>Q. Can this program see <code>r1=1</code>, <code>r2=0</code> and <code>x=1</code> ?</p>
+<ul>
+<li>Seq Consistency: NO</li>
+<li>TSO: YES
+<ul>
+<li>x =1 is written, but y=1 and x=2 are still in the write queue.</li>
+</ul>
+</li>
+<li>ARM: YES</li>
+</ul>
+<h5 id="m345-litmus-test-load-buffering"><a class="header" href="#m345-litmus-test-load-buffering">M3.4.5 Litmus Test: Load Buffering</a></h5>
+<pre><code>// Thread 1         // Thread 2
+r1 = x              r2 = y
+y = 1               x = 1
+</code></pre>
+<p>Q. Can program see r1=1, r2=1?</p>
+<ul>
+<li>Seq Consistency: NO</li>
+<li>TSO: NO</li>
+<li>ARM: YES (can reorder reads)</li>
+</ul>
+<h5 id="m346-litmus-test-store-buffering"><a class="header" href="#m346-litmus-test-store-buffering">M3.4.6 Litmus Test: Store Buffering</a></h5>
+<pre><code>// Thread 1            // Thread 2
+x = 1                  y = 1
+r1 = y                 r2 = x
+</code></pre>
+<p>Q. Can the program see r1=0, r2=0?</p>
+<ul>
+<li>Seq Consistent: NO</li>
+<li>x86 TSO: YES</li>
+<li>ARM: YES</li>
+</ul>
+<h5 id="m347-litmus-test-coherence"><a class="header" href="#m347-litmus-test-coherence">M3.4.7 Litmus Test: Coherence</a></h5>
+<pre><code>//Thread 1        //Thread 2        //Thread 3        //Thread 4
+x = 1             x = 2             r1 = x            r3 = x
+                                    r2 = x            r4 = x
+</code></pre>
+<p>Q. Can the prohram see r1=1, r2=2, r3=2, r4=1 ?</p>
+<ul>
+<li>Seq Consistent: NO</li>
+<li>x86 TSO: NO</li>
+<li>ARM: NO</li>
+</ul>
+<h2 id="m35-weak-ordering-and-data-race-free-seq-consistency--drf-sc"><a class="header" href="#m35-weak-ordering-and-data-race-free-seq-consistency--drf-sc">M3.5 Weak Ordering and Data Race Free Seq. Consistency  (DRF-SC)</a></h2>
+<ul>
+<li>Proposed by Sarita Adve and Mark Hill in “<a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.42.5567">Weak Ordering – A New Definition</a>”.</li>
+<li>synchronization model : a set of constraints on memory accesses to specify how &amp; when synchronization needs to done</li>
+<li>Hardware is weakly ordered w.r.t. a sync model IFF it appears seq. consistent to all software that obeys the sync. model.</li>
+<li>One model that was proposed by the authors is Data-Race-Free (DRF) model.
+<ul>
+<li>DRF assumes HW has sync operations, other than read/write. 
+<ul>
+<li>a barrier is a sync-operation</li>
+</ul>
+</li>
+<li>Then read/writes can be reordered but cannot be moved across a sync-operation.</li>
+</ul>
+</li>
+<li>A program is DRF if two memory accesses are:
+<ul>
+<li>either both reads</li>
+<li>Or accesses that are separated by sync operations, forcing one to happen before the other</li>
+</ul>
+</li>
+<li>Weak Ordering: A contract between SW and HW that <strong>If SW is DRF, the HW acts as if it is sequentially consistent.</strong> This was proved by the authors
+<ul>
+<li>A recipe for HW designers &amp; SW developers to run sequentially consistent programs.</li>
+</ul>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../M/2_Cache_Side_Channel_Attacks.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../Appendix.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../M/2_Cache_Side_Channel_Attacks.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../Appendix.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+                <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            var socket = new WebSocket("ws://localhost:3000/__livereload");
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
