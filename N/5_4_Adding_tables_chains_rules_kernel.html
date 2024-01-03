@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>N2.4 Softirq NET_RX - teja&#x27;s notes</title>
+        <title>N5.4 Adding tables, chains, rules (kernel) - teja&#x27;s notes</title>
                 
 
         <!-- Custom HTML head -->
@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item expanded "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="../N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item expanded "><a href="../N/2_4_softirq_netrx.html" class="active">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item "><a href="../N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/5_1_rule_matching.html">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="../N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item "><a href="../N/5_3_Adding_tables_chains_rules_userspace.html">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item "><a href="../N/5_4_Adding_tables_chains_rules_kernel.html">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="../N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item "><a href="../M/3_Memory_Models.html">Memory Models</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="../N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item expanded "><a href="../N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/5_1_rule_matching.html">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="../N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item "><a href="../N/5_3_Adding_tables_chains_rules_userspace.html">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item expanded "><a href="../N/5_4_Adding_tables_chains_rules_kernel.html" class="active">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="../N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item "><a href="../M/3_Memory_Models.html">Memory Models</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -145,52 +145,100 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="n24-softirq-processing-net_rx"><a class="header" href="#n24-softirq-processing-net_rx">N2.4 Softirq processing NET_RX</a></h1>
-<p>Softirq processing was scheduled by the bottom half, and NET_RX begins. All of NET_RX processing is done in <code>net_rx_action()</code>. The logic is to process packets until one of the following events occurs:</p>
+                        <h1 id="n54-adding-tables-chains-rules-kernel"><a class="header" href="#n54-adding-tables-chains-rules-kernel">N5.4 Adding tables, chains, rules (kernel)</a></h1>
+<p>Netlink messages are handled in  nfnetlink_rcv_batch()</p>
+<pre><code class="language-c">(gdb) bt
+#0  nfnetlink_rcv_batch
+#1  nfnetlink_rcv_skb_batch
+#2  nfnetlink_rcv
+#3 netlink_unicast_kernel
+#4  netlink_unicast
+#5  netlink_sendmsg
+#6  sock_sendmsg_nosec
+#7  sock_sendmsg
+#8  ____sys_sendmsg
+</code></pre>
+<p>An overview of how the data is handled in <code>nfnetlink_rcv_batch</code>:</p>
 <ol>
-<li>The packet queue is empty. In this case NET_RX softirq stops.</li>
-<li>NET_RX has been running for longer than <code>netdev_budget_usecs</code>, whose default value is 2 milliseconds.</li>
-<li>NET_RX has processed more than <code>netdev_budget</code> (fixed value of 300) packets. (We will revist this constraint while looking at NAPI)</li>
+<li>Hold the <code>nftables_pernet-&gt;commit mutex</code></li>
+<li>Add each change as a transaction into <code>nftables_pernet-&gt;commit_list</code>.</li>
+<li>Commit changes in <code>nf_tables_commit</code></li>
+<li>Release lock <code>nftables_pernet-&gt;commit mutex</code></li>
 </ol>
-<p>In cases 2 and 3, there still might be packets to process, in which case NET_RX will schedule itself before exiting, (i.e. set the NET_RX_SOFTIRQ bit before exiting), so it can process some more packets in another session. In cases 2 and 3 NET_RX processing is almost at it's limits. To indicate this <code>sd-&gt;time_squeeze</code> is incremented, so that a few parameters can be tuned. We will revisit this while discussing NAPI.</p>
-<p>Softirq processing is done with elevated privilages, which can easily cause it to high-jack the complete CPU. The above constraints are to make sure that softirq processing allows the applications run. If the softirq were to high-jack the CPU, the user application would never run, and the end user would see applications not responding.</p>
-<p>The actual function that dequeues packets from <code>input_pkt_queue</code> and begins processing them is <code>process_backlog()</code>. After dequeueing the packet it calls <code>__netif_receive_skb()</code> which pushes the packet up into the protocol stacks.</p>
-<p>For now ignore the napi part of <code>net_rx_action()</code>, it calls <code>napi_poll()</code> which will call the registered poll function <code>n-&gt;poll()</code>. The poll function is set to process_backlog. For now believe me even if it does not make much sense. It will make sense one we look at the NAPI framework.</p>
-<pre><code class="language-c">net_rx_action()
+<pre><code class="language-c">static void nfnetlink_rcv_batch(struct sk_buff *skb, struct nlmsghdr *nlh, 
+                                u16 subsys_id, u32 genid)
 {
-    unsigned long time_limit = jiffies +
-                               usecs_to_jiffies(netdev_budget_usecs);
-    int budget = netdev_budget;
-
-    budget -= napi_poll(n, &amp;repoll)
+    struct net *net = sock_net(skb-&gt;sk); // same namespace as the process
+    
+    // subsys_id = NFNL_SUBSYS_NFTABLES
+    ss = nfnl_dereference_protected(subsys_id);
+    /* ss = struct nfnetlink_subsystem nf_tables_subsys {
+    		.cb				= nf_tables_cb,
+    		.commit			= nf_tables_commit,
+    		.valid_genid	= nf_tables_valid_genid,
+    	} */
+    
+    nc = nfnetlink_find_client(type, ss);
+    
+    ss-&gt;valid_genid(net, genid)
     {
-        work = n-&gt;poll(n, weight) // same as process_backlog
-        process_backlog(n, weight)
+        
+        struct nftables_pernet *nft_net = nft_pernet(net);
+        mutex_lock(&amp;nft_net-&gt;commit_mutex);
+    }
+    
+    while (skb-&gt;len &gt;= nlmsg_total_size(0)) {
+        type = nlh-&gt;nlmsg_type;
+        if (type == NFNL_MSG_BATCH_BEGIN) {
+            /* Malformed: Batch begin twice */
+            status |= NFNL_BATCH_FAILURE;
+            goto done;
+        } else if (type == NFNL_MSG_BATCH_END) {
+            status |= NFNL_BATCH_DONE;
+            goto done;
+        } else if (type &lt; NLMSG_MIN_TYPE) {
+            err = -EINVAL;
+            goto ack;
+        }
+        
+        nc = nfnetlink_find_client(type, ss); // call back
+        // nc is picked from nf_tables_cb
         {
-            skb_queue_splice_tail_init(&amp;sd-&gt;input_pkt_queue,
-                                       &amp;sd-&gt;process_queue);
-            while ((skb = __skb_dequeue(&amp;sd-&gt;process_queue)))
-                __netif_receive_skb(skb);
+            return &amp;ss-&gt;cb[cb_id]
+        }
+        
+        err = nc-&gt;call(skb, &amp;info, (const struct nlattr **)cda);
+        // create a table and add transaction to commit_list
+    }
+
+    err = ss-&gt;commit(net, oskb);
+    // nf_tables_commit(struct net *net, struct sk_buff *skb)
+    {
+     	list_for_each_entry_safe(trans, next, &amp;nft_net-&gt;commit_list, list) {
+            // based  on the transaction type, commit it
+        }
+        nf_tables_commit_release(net)
+        {
+            // some clean-up and finally unlock mutex
+            mutex_unlock(&amp;nft_net-&gt;commit_mutex);
         }
     }
-    // time and budget constraints
-    if (unlikely(budget &lt;= 0 ||
-                 time_after_eq(jiffies, time_limit))) {
-        sd-&gt;time_squeeze++;
-        break;
+    if (err) {
+        ss-&gt;abort(net, oskb, NFNL_ABORT_NONE);
     }
-} 
+
+}
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="../N/2_3_rps_rss.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="../N/5_3_Adding_tables_chains_rules_userspace.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="../N/2_5_netif_receive_skb_core.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="../N/5_5_Atomic_transactions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -200,11 +248,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="../N/2_3_rps_rss.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="../N/5_3_Adding_tables_chains_rules_userspace.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="../N/2_5_netif_receive_skb_core.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="../N/5_5_Atomic_transactions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>

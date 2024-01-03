@@ -1,0 +1,355 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>N5.1 Rule Matching - teja&#x27;s notes</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+                <!-- MathJax -->
+        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="../N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item expanded "><a href="../N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/5_1_rule_matching.html" class="active">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="../N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item "><a href="../N/5_3_Adding_tables_chains_rules_userspace.html">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item "><a href="../N/5_4_Adding_tables_chains_rules_kernel.html">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="../N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item "><a href="../M/3_Memory_Models.html">Memory Models</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">teja&#x27;s notes</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="n51-rule-matching"><a class="header" href="#n51-rule-matching">N5.1 Rule Matching</a></h1>
+<h3 id="n510-setup-table-chain-and-a-rule"><a class="header" href="#n510-setup-table-chain-and-a-rule">N5.1.0 Setup table, chain and a rule</a></h3>
+<p>Let us first setup a simple table, a chain and rule that counts all packets whose source address is <code>127.0.0.1</code></p>
+<p>For our current exploration, lets add a simple rule which counts packets from 127.0.0.9</p>
+<pre><code class="language-sh">$ nft add table ip T  # a table called T
+$ nft add chain T C { type filter hook prerouting priority 0\; }  # a chain C
+$ nft add rule T C ip saddr 127.0.0.9 counter
+</code></pre>
+<p>The above chain has been added in the prerouting hook, i.e. it will run before the kernel makes a rounting decision. A kernel based on the routing table, will decide if the packet has to forwarded out of an network interface or will be consumed locally by an application.</p>
+<p>Next to check the ruleset:</p>
+<pre><code class="language-sh">$ nft list ruleset 
+
+table ip T {
+        chain C {
+                type filter hook prerouting priority filter; policy accept;
+                ip daddr 127.0.0.9 counter packets 4 bytes 336
+        }
+}
+</code></pre>
+<p>Run pings to that address, and we can see the counter increase.</p>
+<pre><code class="language-sh">$ ping 127.0.0.9
+</code></pre>
+<h3 id="n511-rule-matching-in-net_rxnet_tx"><a class="header" href="#n511-rule-matching-in-net_rxnet_tx">N5.1.1 Rule matching in NET_RX/NET_TX</a></h3>
+<p>Like discussed in the RX,TX path articles, netfilter processing happens in the softirq context. The pre-routing hook is hit in <code>ip_rcv</code></p>
+<pre><code class="language-c">int ip_rcv(struct sk_buff *skb, struct net_device *dev,
+           struct packet_type *pt,
+	       struct net_device *orig_dev)
+{
+	struct net *net = dev_net(dev);
+
+	skb = ip_rcv_core(skb, net);
+	if (skb == NULL)
+		return NET_RX_DROP;
+
+	return NF_HOOK(NFPROTO_IPV4, NF_INET_PRE_ROUTING,
+		       net, NULL, skb, dev, NULL,
+		       ip_rcv_finish);
+}
+
+</code></pre>
+<p>On entering NF_HOOK it internally calls calls nf_hook. If the nf filters return a verdict of accept, the packet is passed into the okfn (<code>ip_rcv_finish</code> in  this case ).  Take a look at all the data that is passed into the netfilter  hooks.</p>
+<pre><code class="language-c">static inline int
+NF_HOOK(uint8_t pf,              //protocol family (IP in our case)
+		 unsigned int hook,      //PREROUTING
+		 struct net *net,        //network namespace (net_init)
+		 struct sock *sk,        //will be set if sock lookup happens early on
+	     struct sk_buff *skb,    //the packet
+	     struct net_device *in,  //source device
+	     struct net_device *out, //destination device (if routing is complete)
+	     int (*okfn)(struct net *, struct sock *, struct sk_buff *))
+	                             //func to run on ACCEPT
+{
+	int ret = nf_hook(pf, hook, net, sk, skb, in, out, okfn);
+    if (ret == 1) 
+		ret = okfn(net, sk, skb);
+	return ret;
+}
+</code></pre>
+<p><code>nf_hook</code> then based on the hook and protocol family which called NF_HOOK, chooses a list of <code>nf_hook_entries</code>. This list is then traversed in <code>nf_hook_slow</code>.</p>
+<pre><code class="language-c">static inline int
+nf_hook(u_int8_t pf,
+        unsigned int hook, struct net *net,
+        struct sock *sk, struct sk_buff *skb,
+        struct net_device *indev, struct net_device *outdev,
+        int (*okfn)(struct net *, struct sock *, struct sk_buff *))
+{
+	struct nf_hook_entries *hook_head = NULL;
+	
+	rcu_read_lock();
+	switch (pf) {
+	case NFPROTO_IPV4:
+		hook_head = rcu_dereference(net-&gt;nf.hooks_ipv4[hook]);
+		break;
+		// ... other protocols //
+		
+		default:
+		WARN_ON_ONCE(1);
+		break;
+	}
+	
+	if (hook_head) {
+		struct nf_hook_state state;
+		nf_hook_state_init(&amp;state, hook, pf, indev, outdev,
+				   sk, net, okfn);
+		ret = nf_hook_slow(skb, &amp;state, hook_head, 0);
+	}
+	rcu_read_unlock();
+
+	return ret;
+}
+</code></pre>
+<p><code>nf_hook_slow</code> is the actual function that runs each of the hook_entry functions. If any of the hook functions return a terminating verdict (<code>NF_ACCEPT</code> or <code>NF_DROP</code>),  the loop is broken and the verdict is returned.</p>
+<pre><code class="language-c">int nf_hook_slow(struct sk_buff *skb, struct nf_hook_state *state,
+		 const struct nf_hook_entries *e,
+         unsigned int s)
+{
+	unsigned int verdict;
+	int ret;
+
+	for (; s &lt; e-&gt;num_hook_entries; s++) {
+		verdict = nf_hook_entry_hookfn(&amp;e-&gt;hooks[s], skb, state);
+		switch (verdict &amp; NF_VERDICT_MASK) {
+		case NF_ACCEPT:
+			break;
+		case NF_DROP:
+			kfree_skb(skb);
+			ret = NF_DROP_GETERR(verdict);
+			if (ret == 0)
+				ret = -EPERM;
+			return ret;
+		// ... other verdicts ///
+		}
+	}
+
+	return 1;
+}
+</code></pre>
+<p>The <code>hook_entries</code> are added in <code>nf_register_net_hook</code> , which takes a <code>struct nf_hook_ops</code> which is called while adding a rule.  In our case, for ipv4, <code>nft_chain_filter_ipv4_init</code> registers <code>nft_do_chain_ipv4</code> as the hook function.</p>
+<p><code>nft_do_chain_ipv4</code> simply sets pktinfo from the skb and calls <code>nft_do_chain</code>.</p>
+<p>All chains finally enter <code>nft_do_chain</code>  which matches the packet against rules. How rules are translated into register operations will discussed in a later article. But, for now <code>nft_do_chain</code> is the actual function that matches rules against packets and returns a verdict</p>
+<p>The overall stack at this point looks like:</p>
+<pre><code class="language-c">(gdb) hbreak nft_do_chain
+Hardware assisted breakpoint 3 at 0xffffffff83399250: file net/netfilter/nf_tables_core.c, line 159.
+
+(gdb) bt
+#0  nft_do_chain ()
+#1  nft_do_chain_ipv4 () 
+#2  nf_hook_entry_hookfn ()
+#3  nf_hook_slow ()
+#4  nf_hook_slow_list ()
+#5  NF_HOOK_LIST (pf=2 '\002',...
+				  okfn=0xffffffff83487250 &lt;ip_rcv_finish&gt;, ...)
+#6  ip_sublist_rcv ()
+#7  ip_list_rcv ()
+#8  __netif_receive_skb_list_ptype ()
+#9  __netif_receive_skb_list_core ()
+#10  __netif_receive_skb_list ()
+#11 netif_receive_skb_list_internal ()
+    ... napi poll ...
+#18 net_rx_action () at net/core/dev.c:7201
+#19 __do_softirq () at kernel/softirq.c:558
+#20 do_softirq () at kernel/softirq.c:459
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../N/5_Netfilter_Internals.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../N/5_2_rule_deconstruction.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../N/5_Netfilter_Internals.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../N/5_2_rule_deconstruction.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+                <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            var socket = new WebSocket("ws://localhost:3000/__livereload");
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
