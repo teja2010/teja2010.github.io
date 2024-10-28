@@ -1,50 +1,49 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>teja&#x27;s notes</title>
-                <meta name="robots" content="noindex" />
-                
+        <meta name="robots" content="noindex">
+
 
         <!-- Custom HTML head -->
         
-
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
-                <link rel="icon" href="favicon.svg">
-                        <link rel="shortcut icon" href="favicon.png">
-                <link rel="stylesheet" href="css/variables.css">
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
-                <link rel="stylesheet" href="css/print.css" media="print">
-        
+        <link rel="stylesheet" href="css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-                <link rel="stylesheet" href="fonts/fonts.css">
-        
+        <link rel="stylesheet" href="fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css">
         <link rel="stylesheet" href="tomorrow-night.css">
         <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        
-                <!-- MathJax -->
-        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-            </head>
-    <body>
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -60,71 +59,102 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
 
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
-            var html = document.querySelector('html');
-            var sidebar = 'hidden';
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="Preface.html">Preface</a></li><li class="chapter-item "><a href="N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item "><a href="N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item "><a href="N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/5_1_rule_matching.html">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item "><a href="N/5_3_Adding_tables_chains_rules_userspace.html">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item "><a href="N/5_4_Adding_tables_chains_rules_kernel.html">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item "><a href="M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item "><a href="M/3_Memory_Models.html">Memory Models</a></li></ol></li><li class="chapter-item "><a href="P_Papers.html">P.Papers</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="P/1_ML_sys.html">ML Sys</a></li></ol></li><li class="chapter-item "><a href="Appendix.html">A. Appendix</a></li></ol>            </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+                <ol class="chapter"><li class="chapter-item "><a href="HI.html">Hi</a></li><li class="chapter-item "><a href="Preface.html">0. Preface</a></li><li class="chapter-item "><a href="N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/1_setup_uml.html">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item "><a href="N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item "><a href="N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="N/5_1_rule_matching.html">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item "><a href="N/5_3_Adding_tables_chains_rules_userspace.html">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item "><a href="N/5_4_Adding_tables_chains_rules_kernel.html">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item "><a href="M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item "><a href="M/3_Memory_Models.html">Memory Models</a></li></ol></li><li class="chapter-item "><a href="P_Papers.html">P.Papers</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="P/1_ML_sys.html">ML Sys</a></li></ol></li><li class="chapter-item "><a href="Appendix.html">A. Appendix</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
 
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                
-                <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky bordered">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
-                                            </div>
+                    </div>
 
                     <h1 class="menu-title">teja&#x27;s notes</h1>
 
                     <div class="right-buttons">
-                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
-                                                                        
+
                     </div>
                 </div>
 
-                                <div id="search-wrapper" class="hidden">
+                <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
                         <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
                     </form>
@@ -134,9 +164,9 @@
                         </ul>
                     </div>
                 </div>
-                
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -146,11 +176,14 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="0-preface"><a class="header" href="#0-preface">0. Preface</a></h1>
+                        <h1 id="hi-"><a class="header" href="#hi-">Hi 👋</a></h1>
+<p>Hi I am Tejaswi. These are my notes.</p>
+<p>I am broadly intersted in systems, networking, linux and math. These notes form markers as I explore these realms.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="0-preface"><a class="header" href="#0-preface">0. Preface</a></h1>
 <ol>
 <li>
 <p>This is a simple collection of some of my notes. Some parts are incomplete, I'll
-mark them with a ​&quot;WIP&quot;​ tag.</p>
+mark them with a ​"WIP"​ tag.</p>
 </li>
 <li>
 <p>No license. I am doing this for myself. If you find it helpful, that is great.</p>
@@ -170,15 +203,15 @@ mark them with a ​&quot;WIP&quot;​ tag.</p>
 <p>Before we jump in,  notes on how packets are represented in Linux and visualizing their processing.</p>
 <h3 id="n01-packet-representation-in-linux"><a class="header" href="#n01-packet-representation-in-linux">N.0.1 Packet Representation in Linux</a></h3>
 <p>Packets are represented using sk_buff (socket buffer) in Linux. The struct is declared in <code>include/linux/skbuff.h</code>. I will call a packet as skb interchangeably from now on. The sk_buff struct contains two parts, the packet data and it's meta data.</p>
-<p>Firstly it contains pointers to the actual data. The actual packet with Ethernet, IP, transport headers and payload that has made it's way over the network will be put in some memory that is allocated. The simplest way this is done is to allocate a contiguous memory block which will contain the whole packet. (We will see in later pages how very large packets can be created using lists of such blocks or how number of data copies can be reduced by having multiple small chunks of data.) skb-&gt;head points to the start of the this block, and skb-&gt;end points to the end of this block. The whole block need not contain meaningful data. skb-&gt;data points to the place where the packet data starts, and skb-&gt;tail points to the place where the packet data ends. This allows the packet to have some head room and tail room if the packet needs to expand. These four pointers are used to point to the actual data. They are placed at the end of the sk_buff struct. David Miller's page on <a href="http://vger.kernel.org/%7Edavem/skb_data.html">skb_data</a> describes skb data in greater detail.</p>
-<p>An image from the above page: </p>
+<p>Firstly it contains pointers to the actual data. The actual packet with Ethernet, IP, transport headers and payload that has made it's way over the network will be put in some memory that is allocated. The simplest way this is done is to allocate a contiguous memory block which will contain the whole packet. (We will see in later pages how very large packets can be created using lists of such blocks or how number of data copies can be reduced by having multiple small chunks of data.) skb-&gt;head points to the start of the this block, and skb-&gt;end points to the end of this block. The whole block need not contain meaningful data. skb-&gt;data points to the place where the packet data starts, and skb-&gt;tail points to the place where the packet data ends. This allows the packet to have some head room and tail room if the packet needs to expand. These four pointers are used to point to the actual data. They are placed at the end of the sk_buff struct. David Miller's page on <a href="http://vger.kernel.org/~davem/skb_data.html">skb_data</a> describes skb data in greater detail.</p>
+<p>An image from the above page:</p>
 <p><img src="imgs/01_skb_layout.png" alt="skb_layout" /></p>
-<p>Additionally the skb contains lots of meta data. Without checking the actual data, a fully filled skb can provide the protocol information, checksum details, it's corresponding socket, etc. The meta data is information that is extracted from the packet data or information attached to the current packet that can be used by all the layers. A few of these fields are explained in David Miller's page <a href="http://vger.kernel.org/%7Edavem/skb.html">How SKBs work</a>.</p>
+<p>Additionally the skb contains lots of meta data. Without checking the actual data, a fully filled skb can provide the protocol information, checksum details, it's corresponding socket, etc. The meta data is information that is extracted from the packet data or information attached to the current packet that can be used by all the layers. A few of these fields are explained in David Miller's page <a href="http://vger.kernel.org/~davem/skb.html">How SKBs work</a>.</p>
 <p>This is similar to how photographs are saved. One part is the actual image, the second part is meta data like it's dimensions, ISO, aperture, camera model, location information, etc. The meta data by itself is not useful but adds detail to the original data.</p>
-<p>I'll add a page which describes the skb and it's fields in greater detail. TODO. </p>
+<p>I'll add a page which describes the skb and it's fields in greater detail. TODO.</p>
 <h3 id="n02-visualizing-packet-processing"><a class="header" href="#n02-visualizing-packet-processing">N.0.2 Visualizing Packet Processing</a></h3>
 <p>This is not a standard way of visualizing, but I think this is the right way to visualize packet processing and cant visualize in any other way. Receiving packets is in the bottom to top direction. And transmitting packets is in the top to bottom direction. Forwarding to a different layer is left to right.
-While receiving packets, drivers receive data first. The bottom most layer where the drivers stay. The drivers hand over the packet to the core network. The core networking code then passes it over to the right protocol stack(s). After the protocol stack processing is done, it enters socket layer, from where the user picks up the packet. </p>
+While receiving packets, drivers receive data first. The bottom most layer where the drivers stay. The drivers hand over the packet to the core network. The core networking code then passes it over to the right protocol stack(s). After the protocol stack processing is done, it enters socket layer, from where the user picks up the packet.</p>
 <img src="imgs/visualize_pkt_proc.png" alt="visualize"  />
 <h4 id="n021-top-half-and-bottom-half-processing"><a class="header" href="#n021-top-half-and-bottom-half-processing">N.0.2.1 Top half and bottom half processing</a></h4>
 <p>The path from the driver to the socket queue is divided into two halves.</p>
@@ -189,30 +222,30 @@ While receiving packets, drivers receive data first. The bottom most layer where
 <li>The top half is below the bottom half in my figure.</li>
 <li>I can use bottom half OR softirq processing interchangeably.</li>
 <li>Softirq processing done while receiving packets is also called NET_RX processing. I can use this as well. :)</li>
-<li>Core network code runs in both these halves. But most of it is in softirq processing. </li>
+<li>Core network code runs in both these halves. But most of it is in softirq processing.</li>
 </ol>
 <p>With this, basic information we can start describing the RX and TX processing paths.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n1-setup-qemu"><a class="header" href="#n1-setup-qemu">N1 Setup Qemu</a></h1>
 <p>These notes are based on the following videos:</p>
 <ol>
 <li><a href="https://www.youtube.com/watch?v=OdybsP9cQNA">Running an external custom kernel in Fedora 32 under QEMU: Kernel Debugging Part 1</a> I am more used to Ubuntu, so I chose it instead.</li>
-<li><a href="https://www.youtube.com/watch?v=unizGCcZg3Y">GDB on the Linux Kernel</a>. </li>
+<li><a href="https://www.youtube.com/watch?v=unizGCcZg3Y">GDB on the Linux Kernel</a>.</li>
 </ol>
-<p>The script below is the same as the one described in these videos. </p>
+<p>The script below is the same as the one described in these videos.</p>
 <p><strong>Please watch both the videos before continuing further.</strong></p>
 <hr />
 <p>Like described in the article on UML Setup, I like to learn by running a VM and attaching it via GDB. KVM and QEMU are the newer and well supported VM solutions. This page is a tutorial on how to launch a debug instance in QEMU and attach to it using GDB.</p>
-<p>Install QEMU (check Qemu download page for distribution specific instructions). </p>
+<p>Install QEMU (check Qemu download page for distribution specific instructions).</p>
 <h3 id="n11-setup--build-a-kernel-with-debug-symbols"><a class="header" href="#n11-setup--build-a-kernel-with-debug-symbols">N1.1 Setup &amp; build a kernel with debug symbols</a></h3>
-<p>Clone the kernel from kernel git repo. </p>
+<p>Clone the kernel from kernel git repo.</p>
 <pre><code class="language-shell">git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
 cd linux 
 </code></pre>
-<p>Next run &quot;make menuconfig&quot; to modify a few configurations. On running the command a ncurses interface to enable/disable options will open. Use the arrow keys to move between options and 'Y' and 'N' keys to include/exclude options.
-First enable CONFIG_DEBUG_KERNEL. It is located under &quot;Kernel hacking&quot; as &quot;Kernel debugging&quot;.
-Next disable RANDOMIZE_MEMORY_PHYSICAL_PADDING. It is located under &quot;Processor type and features&quot; as &quot;Randomize the kernel memory sections&quot;.
-After making the changes save the changes and exit the menuconfig interface. A lot of youtube videos explain the same in detail, check them if confused. To reset any changes delete the &quot;.config&quot; file and start over by running &quot;make defconfig&quot;. Finally run make.
-It will take some to compile the kernel. Meanwhile move to the next step and install a VM in qemu. </p>
+<p>Next run "make menuconfig" to modify a few configurations. On running the command a ncurses interface to enable/disable options will open. Use the arrow keys to move between options and 'Y' and 'N' keys to include/exclude options.
+First enable CONFIG_DEBUG_KERNEL. It is located under "Kernel hacking" as "Kernel debugging".
+Next disable RANDOMIZE_MEMORY_PHYSICAL_PADDING. It is located under "Processor type and features" as "Randomize the kernel memory sections".
+After making the changes save the changes and exit the menuconfig interface. A lot of youtube videos explain the same in detail, check them if confused. To reset any changes delete the ".config" file and start over by running "make defconfig". Finally run make.
+It will take some to compile the kernel. Meanwhile move to the next step and install a VM in qemu.</p>
 <pre><code>make defconfig
 make menuconfig     # enable CONFIG_DEBUG_KERNEL,
                     # disable RANDOMIZE_MEMORY_PHYSICAL_PADDING
@@ -222,17 +255,17 @@ make -j1            # replace 1 with the number of CPUs that make
 </code></pre>
 <h3 id="n12-create-an-image-for-qemu"><a class="header" href="#n12-create-an-image-for-qemu">N1.2 Create an image for QEMU</a></h3>
 <p>Move out of the linux directory and create an image for QEMU.</p>
-<p><code>qemu-img create kernel-dev.img 20G</code> </p>
+<p><code>qemu-img create kernel-dev.img 20G</code></p>
 <p>Next download ubuntu's server iso image from <a href="https://ubuntu.com/download/server">here</a>. It is a ~1GB file which can be used for a Linux server. You can alternatively install the desktop version if you are more comfortable with a GUI. Move the downloaded iso file into the same directory.
 Finally save the script below as start.sh.</p>
 <pre><code class="language-bash">#!/bin/bash
 
 #startup.sh
 
-KERNEL=&quot;linux/arch/x86_64/boot/bzImage&quot;
+KERNEL="linux/arch/x86_64/boot/bzImage"
 RAM=1G
 CPUS=2
-DISK=&quot;kernel-dev.img&quot;
+DISK="kernel-dev.img"
 
 if [ $# -eq 1 ]
 then
@@ -255,14 +288,14 @@ else
 		-initrd initrd.img \
 		-S -s \
 		-cpu host \
-		-append &quot;root=/dev/mapper/ubuntu--vg-ubuntu--lv ro nokaslr&quot; \
+		-append "root=/dev/mapper/ubuntu--vg-ubuntu--lv ro nokaslr" \
 		-net user,hostfwd=tcp::5555-:22 -net nic \
 		# use this option to run debug kernel
 		# see the video 1 on how to pull the initrd.img
-		# the &quot;root=/dev/ ...&quot; command needs to pulled from grub.cfg (see video 1)
+		# the "root=/dev/ ..." command needs to pulled from grub.cfg (see video 1)
 fi
 </code></pre>
-<p>The above script when given an ISO file passes it as an CD to the QEMU instance. This way we can install ubuntu into &quot;kernel-dev.img&quot;. </p>
+<p>The above script when given an ISO file passes it as an CD to the QEMU instance. This way we can install ubuntu into "kernel-dev.img".</p>
 <p>If no arguments are provided it tries to run the OS installed on kernel-dev.img. This way we can use the script to start the VM after we have completed installing ubuntu. At this point the directory structure should look like this:</p>
 <pre><code>  .
   ├── kernel-dev.img
@@ -270,7 +303,7 @@ fi
   ├── ubuntu-21.04-live-server-amd64.iso
   └── startup.sh 
 </code></pre>
-<p>First to install ubuntu run: (if superuser privileges needed, run with sudo) </p>
+<p>First to install ubuntu run: (if superuser privileges needed, run with sudo)</p>
 <pre><code>./startup.sh ubuntu-21.04-live-server-amd64.iso
 </code></pre>
 <p>Go through all the steps and install ubuntu. A lot of YouTube videos show the  complete process. Use them as a reference if necessary.</p>
@@ -283,10 +316,10 @@ fi
 <p>The boot will wait for GDB to connect. On a separate terminal run:</p>
 <pre><code class="language-bash">gdb linux/vmlinux
 </code></pre>
-<p>Within the gdb prompt then run &quot;target remote :1234&quot; to connect to QEMU. The <code>bt</code> command should then show some stack within QEMU.
-Run &quot;hbreak start_kernel&quot; to add a hardware breakpoint at start_kernel() and then run &quot;continue&quot;. The VM would then begin booting and will stop in the start_kernel function.</p>
+<p>Within the gdb prompt then run "target remote :1234" to connect to QEMU. The <code>bt</code> command should then show some stack within QEMU.
+Run "hbreak start_kernel" to add a hardware breakpoint at start_kernel() and then run "continue". The VM would then begin booting and will stop in the start_kernel function.</p>
 <p>Add other hardware breakpoints (since QEMU uses hardware acceleration for Virtualization, normal SW breakpoints will not work) and start tinkering.
-The network options are similar to those of UML. Thses options have been commented in the above script. </p>
+The network options are similar to those of UML. Thses options have been commented in the above script.</p>
 <h3 id="n13-network-setup"><a class="header" href="#n13-network-setup">N1.3 Network setup</a></h3>
 <p>By default the script provides an interface via which the VM can access both internet and the host machine (over ssh). This is the SLIRP networking mode. Follow the link <a href="https://wiki.qemu.org/Documentation/Networking#User_Networking_.28SLIRP.29">here</a> to read more.</p>
 <p>The interface will be created. If the interface does not have an address, run dhclient on the interface so it is assigned an address. Next install an sshserver, if not installed during ubuntu installation, so we can access the guest over ssh.</p>
@@ -300,18 +333,18 @@ sudo apt install openssh-server
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n1-setup-uml-older"><a class="header" href="#n1-setup-uml-older">N1. Setup UML (older)</a></h1>
 <p>SKIP THIS IF YOU WERE ABLE TO SETUP QEMU. This page is here only for completeness, but is not necessary to experiment with a kernel.</p>
 <hr />
-<p>I prefer to learn/tinker with linux using UML. UML is User mode linux, which is a simple VM. It emulates a uniprocessor linux system, and can run even on machines with very old hardware (like my laptop). Check the UML homepage for additional details. This page is just to a simple tutorial on how to build and run it. I have also added sections on how to attach it to GDB for easy debugging and a section on how to setup basic networking between multiple UMLs which you can skip in the first read. </p>
+<p>I prefer to learn/tinker with linux using UML. UML is User mode linux, which is a simple VM. It emulates a uniprocessor linux system, and can run even on machines with very old hardware (like my laptop). Check the UML homepage for additional details. This page is just to a simple tutorial on how to build and run it. I have also added sections on how to attach it to GDB for easy debugging and a section on how to setup basic networking between multiple UMLs which you can skip in the first read.</p>
 <h3 id="n01-clone-and-build-the-kernel"><a class="header" href="#n01-clone-and-build-the-kernel">N0.1 Clone and build the kernel</a></h3>
 <p>Clone the kernel, and build it.
 Make defconfig sets up the default kernel config. The kernel config is a set of kernel features which will either be compiled into the kernel or will be compiled as modules. The architecture for which we are configuring is the UM (user mode) architechture. While building the config, you may be prompted to choose a configuration. Press enter to choose the default configuration.
-Once the configuration is done, a &quot;.config&quot; file will be populated with the chosen options.
+Once the configuration is done, a ".config" file will be populated with the chosen options.
 Begin compiling the code. Based on your machine's CPU capabities, replace 1 with the number of parallel compilation jobs you want make to run. Please remain patient as the very first compilation will take some time.</p>
 <pre><code class="language-bash">git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
 cd linux
 make defconfig ARCH=um
 make -j1 ARCH=um 
 </code></pre>
-<p>A new file &quot;linux&quot; will be created. This is the UML executable which runs as an application on the host machine. It needs a few other files and arguments to run, which will be explained in the next section.</p>
+<p>A new file "linux" will be created. This is the UML executable which runs as an application on the host machine. It needs a few other files and arguments to run, which will be explained in the next section.</p>
 <h3 id="n011-kernel-config-optional"><a class="header" href="#n011-kernel-config-optional">N0.1.1 Kernel config [OPTIONAL]</a></h3>
 <p>The kernel src includes a neat way to configure the kernel. Run make menuconfig to configure various options. A ncurses interface should start up, with the instructions provided in the top. Pressing Y includes a config and N excludes a config. After configuring the kernel, save and exit the config. The .config file will get updated with the necessary configuration.
 To build the uml binary with debug symbols, edit KBUILD_HOSTCFLAGS in the Makefile. Just add a '-g' option at the end. The kernel can then be rebuilt with the new configuration.</p>
@@ -328,7 +361,7 @@ make -j1 ARCH=um
  KBUILD_HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS) 
 </code></pre>
 <h3 id="n02-rootfs-setup"><a class="header" href="#n02-rootfs-setup">N0.2 Rootfs setup</a></h3>
-<p>We have a compiled kernel but we still need a init script and other userspace  programs. We need a rootfs to emulate the disk. There are a lot of blogs  which describe how to build a rootfs. We will download a debian rootfs that is  provided by google. 
+<p>We have a compiled kernel but we still need a init script and other userspace  programs. We need a rootfs to emulate the disk. There are a lot of blogs  which describe how to build a rootfs. We will download a debian rootfs that is  provided by google.
 Run the following command to download the rootfs and uncompress it. On  uncompressing it a 1GiB net_test.rootfs.20150203 should be available.</p>
 <pre><code>wget -nv https://dl.google.com/dl/android/net_test.rootfs.20150203.xz
 unxz net_test.rootfs.20150203.xz 
@@ -340,7 +373,7 @@ We now have everything needed to run the UML.</p>
 <pre><code>mkdir temp
 sudo mount net_test.rootfs.20150203 temp
 </code></pre>
-<p>Copying from/to the directory is equivalent to copying files from/to the UML. In the below example I am copying my tmux configuration files into the rootfs. When I boot into UML, I will find the config file in the home directory. (Super user privilages are needed to add/remove files from the rootfs). </p>
+<p>Copying from/to the directory is equivalent to copying files from/to the UML. In the below example I am copying my tmux configuration files into the rootfs. When I boot into UML, I will find the config file in the home directory. (Super user privilages are needed to add/remove files from the rootfs).</p>
 <pre><code>sudo cp ~/.tmux.conf temp/home/ 
 </code></pre>
 <p>By chroot-ing into the mounted directory, any necessary programs can be installed. On running chroot, you will able to edit the rootfs with super user privilages. I am installing tmux in the below code and then exiting the chroot shell.</p>
@@ -357,7 +390,7 @@ exit
 <pre><code>Err http://ftp.jp.debian.org wheezy Release.gpg
 Connection failed
 </code></pre>
-<p>If the /etc/hosts file contains an address for a particular hostname, the  system will not do an additional DNS lookup. In this case, the address  corresponding to ftp.jp.debian.org is incorrect, causing apt-get to fail.  Run the command &quot;dig ftp.jp.debian.org&quot; in the host machine (not within chroot) to get the right address. Update the IP address to &quot;133.5.166.3&quot;.  Finally <code>/etc/hosts</code> should contain the following entries:</p>
+<p>If the /etc/hosts file contains an address for a particular hostname, the  system will not do an additional DNS lookup. In this case, the address  corresponding to ftp.jp.debian.org is incorrect, causing apt-get to fail.  Run the command "dig ftp.jp.debian.org" in the host machine (not within chroot) to get the right address. Update the IP address to "133.5.166.3".  Finally <code>/etc/hosts</code> should contain the following entries:</p>
 <pre><code>127.0.0.1       localhost
 ::1             localhost ip6-localhost ip6-loopback
 fe00::0         ip6-localnet
@@ -370,10 +403,10 @@ ff02::2         ip6-allrouters
 <h4 id="0212-apt-get-is-still-failing-"><a class="header" href="#0212-apt-get-is-still-failing-">0.2.1.2 apt-get is still failing !!!</a></h4>
 <p>OK, dont worry, download my rootfs from my github repo <a href="https://github.com/teja2010/teja2010.github.io/tree/master/old/extra">here</a>.</p>
 <h4 id="03-take-it-for-a-spin"><a class="header" href="#03-take-it-for-a-spin">0.3 Take it for a spin</a></h4>
-<p>Finally if all this works out you are ready to start a UML instance.    Just run the following command, where you provide path to rootfs as the value    against &quot;ubda&quot;, and 256MiB as the RAM. DO NOT forget the &quot;M&quot; in 256M, else    UML will try to boot with just to 256Bytes of RAM, and fail :). I usually    provide 256MiB RAM, you can go as low as 100 or 50MiB.</p>
+<p>Finally if all this works out you are ready to start a UML instance.    Just run the following command, where you provide path to rootfs as the value    against "ubda", and 256MiB as the RAM. DO NOT forget the "M" in 256M, else    UML will try to boot with just to 256Bytes of RAM, and fail :). I usually    provide 256MiB RAM, you can go as low as 100 or 50MiB.</p>
 <pre><code>./linux ubda=net_test.rootfs.20150203 mem=256M 
 </code></pre>
-<p>You will see the VM booting, printing dmesg, bringing up the various kernel    susbsystems.    Finally when a promt to enter the password appears, enter root as the    password. Play around with the tiny VM. When the fun ends, run &quot;halt&quot; to    shutdown UML.</p>
+<p>You will see the VM booting, printing dmesg, bringing up the various kernel    susbsystems.    Finally when a promt to enter the password appears, enter root as the    password. Play around with the tiny VM. When the fun ends, run "halt" to    shutdown UML.</p>
 <h4 id="04-attach-gdb"><a class="header" href="#04-attach-gdb">0.4 Attach GDB</a></h4>
 <p>It is fun to add breakpoints and view specific code in GDB. To do this,    we have to first find the process id (PID) of the main UML process.    Run the following command to find the UML pid. The output should show multiple PIDs</p>
 <pre><code class="language-bash">$ ps aux | grep ubda
@@ -397,7 +430,7 @@ ff02::2         ip6-allrouters
 <p>GDB will read the symbols from linux and attach itself. Play around, check    the backtrace, etc. All globals are now accessable.</p>
 <h3 id="05-a-private-uml-subnet"><a class="header" href="#05-a-private-uml-subnet">0.5 A private UML subnet</a></h3>
 <p>In most cases we want to play around with two UMLs connected to each other    and ignorant of the rest of the world. In such cases, the simplest way is to    connect them using the mcast transport.
-Make copies of the rootfs, for each UML instance. In this case have two    copies ready, and run them with one additional argument &quot;eth0&quot;. This will    add an additional eth0 interface. We set eth0 to mcast. i.e. the eth0    interfaces in both the instances are connected over mcast.</p>
+Make copies of the rootfs, for each UML instance. In this case have two    copies ready, and run them with one additional argument "eth0". This will    add an additional eth0 interface. We set eth0 to mcast. i.e. the eth0    interfaces in both the instances are connected over mcast.</p>
 <pre><code>./linux ubda=net_test.rootfs.20150203_1 mem=256M eth0=mcast
 ./linux ubda=net_test.rootfs.20150203_2 mem=256M eth0=mcast 
 </code></pre>
@@ -405,7 +438,7 @@ Make copies of the rootfs, for each UML instance. In this case have two    copie
 <pre><code>ip address add 192.168.1.1/24 dev eth0  
 </code></pre>
 <p>The full mcast readme is    <a href="http://user-mode-linux.sourceforge.net/old/text/mcast.txt">here</a>.    It contains details to create more complex mcast networks.</p>
-<p>On assigning mcast to a eth device, each UML instance opens sockets which    listen to multicast traffic. If a multicast address is not assigned (like    above), all the instances listen to 239.192.168.1 . All packets are received    and then filtered out based on destination MAC address. The packets    can even be seen in packetdumps collected in the host OS.    Quoting from the above readme, &quot;It's basically like an ethernet    where all machines have promiscuous mode turned on&quot;. Bad for performance,    but very easy to setup.</p>
+<p>On assigning mcast to a eth device, each UML instance opens sockets which    listen to multicast traffic. If a multicast address is not assigned (like    above), all the instances listen to 239.192.168.1 . All packets are received    and then filtered out based on destination MAC address. The packets    can even be seen in packetdumps collected in the host OS.    Quoting from the above readme, "It's basically like an ethernet    where all machines have promiscuous mode turned on". Bad for performance,    but very easy to setup.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n2-packet-rx-path-1--basic"><a class="header" href="#n2-packet-rx-path-1--basic">N2. Packet RX path 1 : Basic</a></h1>
 <p>This page describes the code flow while receiving a packet. It begins with the packet just entering the core networking code, top half and bottom half processing, basic flow through the IP and UDP layers and finally the packet is enqueued into a socket queue.</p>
 <p>Additionally hash based software packet steering across CPUs (RPS and RSS), Inter Processor Interrupts (IPI) and scheduling softirq processing is described. They can be ignored in the first read and can be revisited in later runs after gaining additional context. These sections have been marked OPTIONAL.
@@ -419,7 +452,7 @@ netif_rx_ni()
 <ol>
 <li>
 <p>Enqueue the packet into a queue which contains packets that need processing.
-The kernel maintains a softnet_data structure for each CPU. It is the core structure that facilitates network processing. Each softnet_data struct contains a &quot;input_pkt_queue&quot; into which packets that need to be processed will be enqueued. This queue is protected by a spinlock that is part of the queue (calls to rps_lock() and rps_unlock() are to lock/unlock the spinlock). The input_pkt_queue is of type sk_buff_head, which is used within by kernel to represent skb lists.
+The kernel maintains a softnet_data structure for each CPU. It is the core structure that facilitates network processing. Each softnet_data struct contains a "input_pkt_queue" into which packets that need to be processed will be enqueued. This queue is protected by a spinlock that is part of the queue (calls to rps_lock() and rps_unlock() are to lock/unlock the spinlock). The input_pkt_queue is of type sk_buff_head, which is used within by kernel to represent skb lists.
 Before enqueuing, if the queue length is more than <code>netdev_max_backlog</code> (whose default length is 1000), the packet is dropped. This value can be modified by changing <code>/proc/sys/net/core/netdev_max_backlog</code>.
 For each each packet drop sd-&gt;dropped is incremented. Certain numbers are maintained by softnet_data, I'll add a page describing the struct. TODO</p>
 </li>
@@ -742,7 +775,7 @@ udp_queue_rcv_skb(sk, skb)
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n2-packet-tx-path-1--basic"><a class="header" href="#n2-packet-tx-path-1--basic">N2. Packet TX path 1 : Basic</a></h1>
 <p>This page contains the basic code flow while transmitting a packet. It    begins with the userspace sendmsg, enters the UDP and IP stacks, finds    a route, enters core networking and finally being handed over to the driver    which pushes    it out. TX, unlike RX, can happen without a softirq being raised. The    processing happens completely in the application context. In this page I    describe packet transmission without a softirq being raised. I'll cover    how qdiscs are used in a separate page, after which NET_TX with qdiscs    will be described.</p>
-<p>UDP &amp; IP stack processing and routing will be described in detail in a    separate page, this is just a basic overview.    We will end the discussion by handling over the packet to the driver. How    the driver actually transmits the packet will be described in later pages.  </p>
+<p>UDP &amp; IP stack processing and routing will be described in detail in a    separate page, this is just a basic overview.    We will end the discussion by handling over the packet to the driver. How    the driver actually transmits the packet will be described in later pages.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n31-32-sendmsg-from-userspace"><a class="header" href="#n31-32-sendmsg-from-userspace">N3.1-3.2 sendmsg() from userspace</a></h1>
 <h3 id="31-sendmsg"><a class="header" href="#31-sendmsg">3.1 sendmsg()</a></h3>
 <p>After opening a UDP socket the application gets a fd as a handle for the  underlying kernel socket. The application sends data into the socket by calling <code>send()</code> or <code>sendmsg()</code> or <code>sendto()</code>, all of which will send out UDP data.</p>
@@ -802,8 +835,8 @@ udp_queue_rcv_skb(sk, skb)
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n33-34-alloc-skb-and-send_skb"><a class="header" href="#n33-34-alloc-skb-and-send_skb">N3.3-3.4 alloc skb and send_skb</a></h1>
 <h3 id="n33-alloc-skb-fill-it-up-optional"><a class="header" href="#n33-alloc-skb-fill-it-up-optional">N3.3 Alloc skb, fill it up (OPTIONAL)</a></h3>
-<p><code>ip_make_skb()</code> is called to create a skb and is provided flowi4, sk, msg ptr, msg length and route as  the arguments. This is a generic function that can be called from any tranport layer, here UDP calls it and the argument <code>tranhdrlen</code> (transport header length) is equal to sizeof an udp header. Additionally, the length field is equal to the amount of data below the      ip header, i.e. length contains payload length plus udp header length. </p>
-<p>A skb queue head is inited, which      contains a list of skbs. Note that a head itself DOES NOT contain data. It      is a handle to a skb list. On init, the list is empty, with <code>sk_buff_head-&gt;next</code>      equal to <code>sk_buff_head-&gt;prev</code> equal to its own address, and <code>sk_buff_head-&gt;qlen</code>      is zero. Multiple skbs will be added to it if the msg size is greater      than the MTU, forcing IP fragmentation. For now, we will ignore ip fragmentation, so a single skb will be added to it later. </p>
+<p><code>ip_make_skb()</code> is called to create a skb and is provided flowi4, sk, msg ptr, msg length and route as  the arguments. This is a generic function that can be called from any tranport layer, here UDP calls it and the argument <code>tranhdrlen</code> (transport header length) is equal to sizeof an udp header. Additionally, the length field is equal to the amount of data below the      ip header, i.e. length contains payload length plus udp header length.</p>
+<p>A skb queue head is inited, which      contains a list of skbs. Note that a head itself DOES NOT contain data. It      is a handle to a skb list. On init, the list is empty, with <code>sk_buff_head-&gt;next</code>      equal to <code>sk_buff_head-&gt;prev</code> equal to its own address, and <code>sk_buff_head-&gt;qlen</code>      is zero. Multiple skbs will be added to it if the msg size is greater      than the MTU, forcing IP fragmentation. For now, we will ignore ip fragmentation, so a single skb will be added to it later.</p>
 <p>​      Next <code>__ip_append_data()</code> is called to fill in the queue with the skb(s).      The primary goal of <code>__ip_append_data</code> is to estimate memory necessary for  the packet(s) and accordingly create and enqueue skb(s) into the queue.  The skb needs memory necessary to accommodate:</p>
 <ol>
 <li>link layer headers: each device during init sets <code>dev-&gt;hh_len</code>. Hardware header length (usually represented by var <code>hh_len</code>) is the maximum space the driver will need to fill in header(s) below the network header. e.g. ethernet header is added by ethernet drivers.</li>
@@ -811,7 +844,7 @@ udp_queue_rcv_skb(sk, skb)
 <li>Payload. Obviously.</li>
 </ol>
 <p>Additionally some extra tail space is also      provided while allocating the skb. The allocation logic is shown in the      code below. Once  the calculation is done, <code>sock_alloc_send_skb()</code> is called, which internally  calls <code>sock_alloc_send_pskb()</code> to allocate the skb. Each skb must be accounted for in the sock where it was created (TX) or in the sock where it is destined to (RX). This is to control the memory used by packets. Each sock will have restrictions on the amount of memory it can use. In this case <code>wmem</code>, the amount of data written into the socket that hasn't transmitted yet, is a constraint      while allocating data. If      wmem is full, <code>sendmsg()</code> call can get blocked (unless the socket is set to non blocking mode) till sock memory is freed. Once data is allocated, the  udp payload data is written into the skb. <code>skb-&gt;transport_header</code> and <code>skb-&gt;network_header</code> are set. IP and UDP headers haven't been filled yet, but pointers to where they have to be  filled are set. The skb is added to the skb queue and finally sock wmem is updated.</p>
-<p>Next __ip_make_skb() will fill in ip header. (ignore fragmentation code for now, which will run if the queue has more than one skb). Finally it returns the created skb's pointer. </p>
+<p>Next __ip_make_skb() will fill in ip header. (ignore fragmentation code for now, which will run if the queue has more than one skb). Finally it returns the created skb's pointer.</p>
 <pre><code class="language-c">struct sk_buff *ip_make_skb()
 {
     struct sk_buff_head queue;
@@ -878,7 +911,7 @@ udp_queue_rcv_skb(sk, skb)
 } 
 </code></pre>
 <h4 id="n331-older-skb-allocation-logic"><a class="header" href="#n331-older-skb-allocation-logic">N3.3.1 (Older?) Skb allocation logic</a></h4>
-<p>The figure below which shows how pointers in skb meta data are being updated corresponding to steps commented in the code above. These pictures are from  <a href="http://vger.kernel.org/%7Edavem/skb_data.html">davem's skb_data page</a> which describes udp packet data being filled in a skb. This logic is very different from what I have described above. It is possible that this was the allocation logic earlier. It is entirely possible I have missed something. Comments are welcome.</p>
+<p>The figure below which shows how pointers in skb meta data are being updated corresponding to steps commented in the code above. These pictures are from  <a href="http://vger.kernel.org/~davem/skb_data.html">davem's skb_data page</a> which describes udp packet data being filled in a skb. This logic is very different from what I have described above. It is possible that this was the allocation logic earlier. It is entirely possible I have missed something. Comments are welcome.</p>
 <p><img src="N/imgs/02_skb_creation2.svg" alt="skb_creation" /></p>
 <h4 id="34-udp-and-ip-send_skb"><a class="header" href="#34-udp-and-ip-send_skb">3.4 UDP and IP send_skb</a></h4>
 <p>​      <code>udp_send_skb()</code> is simple, it fills in the UDP header, computes the checksum (<code>csum</code>),      and sends the skb to <code>ip_send_skb()</code>. If ip_send_skb returns an error,      SNMP value SNDBUFERRORS is incremented. And if everything goes well OUTDATAGRAMS      is incremented.</p>
@@ -917,8 +950,8 @@ udp_queue_rcv_skb(sk, skb)
 <div style="break-before: page; page-break-before: always;"></div><h1 id="n35-38-net_tx-and-driver-xmit"><a class="header" href="#n35-38-net_tx-and-driver-xmit">N3.5-3.8 NET_TX and driver xmit</a></h1>
 <h3 id="n35-core-networking"><a class="header" href="#n35-core-networking">N3.5 Core networking</a></h3>
 <p>​      The current section will cover the simplest case of sending out a packet.      NET_TX softirq will not be scheduled, in most cases packets will be sent      out this way.</p>
-<p>​      Every real network device on creation has atleast one TX queue (var &quot;txq&quot;).      By real I mean actual physical devices: ethernet or wifi interfaces.      Virtual network devices like loopback, tun interfaces, etc are &quot;queueless&quot;,      i.e. they have a txq and a default Queue Discipline (<code>qdisc</code>), but a function is not added to      enqueue packets.</p>
-<p>Run &quot;tc qdisc show dev lo&quot;, and it should show &quot;noqueue&quot; as the only queue. Other real devices have queues with  specific properties, as shown below eth0 has a <code>fq_codel</code> queue. I'll add a separate page for qdiscs, for now ignore them.</p>
+<p>​      Every real network device on creation has atleast one TX queue (var "txq").      By real I mean actual physical devices: ethernet or wifi interfaces.      Virtual network devices like loopback, tun interfaces, etc are "queueless",      i.e. they have a txq and a default Queue Discipline (<code>qdisc</code>), but a function is not added to      enqueue packets.</p>
+<p>Run "tc qdisc show dev lo", and it should show "noqueue" as the only queue. Other real devices have queues with  specific properties, as shown below eth0 has a <code>fq_codel</code> queue. I'll add a separate page for qdiscs, for now ignore them.</p>
 <pre><code class="language-bash">$ tc qdisc show dev lo
 qdisc noqueue 0: root refcnt 2
 
@@ -927,7 +960,7 @@ qdisc fq_codel 0: root refcnt 2 limit 10240p flows 1024 quantum 1514 target 5.0m
 interval 100.0ms memory_limit 32Mb ecn 
 </code></pre>
 <p>A small optional section on how loopback's xmit works is added next. For now assume our device has a queue.</p>
-<p><code>__dev_queue_xmit()</code> finds the tx queue and qdisc and if a enqueue function      is present, calls <code>__dev_xmit_skb()</code> which calls the function to enqueue the      skb into the <code>qdisc</code>. At this point the skb is in the queue. We move  forward without any skb pointer held. After enqueueing the skb,      <code>__qdisc_run()</code> is called to process packets (if possible) that have been      enqueued. If no other process needs the cpu and less than 64 packets      have been processed in the current context, <code>__qdisc_run()</code> will continue      processing packets. <code>__qdisc_run</code> calls <code>qdisc_restart()</code> internally, which      dequeues skbs from the queue and calls <code>sch_direct_xmit()</code>, which calls      <code>dev_hard_start_xmit()</code> and it finally calls <code>xmit_one()</code>. <code>xmit_one()</code> will transmit one skb from the queue. </p>
+<p><code>__dev_queue_xmit()</code> finds the tx queue and qdisc and if a enqueue function      is present, calls <code>__dev_xmit_skb()</code> which calls the function to enqueue the      skb into the <code>qdisc</code>. At this point the skb is in the queue. We move  forward without any skb pointer held. After enqueueing the skb,      <code>__qdisc_run()</code> is called to process packets (if possible) that have been      enqueued. If no other process needs the cpu and less than 64 packets      have been processed in the current context, <code>__qdisc_run()</code> will continue      processing packets. <code>__qdisc_run</code> calls <code>qdisc_restart()</code> internally, which      dequeues skbs from the queue and calls <code>sch_direct_xmit()</code>, which calls      <code>dev_hard_start_xmit()</code> and it finally calls <code>xmit_one()</code>. <code>xmit_one()</code> will transmit one skb from the queue.</p>
 <pre><code class="language-c">__dev_queue_xmit()
 {
     struct netdev_queue *txq;
@@ -974,7 +1007,7 @@ interval 100.0ms memory_limit 32Mb ecn
 } 
 </code></pre>
 <h3 id="n38-loopback-xmit-optional"><a class="header" href="#n38-loopback-xmit-optional">N3.8 loopback xmit (OPTIONAL)</a></h3>
-<p>​      Like described earlier, each device during creation registers certain      functions using the <code>net_device_ops</code> structure. Loopback registers      <code>loopback_xmit</code> as the function. On sending a packet to loopback, when      <code>ops-&gt;ndo_start_xmit</code> is called, the packet enters <code>loopback_xmit()</code>. It is      a very simple function, which increments stats and calls <code>netif_rx_ni()</code>      to begin the RX path of the packet. The end of TX coincides with the start of RX in this function. </p>
+<p>​      Like described earlier, each device during creation registers certain      functions using the <code>net_device_ops</code> structure. Loopback registers      <code>loopback_xmit</code> as the function. On sending a packet to loopback, when      <code>ops-&gt;ndo_start_xmit</code> is called, the packet enters <code>loopback_xmit()</code>. It is      a very simple function, which increments stats and calls <code>netif_rx_ni()</code>      to begin the RX path of the packet. The end of TX coincides with the start of RX in this function.</p>
 <p>​      The loopback device is described in <code>drivers/net/loopback.c</code> .</p>
 <pre><code class="language-c">loopback_xmit()
 {
@@ -1021,7 +1054,7 @@ interval 100.0ms memory_limit 32Mb ecn
 <p>​    Both applications create networking sockets using the socket() system call.    The arguments are socket family, socket type and protocol type. The    <a href="http://www.man7.org/linux/man-pages/man2/socket.2.html">man page</a>    describes possible values the arguments take. AF_INET and AF_INET6 are to    create a IPv4 and IPv6 sockets respectively. Some of other options are to    create UNIX sockets for Inter process communication, NETLINK sockets for    monitoring kernel events and communicating with kernel modules,    AF_PACKET sockets to capture packets,    AF_PPPOX sockets for creating PPP tunnels, etc.</p>
 <p>​    There are two major Socket types:</p>
 <ol>
-<li>SOCK_STREAM: used to send/recv octet streams.    For example TCP socket is a STREAM sock. Stream sockets guarantee reliable    in order delivery after a two way connection is established.    It does not preserve message boundaries. i.e. if the server    writes 40 bytes first and then 60 bytes, the client may receive all the    100 bytes in one shot, never knowing that the server wrote it in two parts.    Usually both sides agree upon a fixed boundary that is used to detect message    boundaries.    For example HTTP, which operates over TCP uses &quot;\r\n&quot; (CRLF: Carriage Return    Line Feed) as a boundary. See the  <a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Message_format">wiki</a> page describing the HTTP Message format.</li>
+<li>SOCK_STREAM: used to send/recv octet streams.    For example TCP socket is a STREAM sock. Stream sockets guarantee reliable    in order delivery after a two way connection is established.    It does not preserve message boundaries. i.e. if the server    writes 40 bytes first and then 60 bytes, the client may receive all the    100 bytes in one shot, never knowing that the server wrote it in two parts.    Usually both sides agree upon a fixed boundary that is used to detect message    boundaries.    For example HTTP, which operates over TCP uses "\r\n" (CRLF: Carriage Return    Line Feed) as a boundary. See the  <a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Message_format">wiki</a> page describing the HTTP Message format.</li>
 <li>SOCK_DGRAM: Datagram are the exact opposite of SOCK_STREAM, they are    connectionless, delivery is unreliable. But message boundaries are preserved,    i.e. in the prev example, the client would receive two messages 40 and 60    bytes long (if they were not dropped on the way). An example is UDP.</li>
 </ol>
 <p>​    Protocol field, usually zero, is used if there are multiple protocols for a    specific (family, protocol) set. For example both SCTP and TCP both offer    SOCK_STREAM services within AF_INET family, UDP and ICMP offer DGRAM services    within the AF_INET family. TCP is the default option, so a socket call with    family AF_INET, type STREAM_SOCK and protocol set to zero will initialize a    TCP socket.    Providing IPPROTO_SCTP instead of zero will create a SCTP socket.    Explicitly setting IPPROTO_TCP will also create a TCP.</p>
@@ -1069,7 +1102,7 @@ interval 100.0ms memory_limit 32Mb ecn
 </code></pre>
 <p>​    The flow after calling a socket call usually follows the following pattern:</p>
 <ol>
-<li>syscall entry, socket lookup based on fd. </li>
+<li>syscall entry, socket lookup based on fd.</li>
 <li>check if the process has the necessary security permissions</li>
 <li>call the corresponding function from sock-&gt;ops</li>
 <li>get sock from the socket, call the function from sk-&gt;ops</li>
@@ -1163,7 +1196,7 @@ interval 100.0ms memory_limit 32Mb ecn
   
 </code></pre>
 <p>​    Multiple sockets can be bound to a single port, both TCP and UDP use it to    allow mutliple processes to share a port. All applications that want to reuse    the port should us the reuseport socket option (SO_REUSEPORT) to allow sharing    the port. See man page socket(7), about the use of SO_REUSEPORT, where possible    use cases are also described.
-​    TCP (in Linux) has a unique way of allowing multiple sockets to share a port,    this has been added as a comment in &quot;include/net/inet_hashtables.h&quot;, which  have added below. This logic is implemented in inet_csk_bind_conflict().</p>
+​    TCP (in Linux) has a unique way of allowing multiple sockets to share a port,    this has been added as a comment in "include/net/inet_hashtables.h", which  have added below. This logic is implemented in inet_csk_bind_conflict().</p>
 <pre><code class="language-c">/* There are a few simple rules, which allow for local port reuse by
  * an application.  In essence:
  *
@@ -1708,7 +1741,7 @@ The socket is eventually reused for another connection. A delayed FIN, that  was
 <li><a href="https://www.youtube.com/watch?v=cODU94yVxDs">intro to nftables</a></li>
 <li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Portal:DeveloperDocs">netfilter developer docs</a>
 <ul>
-<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Portal:DeveloperDocs/nftables_internals">nftables internals</a> </li>
+<li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Portal:DeveloperDocs/nftables_internals">nftables internals</a></li>
 <li><a href="https://wiki.nftables.org/wiki-nftables/index.php/Portal:DeveloperDocs/nftables_internals">sets internals</a></li>
 </ul>
 </li>
@@ -1952,7 +1985,7 @@ sendto(3,
             nlmsg_flags=NLM_F_REQUEST,
             nlmsg_seq=0, nlmsg_pid=0
         },
-        struct nfgenmsg{ // &lt;- &quot;\x00\x00\x00\x00&quot;
+        struct nfgenmsg{ // &lt;- "\x00\x00\x00\x00"
             nfgen_family=AF_UNSPEC,
             version = NFNETLINK_V0,
             res_id = 0,
@@ -1979,7 +2012,7 @@ recvmsg(3,
                        nlmsg_seq=0,
                        nlmsg_pid=214676 // pid
                    },
-                   struct nfgenmsg{ // &lt;-  &quot;\x00\x00\x00\x03&quot;
+                   struct nfgenmsg{ // &lt;-  "\x00\x00\x00\x03"
                             nfgen_family=AF_UNSPEC,
                             version = NFNETLINK_V0,
                             (be16) res_id = 0x0003, // nft_base_seq(net)
@@ -1988,20 +2021,20 @@ recvmsg(3,
                        nla_len = 8, //&lt;- \x08\x00
                        nla_type = NFTA_GEN_ID, // &lt;- \x01\x00
                    },
-                   data = htonl(nft_net-&gt;base_seq) &quot;\x00\x00\x00\x03&quot;,
-                   padding = &quot;&quot;,
+                   data = htonl(nft_net-&gt;base_seq) "\x00\x00\x00\x03",
+                   padding = "",
                    struct nlattr {
                        nla_len = 8, //&lt;- \x08\x00
-                       nla_type = NFTA_GEN_PROC_PID, // &lt;- &quot;\x02\x00&quot;
+                       nla_type = NFTA_GEN_PROC_PID, // &lt;- "\x02\x00"
                    },
-                   data = htonl(pid), // &lt;- htonl(214676) = &quot;\x00\x03\x46\x94&quot;,
-                   padding = &quot;&quot;,
+                   data = htonl(pid), // &lt;- htonl(214676) = "\x00\x03\x46\x94",
+                   padding = "",
                    struct nlattr {
                        nla_len = 8, //&lt;- \x08\x00
-                       nla_type = NFTA_GEN_PROC_PID, // &lt;- &quot;\x03\x00&quot;
+                       nla_type = NFTA_GEN_PROC_PID, // &lt;- "\x03\x00"
                    },
-                   data=&quot;nft\0&quot;, // &lt;-&quot;\x6e\x66\x74\x00&quot;
-                   padding = &quot;&quot;,
+                   data="nft\0", // &lt;-"\x6e\x66\x74\x00"
+                   padding = "",
                },
                iov_len=69631
            }
@@ -2024,7 +2057,7 @@ struct nftables_pernet {
 <li><code>NFNL_MSG_BATCH_BEGIN</code>: begin a batch of changes to the ruleset</li>
 <li><code>NFT_MSG_NEWTABLE</code> : create a new table, with attributes:
 <ol>
-<li><code>NFTA_TABLE_NAME</code>:  <code>&quot;T2\0&quot;</code></li>
+<li><code>NFTA_TABLE_NAME</code>:  <code>"T2\0"</code></li>
 <li><code>NFTA_TABLE_FLAGS</code>: 0</li>
 </ol>
 </li>
@@ -2049,7 +2082,7 @@ struct nftables_pernet {
                             nlmsg_seq=0, 
                             nlmsg_pid=0
                         },
-                        struct nfgenmsg{ // &lt;- &quot;\x00\x00\x0a\x00&quot;
+                        struct nfgenmsg{ // &lt;- "\x00\x00\x0a\x00"
                             nfgen_family=AF_UNSPEC,
                             version = NFNETLINK_V0,
                             res_id = NFNL_SUBSYS_NFTABLES, /*resource id */
@@ -2063,23 +2096,23 @@ struct nftables_pernet {
                             nlmsg_seq=1,
                             nlmsg_pid=0
                         },
-                         struct nfgenmsg{ // &lt;- &quot;\x02\x00\x00\x00&quot;
+                         struct nfgenmsg{ // &lt;- "\x02\x00\x00\x00"
                             nfgen_family=AF_INET,
                             version = NFNETLINK_V0,
                             res_id = 0, /*resource id */
                         }
                         struct nlattr {
-                            nla_len = 7, // &lt;- &quot;\x07\x00&quot;
-                            nla_type = NFTA_TABLE_NAME, //&lt;- &quot;\x01\x00&quot;
+                            nla_len = 7, // &lt;- "\x07\x00"
+                            nla_type = NFTA_TABLE_NAME, //&lt;- "\x01\x00"
                         },
-                        data = &quot;T2\0&quot;,  // &lt;- &quot;\x54\x32\x00&quot;
-                        padding = &quot;\x00&quot;, // 4 byte alignment
+                        data = "T2\0",  // &lt;- "\x54\x32\x00"
+                        padding = "\x00", // 4 byte alignment
                         
                         struct nlattr {
-                            nla_len = 8, // &lt;- &quot;\x08\x00&quot;
-                            nla_type = NFTA_TABLE_FLAGS //  &quot;\x02\x00&quot;
+                            nla_len = 8, // &lt;- "\x08\x00"
+                            nla_type = NFTA_TABLE_FLAGS //  "\x02\x00"
                         },
-                        (u32) flags = 0, // &lt;- \x00\x00\x00\x00&quot;,
+                        (u32) flags = 0, // &lt;- \x00\x00\x00\x00",
                     },
                     {
                         struct nlmsghdr {
@@ -2089,7 +2122,7 @@ struct nftables_pernet {
                             nlmsg_seq=2, 
                             nlmsg_pid=0,
                         }, 
-                        struct nfgenmsg{ // &lt;- &quot;\x00\x00\x0a\x00&quot;
+                        struct nfgenmsg{ // &lt;- "\x00\x00\x0a\x00"
                             nfgen_family=AF_UNSPEC,
                             version = NFNETLINK_V0,
                             res_id = NFNL_SUBSYS_NFTABLES, /*resource id */
@@ -2101,7 +2134,7 @@ struct nftables_pernet {
         ], 
         msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 76
 </code></pre>
-<p>Though I wont show strace output, to setup a chain will have a netlink message with <code>NFT_MSG_NEWCHAIN</code>  and attributes <code>NFTA_CHAIN_TABLE</code>,  <code> NFTA_CHAIN_NAME</code> , <code>NFTA_CHAIN_HOOK</code> and<code>NFTA_CHAIN_POLICY</code>. </p>
+<p>Though I wont show strace output, to setup a chain will have a netlink message with <code>NFT_MSG_NEWCHAIN</code>  and attributes <code>NFTA_CHAIN_TABLE</code>,  <code> NFTA_CHAIN_NAME</code> , <code>NFTA_CHAIN_HOOK</code> and<code>NFTA_CHAIN_POLICY</code>.</p>
 <p>And to setup a rule nft will send a message with <code>NFT_MSG_NEWRULE</code> and attributes <code>NFTA_RULE_TABLE</code>, <code>NFTA_RULE_CHAIN</code>  and most importantly <code>NFTA_RULE_EXPRESSIONS</code> which is shown below.</p>
 <p>Note: use <code>--string-limit</code> so strace dumps the complete msg data.</p>
 <pre><code class="language-sh">strace -f --string-limit=1024  -o one.txt nft add rule T C ip daddr 127.0.0.9 counter
@@ -2121,7 +2154,7 @@ struct nftables_pernet {
                 nlmsg_flags=NLM_F_REQUEST,
                 nlmsg_seq=0,
                 nlmsg_pid=0},
-            struct nfgenmsg { // &lt;- &quot;\x00\x00\x0a\x00&quot;
+            struct nfgenmsg { // &lt;- "\x00\x00\x0a\x00"
                 nfgen_family=AF_UNSPEC,
                 version = NFNETLINK_V0,
                 res_id = NFNL_SUBSYS_NFTABLES, /*resource id */
@@ -2135,23 +2168,23 @@ struct nftables_pernet {
                 nlmsg_seq=1,
                 nlmsg_pid=0
             },
-            struct nfgenmsg { // &lt;- &quot;\x02\x00\x00\x00&quot;
+            struct nfgenmsg { // &lt;- "\x02\x00\x00\x00"
                 nfgen_family=AF_INET,
                 version = NFNETLINK_V0,
                 res_id = 0,
             },
             struct nlattr {
-                nla_len = 6,       // &quot;\x06\x00&quot;
-                nla_type = NFTA_RULE_TABLE, // &lt;- &quot;\x01\x00&quot;
+                nla_len = 6,       // "\x06\x00"
+                nla_type = NFTA_RULE_TABLE, // &lt;- "\x01\x00"
             },                       
-            data =  &quot;T\0&quot;, //   &quot;\x54\x00
-            padding = &quot;\x00\x00&quot;,
+            data =  "T\0", //   "\x54\x00
+            padding = "\x00\x00",
             struct nlattr {
                 nla_len = 6, // &lt;- \x06\x00
-                nla_type = NFTA_RULE_CHAIN, // &lt;- &quot;\x02\x00&quot;
+                nla_type = NFTA_RULE_CHAIN, // &lt;- "\x02\x00"
             },
-            data = &quot;C\0&quot;, // \x43\x00
-            padding = &quot;\x00\x00&quot;,
+            data = "C\0", // \x43\x00
+            padding = "\x00\x00",
             struct nlattr {
                 nla_len = 120, //&lt;-  \x78\x00,
                 nla_type = NLA_F_NESTED | NFTA_RULE_EXPRESSIONS, //&lt;-\x04\x80
@@ -2160,43 +2193,43 @@ struct nftables_pernet {
             {
                 // 1. payload load 4b @ network header + 16 =&gt; reg 1
                 struct nlattr {
-                    nla_len = 52, //&lt;- &quot;\x34\x00&quot;
+                    nla_len = 52, //&lt;- "\x34\x00"
                     nla_type = NLA_F_NESTED | NFTA_LIST_ELEM,  //&lt;- \x01\x80
                 }
                 struct nlattr {
                     nla_len = 12, //&lt;- \x0c\x00
                     nla_type = NFTA_EXPR_NAME, // &lt;- \x01\x00
                 }
-                data = &quot;payload\0&quot;,  // &lt;- &quot;\x70\x61\x79\x6c\x6f\x61\x64\x00&quot;,
-                padding = &quot;&quot;,
+                data = "payload\0",  // &lt;- "\x70\x61\x79\x6c\x6f\x61\x64\x00",
+                padding = "",
                 struct nlattr {
                     nla_len = 36, // \x24\x00
-                    nla_type = NLA_F_NESTED | NFTA_EXPR_DATA, //&lt;- &quot;\x02\x80&quot;
+                    nla_type = NLA_F_NESTED | NFTA_EXPR_DATA, //&lt;- "\x02\x80"
                 }
                 struct nlattr {
                     nla_len = 8, // \x08\x00
                     nla_type = NFTA_PAYLOAD_DREG // &lt;- \x01\x00
                 }
-                data = 1, //&lt;-  &quot;\x00\x00\x00\x01&quot;
-                payload = &quot;&quot;,
+                data = 1, //&lt;-  "\x00\x00\x00\x01"
+                payload = "",
                 struct nlattr {
                     nla_len = 8, //&lt;- \x08\x00
                     nla_type = NFTA_PAYLOAD_BASE,//&lt;- \x02\x00
                 }
                 data = NFT_PAYLOAD_NETWORK_HEADER, //&lt;-\x00\x00\x00\x01
-                padding = &quot;&quot;,
+                padding = "",
                 struct nlattr {
                     nla_len = 8, //\x08\x00
                     nla_type = NFTA_PAYLOAD_OFFSET ,//\x03\x00
                 }
                 data = 16, // \x00\x00\x00\x0f,
-                padding = &quot;&quot;,
+                padding = "",
                 struct nlattr {
                     nla_len = 8, //\x08\x00
                     nla_type = NFTA_PAYLOAD_LEN // \x04\x00
                 }
-                data = 4, //&quot;\x00\x00\x00\x04&quot;
-                padding = &quot;&quot;,
+                data = 4, //"\x00\x00\x00\x04"
+                padding = "",
             }
             {
                 //2. cmp eq reg 1 0x0900007f
@@ -2208,8 +2241,8 @@ struct nftables_pernet {
                     nla_len = 8, // \x08\x00
                     nla_type = NFTA_EXPR_NAME //\x01\x00
                 }
-                data = &quot;cmp\0&quot;, //&quot;\x63\x6d\x70\x00&quot;
-                payload = &quot;&quot;,
+                data = "cmp\0", //"\x63\x6d\x70\x00"
+                payload = "",
                 struct nlattr {
                     nla_len = 32, // &lt;-\x20\x00
                     nla_type = NLA_F_NESTED | NFTA_EXPR_DATA // \x02\x80
@@ -2219,13 +2252,13 @@ struct nftables_pernet {
                     nla_type = NFTA_CMP_SREG // \x01\x00
                 }
                 data = 1, // \x00\x00\x00\x01
-                padding = &quot;&quot;,
+                padding = "",
                 struct nlattr {
                     nla_len = 8, //\x08\x00,
                     nla_type = NFTA_CMP_OP, //\x02\x00
                 }
-                data =NFT_CMP_EQ, // = 0 &lt;- &quot;\x00\x00\x00\x00&quot;,
-                padding = &quot;&quot;,
+                data =NFT_CMP_EQ, // = 0 &lt;- "\x00\x00\x00\x00",
+                padding = "",
                 struct nlattr {
                     nla_len = 12, //\x0c\x00
                     nla_type = NLA_F_NESTED | NFTA_CMP_DATA, //\x03\x80
@@ -2234,8 +2267,8 @@ struct nftables_pernet {
                     nla_len = 8, //\x08\x00
                     nla_type = NFTA_DATA_VALUE, // \x01\x00
                 }
-                data = 0x0900007f, //&quot;\x7f\x00\x00\x09&quot;
-                padding = &quot;&quot;,
+                data = 0x0900007f, //"\x7f\x00\x00\x09"
+                padding = "",
 
             }
             {
@@ -2248,8 +2281,8 @@ struct nftables_pernet {
                     nla_len = 12, //\x0c\x00
                     nla_type = NFTA_EXPR_NAME, // \x01\x00
                 }
-                data = &quot;counter\0&quot;, // &quot;\x63\x6f\x75\x6e\x74\x65\x72\x00&quot;
-                padding = &quot;&quot;,
+                data = "counter\0", // "\x63\x6f\x75\x6e\x74\x65\x72\x00"
+                padding = "",
                 struct nlattr {
                     nla_len = 4 , // \x04\x00
                     nla_type = NLA_F_NESTED | NFTA_EXPR_DATA, //\x02\x80
@@ -2264,7 +2297,7 @@ struct nftables_pernet {
                 nlmsg_flags=NLM_F_REQUEST,
                 nlmsg_seq=2,
                 nlmsg_pid=0},
-            struct nfgenmsg { // &lt;- &quot;\x00\x00\x0a\x00&quot;
+            struct nfgenmsg { // &lt;- "\x00\x00\x0a\x00"
                 nfgen_family=AF_UNSPEC,
                 version = NFNETLINK_V0,
                 res_id = NFNL_SUBSYS_NFTABLES, /*resource id */
@@ -2372,18 +2405,18 @@ struct nftables_pernet {
 <p>Some of these papers cannot be uploaded/shared. I have provided links to some of the papers if I was able to find a public link off DuckDuckGo. Else I have provided a private link which needs subscription. In case you cannot access them, send me a mail and if possible I'll share the paper.</p>
 <h3 id="m11-early-internet-darpa-internet-protocols"><a class="header" href="#m11-early-internet-darpa-internet-protocols">M1.1 Early Internet, Darpa Internet Protocols</a></h3>
 <p>These papers describe the structure of an early internet. The first paper is a description of the components in building a packet switching network. The second one, published 14 years later is a description the design goals and the protocols developed.</p>
-<h5 id="paper-1-a-protocol-for-packet-network-incommunication-ieee-1974-a-hrefhttpswwwcsprincetoneducoursesarchivefall06cos561paperscerf74pdflinka"><a class="header" href="#paper-1-a-protocol-for-packet-network-incommunication-ieee-1974-a-hrefhttpswwwcsprincetoneducoursesarchivefall06cos561paperscerf74pdflinka">Paper 1. A Protocol for Packet Network Incommunication (IEEE 1974) [<a href="https://www.cs.princeton.edu/courses/archive/fall06/cos561/papers/cerf74.pdf">Link</a>]</a></h5>
+<h5 id="paper-1-a-protocol-for-packet-network-incommunication-ieee-1974-link"><a class="header" href="#paper-1-a-protocol-for-packet-network-incommunication-ieee-1974-link">Paper 1. A Protocol for Packet Network Incommunication (IEEE 1974) [<a href="https://www.cs.princeton.edu/courses/archive/fall06/cos561/papers/cerf74.pdf">Link</a>]</a></h5>
 <p>The paper first clearly defines the components of the network viz Hosts, networks and gateways. The hosts as the end points which are connected to each other. Multiple hosts are connected to internetwork. And internetworks are connected via Gateways. Each internetwork can use its own protocol for communication. But communication across internetworks needed a common protocol. The protocol for internetwork communication is the early IP protocol. The authors then describe a protocol over the internetwork protocol to transfer data between end points.</p>
 <p>The protocols described are similar to modern implementations of IP and TCP headers. The original vision of the packet switching network remains very similar to our current networks. The paper clearly explains their choice for a common internetwork protocol, while each network was free to develop protocols for communication within the network. Th Gateway simply handled translation between the network protocols. This is very clearly the design that we still adopt, except that hosts very rarely communicate on bare link local protocol. Most communication, even between hosts within a network, is over IP. The authors choice to have a common IP protocol implemented by all hosts which we have acknowledge today as the narrow waist of the internet. Other differences include fragmentation using sequence numbers, which have now moved to TCP, while IP implements a blunt form of fragmentation.</p>
 <p><img src="M/imgs/M1_interntwhdr.svg" alt="M1_interntwhdr" /></p>
 <p>The authors describe the transmission control protocol as a means to transmit a stream of data, which it breaks into segments. Early TCP used the sequence numbers provided by internetwork protocol, and both the protocols worked closely to transmit data. Modern IP and TCP have been separated into distinct protocols with independent functions. The authors also have a section which describes early address format and address assignment which have completely changed. The authors also envision a central repository that provides addresses for each node within a network, which in way the current DHCP implementation.</p>
 <p>The paper is a description of the network that the authors envisioned, some of their decisions have formed the basis of the current internet.</p>
-<h5 id="paper-2-the-design-philosophy-of-the-darpa-internet-protocols-acm-1988-a-hrefhttpsgroupscsailmiteduanapublicationspubpdfsthe20design20philosophy20of20the20darpa20internet20protocolspdflinka"><a class="header" href="#paper-2-the-design-philosophy-of-the-darpa-internet-protocols-acm-1988-a-hrefhttpsgroupscsailmiteduanapublicationspubpdfsthe20design20philosophy20of20the20darpa20internet20protocolspdflinka">Paper 2. The Design Philosophy of the DARPA Internet Protocols (ACM 1988) [<a href="https://groups.csail.mit.edu/ana/Publications/PubPDFs/The%20design%20philosophy%20of%20the%20DARPA%20internet%20protocols.pdf">Link</a>]</a></h5>
+<h5 id="paper-2-the-design-philosophy-of-the-darpa-internet-protocols-acm-1988-link"><a class="header" href="#paper-2-the-design-philosophy-of-the-darpa-internet-protocols-acm-1988-link">Paper 2. The Design Philosophy of the DARPA Internet Protocols (ACM 1988) [<a href="https://groups.csail.mit.edu/ana/Publications/PubPDFs/The%20design%20philosophy%20of%20the%20DARPA%20internet%20protocols.pdf">Link</a>]</a></h5>
 <p>The second paper describes the philosophy behind the design of the Internet protocols after the protocols had standardised. The paper first describes the fundamental goals of the network. Then they describe how these goals influence the design.</p>
-<p>One of the foremost goals was for the network to and continue working despite loss. This goal was adopted since the network was initially a military project that was later released for civil use. This made the internet fault tolerant at the expense of performance. To achieve this, the state necessary for internet functioning is moved to the endpoints. This approach is described as &quot;fate sharing&quot; since both entity and the state share the same fate. A consequence of this approach was the stateless design of switches and gateways. Also, each end node is responsible for maintaining any state necessary for the connection. It is interesting that the goal and the chosen approach is applied in current network designs.</p>
+<p>One of the foremost goals was for the network to and continue working despite loss. This goal was adopted since the network was initially a military project that was later released for civil use. This made the internet fault tolerant at the expense of performance. To achieve this, the state necessary for internet functioning is moved to the endpoints. This approach is described as "fate sharing" since both entity and the state share the same fate. A consequence of this approach was the stateless design of switches and gateways. Also, each end node is responsible for maintaining any state necessary for the connection. It is interesting that the goal and the chosen approach is applied in current network designs.</p>
 <p>The paper then describes the services supported over IP and the need for a protocol that allows the user to use the datagram services offered by IP. This created a need for decoupling IP and TCP, and building the User Datagram Protocol as the protocol which offers these services. The paper then describes the division into layers which offer services independently using services offered by lower layers. The classical OSI model is the modern form of this idea, with clear abstractions of the functions provided by each layer.</p>
 <h3 id="m12-distributed-computation-of-a-spanning-tree-in-an-extended-lan"><a class="header" href="#m12-distributed-computation-of-a-spanning-tree-in-an-extended-lan">M1.2 Distributed Computation of a Spanning Tree in an Extended LAN</a></h3>
-<h5 id="paper-an-algorithm-for-distributed-computation-of-a-spanning-tree-in-an-extended-lan-acm-1985-a-hrefhttpswwwituuseeducoursehomepagedatakomht06slidessta-perlmanpdflinka"><a class="header" href="#paper-an-algorithm-for-distributed-computation-of-a-spanning-tree-in-an-extended-lan-acm-1985-a-hrefhttpswwwituuseeducoursehomepagedatakomht06slidessta-perlmanpdflinka">Paper: An Algorithm for Distributed Computation of a Spanning Tree in an Extended LAN (ACM 1985) [<a href="https://www.it.uu.se/edu/course/homepage/datakom/ht06/slides/sta-perlman.pdf">Link</a>]</a></h5>
+<h5 id="paper-an-algorithm-for-distributed-computation-of-a-spanning-tree-in-an-extended-lan-acm-1985-link"><a class="header" href="#paper-an-algorithm-for-distributed-computation-of-a-spanning-tree-in-an-extended-lan-acm-1985-link">Paper: An Algorithm for Distributed Computation of a Spanning Tree in an Extended LAN (ACM 1985) [<a href="https://www.it.uu.se/edu/course/homepage/datakom/ht06/slides/sta-perlman.pdf">Link</a>]</a></h5>
 <p>The author describes a algorithm to build a tree from an extended LAN. As networks began to grow, with LANs interconnected using bridges to build an extended LAN, manual configuration of the bridges increased the risk of loops. Similarly a user without proper knowledge could connect LANs with a bridge and create a Loop. The proposed algorithm allows the bridges to exchange data and construct a tree without any additional configuration. Secondly the algorithm converges in O(mesh diameter) while imposing small memory requirements (proportional to the number of LANs the bridge is connected to) on each bridge.</p>
 <p><img src="M/imgs/M1_extended_LAN.svg" alt="extended_lan" /></p>
 <p>In the final tree, each LAN has a designated bridge. On receiving data from a LAN, a bridge forwards the data to all other LANs on which it is a designated bridge. The complete mesh is transformed into a tree by choosing the designated bridges. The root of the tree is a designated bridge on all of it's LANs. The algorithm chooses a very simple way to choose the root. The bridge with the smallest MAC value is chosen as the root. The bridges exchange HELLO messages to find the root. Once a root is found, the root sends out periodic HELLO messages. These HELLO messages are forwarded on all connected LANs. The bridges based on the HELLO messages share information and choose the designated bridge on each LAN. The algorithm works by each bridge first trying to become the root and then trying to become the designated brigde on each of the LANs it is connected to.</p>
@@ -2404,7 +2437,7 @@ struct nftables_pernet {
 <p><em>A mesh is made by folks like me</em>
 <em>Then bridges find a spanning tree.</em></p>
 <h3 id="m13-network-protocol-folklore"><a class="header" href="#m13-network-protocol-folklore">M1.3 Network Protocol Folklore</a></h3>
-<h5 id="paper-network-protocol-folklore-acm-2019-a-hrefhttpsccronlinesigcommorgwp-contentuploads201910acmdl19-336pdflinka"><a class="header" href="#paper-network-protocol-folklore-acm-2019-a-hrefhttpsccronlinesigcommorgwp-contentuploads201910acmdl19-336pdflinka">Paper: Network Protocol Folklore (ACM 2019) [<a href="https://ccronline.sigcomm.org/wp-content/uploads/2019/10/acmdl19-336.pdf">Link</a>]</a></h5>
+<h5 id="paper-network-protocol-folklore-acm-2019-link"><a class="header" href="#paper-network-protocol-folklore-acm-2019-link">Paper: Network Protocol Folklore (ACM 2019) [<a href="https://ccronline.sigcomm.org/wp-content/uploads/2019/10/acmdl19-336.pdf">Link</a>]</a></h5>
 <p>Radia Perlman, having been working on internet protocols since it's inception, shares a history of choices they made and their consequences on the modern internet implementation. One line from the abstract which makes the paper interesting is: Some decisions have made today’s networks unnecessarily complex and less functional. Surprisingly, mechanisms that were created out of necessity, to compensate for previous decisions, sometimes turn out to be useful for purposes other than the original reason they were invented.</p>
 <p>Ethernet addresses were designed to be 6 bytes long so that nodes connected over ethernet would not need any other address configuration. But ethernets never have more than a few thousand nodes attached. Each ethernet address is unique and location independent, but are simply used for link to link transfer. It is interesting that IPv4, which was designed so each node would get a unique address dynamically has a smaller length of just 4 Bytes. People even envisioned ethernet as Layer 3 replacement, implementing end to end connections over ethernet due to the uniqueness property of the ethernet address.</p>
 <p>DEC had developed an alternate to IP called IS-IS which adopted CLNP (ConnectionLess Network Protocol) addressing. CNLP has very large 20 Byte addresses ( larger than 16Byte IPv6). Though it did not catch on CNLP supported features that were later built into IPv6.</p>
@@ -2460,12 +2493,12 @@ M1.14 SWAN</p>
 <h3 id="m122-censorship-in-china"><a class="header" href="#m122-censorship-in-china">M1.22 Censorship in China</a></h3>
 <p>great firewall</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cache-side-channel-attacks"><a class="header" href="#cache-side-channel-attacks">Cache Side Channel Attacks</a></h1>
-<p>By design caches are transparent, but processes can create contention resulting in timing variations.    CPU data cache timing attacks are to exploit cache timing to expose cache's internal state. </p>
+<p>By design caches are transparent, but processes can create contention resulting in timing variations.    CPU data cache timing attacks are to exploit cache timing to expose cache's internal state.</p>
 <p>Caches are one place where time variations can be exposed.  Caches are built to bridge the gap between main memory and Processor  registers. Since it takes fewer cycles to read from cache than from main memory, recording time differences makes reading from cache detectable.</p>
 <h3 id="caches-recap"><a class="header" href="#caches-recap">Caches Recap:</a></h3>
 <ul>
 <li>Caches are designed to exploit spatial locality in memory access</li>
-<li>For each read, check if the data is present in one of the  caches. If present, read from the cache or load from lower memory. LRU  to evict old entries. </li>
+<li>For each read, check if the data is present in one of the  caches. If present, read from the cache or load from lower memory. LRU  to evict old entries.</li>
 <li>Cold cache misses are when the cache is empty, happens during program load.</li>
 <li>Data can only be added to certain regions in the cache.  Multiple address lines in lower memory map to a subset in the cache.  Conflict miss happens when data that map to the same region are being  loaded, causing unnecessary cache evictions.</li>
 <li>If cache size is larger than the working set of memory, we face capacity misses.</li>
@@ -2475,9 +2508,9 @@ M1.14 SWAN</p>
 <li>A Cache Coherence protocol makes sure of cache coherence  among caches. Cache coherence protocols described below are snooping  protocols, i.e. changes to cache traffic is visible to all cores.</li>
 <li>Write-invalidate: On detecting a write to another cached location, invalidate local copy, forcing a read from main memory.</li>
 <li>Write-update: On detecting a write, update local copy.</li>
-<li>Any cache coherence protocol increases bus traffic. </li>
-<li>Article on cache coherence : <a href="https://fgiesen.wordpress.com/2014/07/07/cache-coherency/">https://fgiesen.wordpress.com/2014/07/07/cache-coherency/</a> </li>
-<li>Notes on CPU caches: <a href="https://www.cse.iitb.ac.in/%7Emythili/os/notes/notes-cache.txt">https://www.cse.iitb.ac.in/~mythili/os/notes/notes-cache.txt</a>
+<li>Any cache coherence protocol increases bus traffic.</li>
+<li>Article on cache coherence : <a href="https://fgiesen.wordpress.com/2014/07/07/cache-coherency/">https://fgiesen.wordpress.com/2014/07/07/cache-coherency/</a></li>
+<li>Notes on CPU caches: <a href="https://www.cse.iitb.ac.in/~mythili/os/notes/notes-cache.txt">https://www.cse.iitb.ac.in/~mythili/os/notes/notes-cache.txt</a>
 <ul>
 <li>has a clean explanation of MESI cache coherence protocol.</li>
 </ul>
@@ -2487,7 +2520,7 @@ M1.14 SWAN</p>
 <li>Build loops, which operate on the same data. Merge loops if necessary</li>
 <li>Within a data structure, make sure critical (read/write heavy) elements are cache aligned and at the top.</li>
 <li>Reduce branches so code can be prefetched.</li>
-<li>Atomic variables are allowed to be present only in one  cache. Use of atomic variables (and hence locks and synchronization  mechanisms) on multiple cores increases cache coherence traffic. </li>
+<li>Atomic variables are allowed to be present only in one  cache. Use of atomic variables (and hence locks and synchronization  mechanisms) on multiple cores increases cache coherence traffic.</li>
 <li>Instead try to use per CPU data structures.</li>
 </ul>
 </li>
@@ -2497,12 +2530,12 @@ M1.14 SWAN</p>
 <li>Exploits Cache behavior to leak information about victim process.</li>
 <li>Flush a line, wait for some time, measure access time. If  the victim has accessed the memory, access time will be in cache and  access will be fast. Else will be slow.</li>
 <li>Repeat to identify victim's memory regions.</li>
-<li>Slides Link: <a href="https://cs.adelaide.edu.au/%7Eyval/CHES16/">https://cs.adelaide.edu.au/~yval/CHES16/</a></li>
+<li>Slides Link: <a href="https://cs.adelaide.edu.au/~yval/CHES16/">https://cs.adelaide.edu.au/~yval/CHES16/</a></li>
 </ul>
 <h3 id="spectre-1-bounds-check-bypass"><a class="header" href="#spectre-1-bounds-check-bypass">Spectre 1: Bounds Check Bypass:</a></h3>
 <ul>
 <li>
-<p>Modern CPUs can speculatively execute instructions in a branch, before a branch true execution starts. </p>
+<p>Modern CPUs can speculatively execute instructions in a branch, before a branch true execution starts.</p>
 </li>
 <li>
 <pre><code>int some_function(int user_input)
@@ -2525,7 +2558,7 @@ M1.14 SWAN</p>
 <p>This can be used to read data from the kernel via eBPF JIT.  Users can provide eBPF  bytecode which the kernel runs at certain kernel hooks. The bytecode is translated into machine code using a JIT engine.</p>
 </li>
 <li>
-<p>HW Solution is to clean up cache while undoing changes. </p>
+<p>HW Solution is to clean up cache while undoing changes.</p>
 </li>
 </ul>
 <h3 id="spectre-2-branch-target-injection"><a class="header" href="#spectre-2-branch-target-injection">Spectre 2: Branch target injection:</a></h3>
@@ -2534,8 +2567,8 @@ M1.14 SWAN</p>
 <li>Most branch predictors maintain a table of branches to jump  addresses. The last 12 bits are used to identify the branches and  addresses.</li>
 <li>Since Only the last 12 bits are used, the attacker fills the table with branch and jump entries. The CPU while executing the victim  code enters the branch and loads the secret into the cache, which is  then read by the attacker. Note that the victim might itself have never  entered the branch, but the CPU speculatively executes the branch.</li>
 <li>This can be used to read the host's memory from a KVM guest.</li>
-<li>HW Solution: Update microcode so OS can control branch prediction table. </li>
-<li>SW Retpoline Solution: Retpoline = return + trampoline. An  indirect branch that is not subject to speculative execution. Instead of a &quot;jmp&quot; use a call and return. <a href="https://support.google.com/faqs/answer/7625886">Google Blog.</a></li>
+<li>HW Solution: Update microcode so OS can control branch prediction table.</li>
+<li>SW Retpoline Solution: Retpoline = return + trampoline. An  indirect branch that is not subject to speculative execution. Instead of a "jmp" use a call and return. <a href="https://support.google.com/faqs/answer/7625886">Google Blog.</a></li>
 </ul>
 <h3 id="spectre-3-rogue-data-cache-load"><a class="header" href="#spectre-3-rogue-data-cache-load">Spectre 3: Rogue data cache load</a></h3>
 <ul>
@@ -2623,7 +2656,7 @@ tsx_async_abort:Not affected
 </ul>
 <p><img src="M/imgs/mem-weak.png" alt="img" /></p>
 <h2 id="m34-litmus-tests"><a class="header" href="#m34-litmus-tests">M3.4 Litmus tests</a></h2>
-<p>A series of tests to show cases where the memory models differ. In each test, threads read/write to shared values x,y,z... and read to thread local registers r1,r2,... </p>
+<p>A series of tests to show cases where the memory models differ. In each test, threads read/write to shared values x,y,z... and read to thread local registers r1,r2,...</p>
 <h5 id="m341-litmus-test-message-passing"><a class="header" href="#m341-litmus-test-message-passing">M3.4.1 Litmus test: Message Passing</a></h5>
 <pre><code>// Thread 1            // Thread 2
 x = 1                     r1 = y
@@ -2737,7 +2770,7 @@ x = 1             x = 2             r1 = x            r3 = x
 <li>Hardware is weakly ordered w.r.t. a sync model IFF it appears seq. consistent to all software that obeys the sync. model.</li>
 <li>One model that was proposed by the authors is Data-Race-Free (DRF) model.
 <ul>
-<li>DRF assumes HW has sync operations, other than read/write. 
+<li>DRF assumes HW has sync operations, other than read/write.
 <ul>
 <li>a barrier is a sync-operation</li>
 </ul>
@@ -2777,12 +2810,9 @@ x = 1             x = 2             r1 = x            r3 = x
 <div style="break-before: page; page-break-before: always;"></div><h1 id="a-appendix"><a class="header" href="#a-appendix">A. Appendix</a></h1>
 <p>These are a few links I think are useful.</p>
 <ol>
-<li>David Miller's <a href="http://vger.kernel.org/%7Edavem/skb.html">How SKBs work</a> and <a href="http://vger.kernel.org/%7Edavem/skb_data.html">skb data</a>. His home page has <a href="https://duckduckgo.com/?q=site%3A%22http%3A%2F%2Fvger.kernel.org%2F%7Edavem%2F%22+html">other useful links</a> as well.</li>
+<li>David Miller's <a href="http://vger.kernel.org/~davem/skb.html">How SKBs work</a> and <a href="http://vger.kernel.org/~davem/skb_data.html">skb data</a>. His home page has <a href="https://duckduckgo.com/?q=site%3A%22http%3A%2F%2Fvger.kernel.org%2F~davem%2F%22+html">other useful links</a> as well.</li>
 <li><a href="https://lwn.net">lwn.net</a> contains clean summaries. Search for links from site, e.g. lwn pages about <a href="https://duckduckgo.com/?q=site%3A%22lwn.net%22+ebpf">eBPF</a>.
-<ol start="3">
-<li>LWN page with Kernel related articles grouped by topic: <a href="https://lwn.net/Kernel/Index/">Kernel index</a>.</li>
-</ol>
-</li>
+3. LWN page with Kernel related articles grouped by topic: <a href="https://lwn.net/Kernel/Index/">Kernel index</a>.</li>
 <li><a href="lartc.org">lartc.org</a> the best place for routing, traffic shaping, tunnelling info.</li>
 <li>Twitter has a lot of active netdev members. <a href="https://twitter.com/tejaswi_tan/lists/netdev1">my list</a></li>
 </ol>
@@ -2791,44 +2821,45 @@ x = 1             x = 2             r1 = x            r3 = x
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                        
-                        
+
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                
-                            </nav>
+
+            </nav>
 
         </div>
 
-        
-        
-        
-                <script type="text/javascript">
+
+
+
+        <script>
             window.playground_copyable = true;
         </script>
-        
-        
-                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
-        
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
-        
-                        <script type="text/javascript">
+
+        <script>
         window.addEventListener('load', function() {
             MathJax.Hub.Register.StartupHook('End', function() {
                 window.setTimeout(window.print, 100);
             });
         });
         </script>
-                
+
+    </div>
     </body>
 </html>

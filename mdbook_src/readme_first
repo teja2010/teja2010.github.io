@@ -1,2 +1,2 @@
-1. to build run `mdbook build`
-2. copy contents in book into the root directory
+1. to build run `mdbook build`. The built files will be added to a new dir `book`.
+2. copy contents in book into the root directory `cp -r book/* ../`

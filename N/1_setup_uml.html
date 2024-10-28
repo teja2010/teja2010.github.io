@@ -1,49 +1,48 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>N1. Setup UML (older) - teja&#x27;s notes</title>
-                
+
 
         <!-- Custom HTML head -->
         
-
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
-                <link rel="icon" href="../favicon.svg">
-                        <link rel="shortcut icon" href="../favicon.png">
-                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
         <link rel="stylesheet" href="../css/general.css">
         <link rel="stylesheet" href="../css/chrome.css">
-                <link rel="stylesheet" href="../css/print.css" media="print">
-        
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-                <link rel="stylesheet" href="../fonts/fonts.css">
-        
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css">
         <link rel="stylesheet" href="../tomorrow-night.css">
         <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        
-                <!-- MathJax -->
-        <script async type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-            </head>
-    <body>
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -59,71 +58,102 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
 
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
-            var html = document.querySelector('html');
-            var sidebar = 'hidden';
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="../Preface.html">Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_uml.html" class="active">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="../N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item "><a href="../N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/5_1_rule_matching.html">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="../N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item "><a href="../N/5_3_Adding_tables_chains_rules_userspace.html">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item "><a href="../N/5_4_Adding_tables_chains_rules_kernel.html">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="../N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item "><a href="../M/3_Memory_Models.html">Memory Models</a></li></ol></li><li class="chapter-item "><a href="../P_Papers.html">P.Papers</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../P/1_ML_sys.html">ML Sys</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>            </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+                <ol class="chapter"><li class="chapter-item "><a href="../HI.html">Hi</a></li><li class="chapter-item "><a href="../Preface.html">0. Preface</a></li><li class="chapter-item expanded "><a href="../N_Linux_Networking.html">N. Linux_Networking</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_qemu.html">N1. Setup Qemu</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../N/1_setup_uml.html" class="active">N1. Setup UML (older)</a></li></ol></li><li class="chapter-item "><a href="../N/2_Packet_RX_Basic.html">N2. Packet RX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/2_1_top_half.html">N2.1 Enter the Core, top half processing</a></li><li class="chapter-item "><a href="../N/2_2_softirq_sched.html">N2.2 Softirqs, Softirq Scheduling (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_3_rps_rss.html">N2.3 Packet Steering (RSS and RPS) (OPTIONAL)</a></li><li class="chapter-item "><a href="../N/2_4_softirq_netrx.html">N2.4 Softirq NET_RX</a></li><li class="chapter-item "><a href="../N/2_5_netif_receive_skb_core.html">N2.5 __netif_receive_skb_core</a></li><li class="chapter-item "><a href="../N/2_6_ip_processing.html">N2.6 IP Processing</a></li><li class="chapter-item "><a href="../N/2_7_udp_processing.html">N2.7 UDP Processing</a></li></ol></li><li class="chapter-item "><a href="../N/3_Packet_TX_Basic.html">N3. Packet TX path 1 : Basic</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/3_1-3_sendmsg_from_userspace.html">N3.1-3.2 sendmsg() from userspace</a></li><li class="chapter-item "><a href="../N/3_3-4_alloc_and_send_skb.html">N3.3-3.4 alloc skb and send_skb</a></li><li class="chapter-item "><a href="../N/3_5-8_net_tx_and_driver_xmit.html">N3.5-3.8 NET_TX and driver xmit</a></li></ol></li><li class="chapter-item "><a href="../N/4_Socket_Programming_BTS.html">N4. (WIP) Socket Programming BTS</a></li><li class="chapter-item "><a href="../N/5_Netfilter_Internals.html">N5. (WIP) Netfilter Internals</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../N/5_1_rule_matching.html">N5.1 Rule Matching</a></li><li class="chapter-item "><a href="../N/5_2_rule_deconstruction.html">N5.2 Rule deconstruction</a></li><li class="chapter-item "><a href="../N/5_3_Adding_tables_chains_rules_userspace.html">N5.3 Adding tables, chains, rules (userspace)</a></li><li class="chapter-item "><a href="../N/5_4_Adding_tables_chains_rules_kernel.html">N5.4 Adding tables, chains, rules (kernel)</a></li><li class="chapter-item "><a href="../N/5_5_Atomic_transactions.html">N5.5 Atomic Transactions</a></li><li class="chapter-item "><div>N5.6 Sets</div></li><li class="chapter-item "><div>N5.7 Maps, vmaps</div></li><li class="chapter-item "><div>N5.8 Performance comparison</div></li></ol></li></ol></li><li class="chapter-item "><a href="../M_Miscellaneous.html">M. Miscellaneous</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../M/1_CSE222a_Notes.html">CSE 222a, Notes</a></li><li class="chapter-item "><a href="../M/2_Cache_Side_Channel_Attacks.html">Cache Side Channel Attacks</a></li><li class="chapter-item "><a href="../M/3_Memory_Models.html">Memory Models</a></li></ol></li><li class="chapter-item "><a href="../P_Papers.html">P.Papers</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../P/1_ML_sys.html">ML Sys</a></li></ol></li><li class="chapter-item "><a href="../Appendix.html">A. Appendix</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
 
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                
-                <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky bordered">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
-                                            </div>
+                    </div>
 
                     <h1 class="menu-title">teja&#x27;s notes</h1>
 
                     <div class="right-buttons">
-                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
-                                                                        
+
                     </div>
                 </div>
 
-                                <div id="search-wrapper" class="hidden">
+                <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
                         <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
                     </form>
@@ -133,9 +163,9 @@
                         </ul>
                     </div>
                 </div>
-                
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -148,18 +178,18 @@
                         <h1 id="n1-setup-uml-older"><a class="header" href="#n1-setup-uml-older">N1. Setup UML (older)</a></h1>
 <p>SKIP THIS IF YOU WERE ABLE TO SETUP QEMU. This page is here only for completeness, but is not necessary to experiment with a kernel.</p>
 <hr />
-<p>I prefer to learn/tinker with linux using UML. UML is User mode linux, which is a simple VM. It emulates a uniprocessor linux system, and can run even on machines with very old hardware (like my laptop). Check the UML homepage for additional details. This page is just to a simple tutorial on how to build and run it. I have also added sections on how to attach it to GDB for easy debugging and a section on how to setup basic networking between multiple UMLs which you can skip in the first read. </p>
+<p>I prefer to learn/tinker with linux using UML. UML is User mode linux, which is a simple VM. It emulates a uniprocessor linux system, and can run even on machines with very old hardware (like my laptop). Check the UML homepage for additional details. This page is just to a simple tutorial on how to build and run it. I have also added sections on how to attach it to GDB for easy debugging and a section on how to setup basic networking between multiple UMLs which you can skip in the first read.</p>
 <h3 id="n01-clone-and-build-the-kernel"><a class="header" href="#n01-clone-and-build-the-kernel">N0.1 Clone and build the kernel</a></h3>
 <p>Clone the kernel, and build it.
 Make defconfig sets up the default kernel config. The kernel config is a set of kernel features which will either be compiled into the kernel or will be compiled as modules. The architecture for which we are configuring is the UM (user mode) architechture. While building the config, you may be prompted to choose a configuration. Press enter to choose the default configuration.
-Once the configuration is done, a &quot;.config&quot; file will be populated with the chosen options.
+Once the configuration is done, a ".config" file will be populated with the chosen options.
 Begin compiling the code. Based on your machine's CPU capabities, replace 1 with the number of parallel compilation jobs you want make to run. Please remain patient as the very first compilation will take some time.</p>
 <pre><code class="language-bash">git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
 cd linux
 make defconfig ARCH=um
 make -j1 ARCH=um 
 </code></pre>
-<p>A new file &quot;linux&quot; will be created. This is the UML executable which runs as an application on the host machine. It needs a few other files and arguments to run, which will be explained in the next section.</p>
+<p>A new file "linux" will be created. This is the UML executable which runs as an application on the host machine. It needs a few other files and arguments to run, which will be explained in the next section.</p>
 <h3 id="n011-kernel-config-optional"><a class="header" href="#n011-kernel-config-optional">N0.1.1 Kernel config [OPTIONAL]</a></h3>
 <p>The kernel src includes a neat way to configure the kernel. Run make menuconfig to configure various options. A ncurses interface should start up, with the instructions provided in the top. Pressing Y includes a config and N excludes a config. After configuring the kernel, save and exit the config. The .config file will get updated with the necessary configuration.
 To build the uml binary with debug symbols, edit KBUILD_HOSTCFLAGS in the Makefile. Just add a '-g' option at the end. The kernel can then be rebuilt with the new configuration.</p>
@@ -176,7 +206,7 @@ make -j1 ARCH=um
  KBUILD_HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS) $(HOSTCXXFLAGS) 
 </code></pre>
 <h3 id="n02-rootfs-setup"><a class="header" href="#n02-rootfs-setup">N0.2 Rootfs setup</a></h3>
-<p>We have a compiled kernel but we still need a init script and other userspace  programs. We need a rootfs to emulate the disk. There are a lot of blogs  which describe how to build a rootfs. We will download a debian rootfs that is  provided by google. 
+<p>We have a compiled kernel but we still need a init script and other userspace  programs. We need a rootfs to emulate the disk. There are a lot of blogs  which describe how to build a rootfs. We will download a debian rootfs that is  provided by google.
 Run the following command to download the rootfs and uncompress it. On  uncompressing it a 1GiB net_test.rootfs.20150203 should be available.</p>
 <pre><code>wget -nv https://dl.google.com/dl/android/net_test.rootfs.20150203.xz
 unxz net_test.rootfs.20150203.xz 
@@ -188,7 +218,7 @@ We now have everything needed to run the UML.</p>
 <pre><code>mkdir temp
 sudo mount net_test.rootfs.20150203 temp
 </code></pre>
-<p>Copying from/to the directory is equivalent to copying files from/to the UML. In the below example I am copying my tmux configuration files into the rootfs. When I boot into UML, I will find the config file in the home directory. (Super user privilages are needed to add/remove files from the rootfs). </p>
+<p>Copying from/to the directory is equivalent to copying files from/to the UML. In the below example I am copying my tmux configuration files into the rootfs. When I boot into UML, I will find the config file in the home directory. (Super user privilages are needed to add/remove files from the rootfs).</p>
 <pre><code>sudo cp ~/.tmux.conf temp/home/ 
 </code></pre>
 <p>By chroot-ing into the mounted directory, any necessary programs can be installed. On running chroot, you will able to edit the rootfs with super user privilages. I am installing tmux in the below code and then exiting the chroot shell.</p>
@@ -205,7 +235,7 @@ exit
 <pre><code>Err http://ftp.jp.debian.org wheezy Release.gpg
 Connection failed
 </code></pre>
-<p>If the /etc/hosts file contains an address for a particular hostname, the  system will not do an additional DNS lookup. In this case, the address  corresponding to ftp.jp.debian.org is incorrect, causing apt-get to fail.  Run the command &quot;dig ftp.jp.debian.org&quot; in the host machine (not within chroot) to get the right address. Update the IP address to &quot;133.5.166.3&quot;.  Finally <code>/etc/hosts</code> should contain the following entries:</p>
+<p>If the /etc/hosts file contains an address for a particular hostname, the  system will not do an additional DNS lookup. In this case, the address  corresponding to ftp.jp.debian.org is incorrect, causing apt-get to fail.  Run the command "dig ftp.jp.debian.org" in the host machine (not within chroot) to get the right address. Update the IP address to "133.5.166.3".  Finally <code>/etc/hosts</code> should contain the following entries:</p>
 <pre><code>127.0.0.1       localhost
 ::1             localhost ip6-localhost ip6-loopback
 fe00::0         ip6-localnet
@@ -218,10 +248,10 @@ ff02::2         ip6-allrouters
 <h4 id="0212-apt-get-is-still-failing-"><a class="header" href="#0212-apt-get-is-still-failing-">0.2.1.2 apt-get is still failing !!!</a></h4>
 <p>OK, dont worry, download my rootfs from my github repo <a href="https://github.com/teja2010/teja2010.github.io/tree/master/old/extra">here</a>.</p>
 <h4 id="03-take-it-for-a-spin"><a class="header" href="#03-take-it-for-a-spin">0.3 Take it for a spin</a></h4>
-<p>Finally if all this works out you are ready to start a UML instance.    Just run the following command, where you provide path to rootfs as the value    against &quot;ubda&quot;, and 256MiB as the RAM. DO NOT forget the &quot;M&quot; in 256M, else    UML will try to boot with just to 256Bytes of RAM, and fail :). I usually    provide 256MiB RAM, you can go as low as 100 or 50MiB.</p>
+<p>Finally if all this works out you are ready to start a UML instance.    Just run the following command, where you provide path to rootfs as the value    against "ubda", and 256MiB as the RAM. DO NOT forget the "M" in 256M, else    UML will try to boot with just to 256Bytes of RAM, and fail :). I usually    provide 256MiB RAM, you can go as low as 100 or 50MiB.</p>
 <pre><code>./linux ubda=net_test.rootfs.20150203 mem=256M 
 </code></pre>
-<p>You will see the VM booting, printing dmesg, bringing up the various kernel    susbsystems.    Finally when a promt to enter the password appears, enter root as the    password. Play around with the tiny VM. When the fun ends, run &quot;halt&quot; to    shutdown UML.</p>
+<p>You will see the VM booting, printing dmesg, bringing up the various kernel    susbsystems.    Finally when a promt to enter the password appears, enter root as the    password. Play around with the tiny VM. When the fun ends, run "halt" to    shutdown UML.</p>
 <h4 id="04-attach-gdb"><a class="header" href="#04-attach-gdb">0.4 Attach GDB</a></h4>
 <p>It is fun to add breakpoints and view specific code in GDB. To do this,    we have to first find the process id (PID) of the main UML process.    Run the following command to find the UML pid. The output should show multiple PIDs</p>
 <pre><code class="language-bash">$ ps aux | grep ubda
@@ -245,7 +275,7 @@ ff02::2         ip6-allrouters
 <p>GDB will read the symbols from linux and attach itself. Play around, check    the backtrace, etc. All globals are now accessable.</p>
 <h3 id="05-a-private-uml-subnet"><a class="header" href="#05-a-private-uml-subnet">0.5 A private UML subnet</a></h3>
 <p>In most cases we want to play around with two UMLs connected to each other    and ignorant of the rest of the world. In such cases, the simplest way is to    connect them using the mcast transport.
-Make copies of the rootfs, for each UML instance. In this case have two    copies ready, and run them with one additional argument &quot;eth0&quot;. This will    add an additional eth0 interface. We set eth0 to mcast. i.e. the eth0    interfaces in both the instances are connected over mcast.</p>
+Make copies of the rootfs, for each UML instance. In this case have two    copies ready, and run them with one additional argument "eth0". This will    add an additional eth0 interface. We set eth0 to mcast. i.e. the eth0    interfaces in both the instances are connected over mcast.</p>
 <pre><code>./linux ubda=net_test.rootfs.20150203_1 mem=256M eth0=mcast
 ./linux ubda=net_test.rootfs.20150203_2 mem=256M eth0=mcast 
 </code></pre>
@@ -253,55 +283,56 @@ Make copies of the rootfs, for each UML instance. In this case have two    copie
 <pre><code>ip address add 192.168.1.1/24 dev eth0  
 </code></pre>
 <p>The full mcast readme is    <a href="http://user-mode-linux.sourceforge.net/old/text/mcast.txt">here</a>.    It contains details to create more complex mcast networks.</p>
-<p>On assigning mcast to a eth device, each UML instance opens sockets which    listen to multicast traffic. If a multicast address is not assigned (like    above), all the instances listen to 239.192.168.1 . All packets are received    and then filtered out based on destination MAC address. The packets    can even be seen in packetdumps collected in the host OS.    Quoting from the above readme, &quot;It's basically like an ethernet    where all machines have promiscuous mode turned on&quot;. Bad for performance,    but very easy to setup.</p>
+<p>On assigning mcast to a eth device, each UML instance opens sockets which    listen to multicast traffic. If a multicast address is not assigned (like    above), all the instances listen to 239.192.168.1 . All packets are received    and then filtered out based on destination MAC address. The packets    can even be seen in packetdumps collected in the host OS.    Quoting from the above readme, "It's basically like an ethernet    where all machines have promiscuous mode turned on". Bad for performance,    but very easy to setup.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="../N/1_setup_qemu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../N/1_setup_qemu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                        
-                                                    <a rel="next" href="../N/2_Packet_RX_Basic.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+
+                            <a rel="next prefetch" href="../N/2_Packet_RX_Basic.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
-                        
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="../N/1_setup_qemu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../N/1_setup_qemu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                
-                                    <a rel="next" href="../N/2_Packet_RX_Basic.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+
+                    <a rel="next prefetch" href="../N/2_Packet_RX_Basic.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
-                            </nav>
+            </nav>
 
         </div>
 
-        
-        
-        
-                <script type="text/javascript">
+
+
+
+        <script>
             window.playground_copyable = true;
         </script>
-        
-        
-                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
-        
-        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
-        
-        
+
+
+    </div>
     </body>
 </html>

@@ -1,5 +1,6 @@
 # Summary
 
+- [Hi](./HI.md)
 - [0. Preface](./Preface.md)
 - [N. Linux_Networking](./N_Linux_Networking.md)
 	- [N1. Setup Qemu](./N/1_setup_qemu.md)
