@@ -1,11 +1,11 @@
 [book]
 authors = ["Tanikella Tejaswi"]
 language = "en"
-multilingual = false
 src = "src"
 title = "teja's notes"
 
 [output.html]
+default-theme = "auto"
 mathjax-support = true
 no-section-label = true
 
