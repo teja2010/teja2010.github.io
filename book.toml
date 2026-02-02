@@ -1,0 +1,17 @@
+[book]
+authors = ["Tanikella Tejaswi"]
+language = "en"
+multilingual = false
+src = "src"
+title = "teja's notes"
+
+[output.html]
+mathjax-support = true
+no-section-label = true
+
+[output.html.fold]
+enable = true
+
+[output.html.playground]
+copyable = true
+line-numbers = true

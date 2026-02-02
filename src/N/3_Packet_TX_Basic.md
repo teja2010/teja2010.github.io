@@ -1,0 +1,5 @@
+# N2. Packet TX path 1 : Basic
+
+ This page contains the basic code flow while transmitting a packet. It    begins with the userspace sendmsg, enters the UDP and IP stacks, finds    a route, enters core networking and finally being handed over to the driver    which pushes    it out. TX, unlike RX, can happen without a softirq being raised. The    processing happens completely in the application context. In this page I    describe packet transmission without a softirq being raised. I'll cover    how qdiscs are used in a separate page, after which NET_TX with qdiscs    will be described.  
+
+UDP & IP stack processing and routing will be described in detail in a    separate page, this is just a basic overview.    We will end the discussion by handling over the packet to the driver. How    the driver actually transmits the packet will be described in later pages.  
